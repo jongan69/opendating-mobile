@@ -1,23 +1,34 @@
 {
   "expo": {
-    "name": "opendating-mobile",
+    "name": "OpenDating",
     "slug": "opendating-mobile",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "opendatingmobile",
+    "scheme": "opendating",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "OpenDating uses your general area to help you discover people nearby. Your exact location is never shared.",
+        "NSPhotoLibraryUsageDescription": "OpenDating needs access to your photos to set up your dating profile.",
+        "NSCameraUsageDescription": "OpenDating can use your camera to take new profile photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FAF9F7",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ],
+      "predictiveBackGestureEnabled": true
     },
     "web": {
       "output": "static",
@@ -25,10 +36,24 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "OpenDating uses your general area to help you discover people nearby. Your exact location is never shared."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "OpenDating needs access to your photos to set up your dating profile.",
+          "cameraPermission": "OpenDating can use your camera to take new profile photos."
+        }
+      ],
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#E8735A",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }

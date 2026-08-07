@@ -31,6 +31,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
@@ -41,3 +42,20 @@ example
 # generated native folders
 /ios
 /android
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+coverage/
+
+# Claude
+.claude/
+
+# Expo doctor
+.expo-doctor/
+
+# Temporary files
+*.log
+*.tmp

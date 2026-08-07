@@ -1,98 +1,123 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+// App bootstrap — routes based on identity/profile state
+import { useEffect } from 'react';
+import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useBootstrap } from '@/features/auth/use-bootstrap';
+import { useTheme } from '@/state/theme-context';
+import { typography } from '@/theme/typography';
+import { spacing } from '@/theme/spacing';
+import { StatusBar } from 'expo-status-bar';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function BootstrapScreen() {
+  const router = useRouter();
+  const { state, error, retry } = useBootstrap();
+  const { colors, isDark } = useTheme();
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  useEffect(() => {
+    switch (state) {
+      case 'no_identity':
+        router.replace('/(onboarding)/welcome');
+        break;
+      case 'no_profile':
+        router.replace('/(onboarding)/basics');
+        break;
+      case 'ready':
+        router.replace('/(tabs)/discover');
+        break;
+      // loading, connecting, authenticating, etc. — show loading UI
+      // error — show error UI
+    }
+  }, [state, router]);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <View style={styles.center}>
+        {/* Logo / brand mark */}
+        <View style={[styles.logo, { backgroundColor: colors.accent }]}>
+          <Text style={styles.logoText}>OD</Text>
+        </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        {state === 'error' ? (
+          <View style={styles.errorContainer}>
+            <Text style={[styles.errorText, { color: colors.destructive }]}>
+              {error ?? 'Something went wrong'}
+            </Text>
+            <Text
+              style={[styles.retryText, { color: colors.accent }]}
+              onPress={retry}
+            >
+              Tap to retry
+            </Text>
+          </View>
+        ) : (
+          <>
+            <ActivityIndicator
+              size="large"
+              color={colors.accent}
+              style={styles.spinner}
+            />
+            <Text style={[styles.statusText, { color: colors.textSecondary }]}>
+              {state === 'loading'
+                ? 'Loading...'
+                : state === 'connecting'
+                  ? 'Connecting to OpenDating...'
+                  : state === 'authenticating'
+                    ? 'Signing in...'
+                    : state === 'fetching_capabilities'
+                      ? 'Checking services...'
+                      : state === 'checking_profile'
+                        ? 'Loading your profile...'
+                        : 'Preparing...'}
+            </Text>
+          </>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
+  center: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    alignItems: 'center',
+    paddingHorizontal: spacing.xxxl,
+    gap: spacing.xxl,
   },
-  title: {
+  logo: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoText: {
+    ...typography.headlineLarge,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  spinner: {
+    marginTop: spacing.lg,
+  },
+  statusText: {
+    ...typography.bodyMedium,
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
+  errorContainer: {
+    alignItems: 'center',
+    gap: spacing.md,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  errorText: {
+    ...typography.bodyLarge,
+    textAlign: 'center',
+  },
+  retryText: {
+    ...typography.labelLarge,
+    marginTop: spacing.sm,
   },
 });
