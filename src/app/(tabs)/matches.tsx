@@ -107,8 +107,8 @@ export default function MatchesScreen() {
         edges={['bottom']}
       >
         <EmptyState
-          icon="💘"
-          title="No matches yet. Keep discovering!"
+          illustration={require('../../../assets/brand/empty-state-coffee-800x600.png')}
+          title="No matches yet"
           subtitle="Swipe right on profiles you like — when they like you back, you'll see them here."
           action={{ label: 'Start discovering', onPress: () => router.navigate('/discover') }}
         />

@@ -1,0 +1,21 @@
+:root {
+  --od-brand-coral: #E8735A;
+  --od-brand-coral-light: #FDF0ED;
+  --od-brand-coral-muted: #F8D5CD;
+
+  --od-bg-light: #FAF9F7;
+  --od-surface-light: #FFFFFF;
+  --od-text-primary-light: #1A1A19;
+  --od-text-secondary-light: #6B6B68;
+  --od-text-tertiary-light: #9B9B98;
+
+  --od-bg-dark: #141413;
+  --od-surface-dark: #1C1C1B;
+  --od-text-primary-dark: #F5F4F2;
+  --od-text-secondary-dark: #9B9B98;
+  --od-text-tertiary-dark: #6B6B68;
+
+  --od-success: #2E7D32;
+  --od-destructive: #C62828;
+  --od-warning: #E65100;
+}

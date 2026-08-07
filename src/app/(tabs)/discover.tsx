@@ -9,11 +9,12 @@ import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
 import { SwipeDeck, type SwipeDeckHandle } from '@/components/discovery/swipe-deck';
 import { EmptyState } from '@/components/ui/empty-state';
+import { BrandMark } from '@/components/brand/brand-mark';
 import { useDiscovery } from '@/features/discovery/use-discovery';
 import { cacheCandidates, getCachedCandidate } from '@/features/discovery/candidate-cache';
 import { useTheme } from '@/state/theme-context';
-import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
+import { radius } from '@/theme/radius';
 import { typography } from '@/theme/typography';
 import type { Candidate } from '@/types/opendating';
 
@@ -91,9 +92,12 @@ export default function DiscoverScreen() {
     >
       {/* Brand header + filters */}
       <View style={styles.header}>
-        <Text style={[typography.titleLarge, { color: colors.text }]}>
-          OpenDating
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <BrandMark size={28} />
+          <Text style={[typography.titleLarge, { color: colors.text }]}>
+            OpenDating
+          </Text>
+        </View>
         <Pressable
           onPress={() => router.push('/filters')}
           hitSlop={spacing.md}

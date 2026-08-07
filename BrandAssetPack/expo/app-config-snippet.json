@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "OpenDating",
+    "slug": "opendating",
+    "icon": "./assets/brand/ios-app-icon-1024.png",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand/android-adaptive-foreground-432.png",
+        "backgroundColor": "#FAF9F7"
+      }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#E8735A",
+          "image": "./assets/brand/brand-mark-white.png",
+          "imageWidth": 76,
+          "resizeMode": "contain"
+        }
+      ]
+    ]
+  }
+}

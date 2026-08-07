@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useBootstrap } from '@/features/auth/use-bootstrap';
 import { useTheme } from '@/state/theme-context';
+import { BrandMark } from '@/components/brand/brand-mark';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { StatusBar } from 'expo-status-bar';
@@ -34,10 +35,7 @@ export default function BootstrapScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <View style={styles.center}>
-        {/* Logo / brand mark */}
-        <View style={[styles.logo, { backgroundColor: colors.accent }]}>
-          <Text style={styles.logoText}>OD</Text>
-        </View>
+        <BrandMark size={80} />
 
         {state === 'error' ? (
           <View style={styles.errorContainer}>

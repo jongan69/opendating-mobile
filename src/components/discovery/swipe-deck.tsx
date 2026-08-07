@@ -264,7 +264,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
   if (isEmpty) {
     return (
       <EmptyState
-        icon="🎉"
+        illustration={require('../../../assets/brand/empty-state-coffee-800x600.png')}
         title="You're all caught up"
         subtitle="Check back soon — new people nearby are added every day."
       />

@@ -5,6 +5,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
+import { BrandMark } from '@/components/brand/brand-mark';
 import { useTheme } from '@/state/theme-context';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
@@ -56,9 +57,7 @@ export default function WelcomeScreen() {
     >
       {/* Brand mark */}
       <View style={styles.brandBlock}>
-        <View style={[styles.logo, { backgroundColor: colors.accent }]}>
-          <Text style={styles.logoText}>OD</Text>
-        </View>
+        <BrandMark size={88} />
         <Text
           style={[
             typography.bodyLarge,

@@ -1,0 +1,26 @@
+{
+  "brand": {
+    "coral": "#E8735A",
+    "coralLight": "#FDF0ED",
+    "coralMuted": "#F8D5CD"
+  },
+  "light": {
+    "background": "#FAF9F7",
+    "surface": "#FFFFFF",
+    "textPrimary": "#1A1A19",
+    "textSecondary": "#6B6B68",
+    "textTertiary": "#9B9B98"
+  },
+  "dark": {
+    "background": "#141413",
+    "surface": "#1C1C1B",
+    "textPrimary": "#F5F4F2",
+    "textSecondary": "#9B9B98",
+    "textTertiary": "#6B6B68"
+  },
+  "semantic": {
+    "success": "#2E7D32",
+    "destructive": "#C62828",
+    "warning": "#E65100"
+  }
+}

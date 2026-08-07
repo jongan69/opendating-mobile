@@ -4,7 +4,7 @@
     "slug": "opendating-mobile",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/brand/ios-app-icon-1024.png",
     "scheme": "opendating",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -18,9 +18,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FAF9F7",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/brand/android-adaptive-foreground-432.png",
+        "backgroundImage": "./assets/brand/android-adaptive-background-432.png",
+        "monochromeImage": "./assets/brand/android-notification-icon-96.png"
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
@@ -32,7 +32,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/brand/favicon-32.png"
     },
     "plugins": [
       "expo-router",
@@ -54,8 +54,9 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#E8735A",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "image": "./assets/brand/splash-screen-1170x2532.png",
+          "imageWidth": 200,
+          "resizeMode": "contain"
         }
       ]
     ],
