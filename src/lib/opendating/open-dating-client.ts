@@ -47,6 +47,7 @@ const SECURE_STORE_PRIVKEY_KEY = 'opendating_privkey';
 const SECURE_STORE_PUBKEY_KEY = 'opendating_pubkey';
 const SERVICES_CACHE_KEY = 'opendating_services_cache';
 
+const CONNECT_TIMEOUT_MS = 15_000;
 const REQUEST_TIMEOUT_MS = 30_000;
 
 // ---- Types ----
@@ -161,8 +162,13 @@ class OpenDatingClientImpl {
         clientNip89: undefined,
       });
 
-      // Connect
-      await this.ndk.connect();
+      // Connect with timeout — don't hang forever if the relay is unreachable
+      await this.withTimeout(
+        this.ndk.connect(),
+        CONNECT_TIMEOUT_MS,
+        'Could not reach the OpenDating relay. Please check your internet connection.'
+      );
+
       this.setState('authenticating');
 
       // Wait for relay connection
@@ -172,7 +178,11 @@ class OpenDatingClientImpl {
       this.setState('connected');
 
       // Fetch capabilities
-      await this.fetchCapabilities();
+      await this.withTimeout(
+        this.fetchCapabilities(),
+        REQUEST_TIMEOUT_MS,
+        'Could not verify OpenDating services. Please try again.'
+      );
 
       // Start response subscription
       await this.startResponseSubscription();
@@ -182,16 +192,21 @@ class OpenDatingClientImpl {
     }
   }
 
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    message: string
+  ): Promise<T> {
+    const timer = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(message)), timeoutMs)
+    );
+    return Promise.race([promise, timer]);
+  }
+
   private async waitForRelay(): Promise<void> {
     // NDK Mobile handles relay connection and NIP-42 AUTH internally.
     // We wait a moment for connection to stabilize.
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const relay = this.ndk?.pool?.getRelay(RELAY_URL);
-    if (!relay || relay.status !== 1) { // 1 = CONNECTED
-      // Try pinging the relay to verify
-      await this.ping();
-    }
   }
 
   async disconnect(): Promise<void> {
