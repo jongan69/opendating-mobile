@@ -45,7 +45,7 @@ export async function saveProfileContentLocally(
 }
 
 /**
- * Persist locally, then publish and register with the profile service.
+ * Persist locally, then publish to the profile service.
  *
  * The local write happens first and unconditionally: a network failure must
  * never cost the user the profile they just filled in.
@@ -60,11 +60,30 @@ export async function publishProfile(content: ProfileContent): Promise<void> {
 
   await saveProfileContentLocally(normalised);
 
-  const eventId = await getOpenDatingClient().publishProfileContent({
+  await getOpenDatingClient().updateProfile({
     ...normalised,
     photos: publishablePhotos(normalised.photos),
   });
-  await storage.saveProfileEventId(eventId);
+}
+
+/**
+ * Adopt the server's copy of the profile when the device has none — a
+ * reinstall or a new device would otherwise open onboarding on empty fields
+ * despite the member already having a profile.
+ */
+export async function restoreProfileFromServer(): Promise<ProfileContent | null> {
+  const existing = await loadProfileContent();
+  if (existing) return existing;
+
+  try {
+    const profile = await getOpenDatingClient().getProfile();
+    const content = profile.profile;
+    if (!content?.display_name) return null;
+    await saveProfileContentLocally({ ...content, v: PROFILE_CONTENT_VERSION });
+    return content;
+  } catch {
+    return null;
+  }
 }
 
 export interface UseProfileContentResult {

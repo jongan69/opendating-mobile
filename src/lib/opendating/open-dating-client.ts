@@ -11,7 +11,6 @@ import {
   createEnvelope,
   buildGiftWrap,
   generateKeypair,
-  signEvent,
   type OpenDatingEnvelope,
 } from 'opendating-protocol';
 import * as SecureStore from 'expo-secure-store';
@@ -59,9 +58,6 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const KIND_OD_COMMAND = 78;
 const KIND_DM = 14;
 const KIND_GIFT_WRAP = 1059;
-/** Parameterized-replaceable app data (NIP-78) — carries profile content. */
-const KIND_PROFILE_CONTENT = 30078;
-const PROFILE_CONTENT_TAG = 'opendating:profile:0.1';
 
 /**
  * NIP-59 randomises seal and wrap timestamps up to two days into the past to
@@ -564,43 +560,17 @@ class OpenDatingClientImpl {
     return result.payload as unknown as OpenDatingProfile;
   }
 
-  async updateProfile(profileEventId?: string): Promise<void> {
-    await this.sendRequest('profile', 'profile.update', {
-      profile_event_id: profileEventId,
-    });
-  }
-
   /**
-   * Publish the user's profile content as a NIP-78 replaceable event and
-   * register the resulting event id with the profile service.
+   * Publish the user's profile content.
    *
-   * Content lives in its own Nostr event rather than in the command payload
-   * because that is what `profile.update { profile_event_id }` points at —
-   * the service stores a reference, and discovery reads the event to build
-   * the card other people see.
+   * Content travels inside the gift-wrapped `profile.update` payload and the
+   * service stores it encrypted at rest, rather than being published as a
+   * separate Nostr event. Discovery has to read it to build the card other
+   * members see, and keeping it out of the relay's public event store means a
+   * profile is never queryable by anyone the service has not granted access.
    */
-  async publishProfileContent(content: ProfileContent): Promise<string> {
-    if (!this.ndk) throw new Error('Not connected. Call connect() first.');
-    if (!this.userPrivkey || !this.userPubkey) {
-      throw new Error('No identity loaded.');
-    }
-
-    const unsigned = {
-      pubkey: this.userPubkey,
-      created_at: Math.floor(Date.now() / 1000),
-      kind: KIND_PROFILE_CONTENT,
-      // `d` makes this replaceable: a later publish supersedes this one
-      // instead of accumulating stale profiles on the relay.
-      tags: [['d', PROFILE_CONTENT_TAG]],
-      content: JSON.stringify(content),
-    };
-
-    const { id, sig } = signEvent(unsigned, this.userPrivkey);
-    const ndkEvent = new NDKEvent(this.ndk, { ...unsigned, id, sig });
-    await ndkEvent.publish();
-
-    await this.updateProfile(id);
-    return id;
+  async updateProfile(content: ProfileContent): Promise<void> {
+    await this.sendRequest('profile', 'profile.update', { profile: content });
   }
 
   async pauseProfile(): Promise<void> {

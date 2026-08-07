@@ -7,8 +7,10 @@ export interface OpenDatingProfile {
   member_id: string;
   pubkey: string;
   status: 'active' | 'paused' | 'deleted';
-  profile_event_id?: string;
+  /** Content as stored by the service — present on profile.get. */
+  profile?: ProfileContent | null;
   visibility?: string;
+  completeness?: number;
   created_at: number;
   updated_at: number;
 }

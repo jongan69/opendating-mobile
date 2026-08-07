@@ -53,7 +53,6 @@ const STORAGE_KEYS = {
   ONBOARDING_COMPLETE: 'opendating_onboarding_done',
   THEME_PREFERENCE: 'opendating_theme',
   PROFILE_CONTENT: 'opendating_profile_content',
-  PROFILE_EVENT_ID: 'opendating_profile_event_id',
 } as const;
 
 export const storage = {
@@ -104,12 +103,6 @@ export const storage = {
     } catch {
       return null;
     }
-  },
-  async saveProfileEventId(eventId: string): Promise<void> {
-    await secureSet(STORAGE_KEYS.PROFILE_EVENT_ID, eventId);
-  },
-  async getProfileEventId(): Promise<string | null> {
-    return secureGet(STORAGE_KEYS.PROFILE_EVENT_ID);
   },
 
   // Onboarding

@@ -7,6 +7,7 @@ import {
   resetOpenDatingClient,
 } from '@/lib/opendating/open-dating-client';
 import { isServiceUnavailable } from '@/lib/opendating/errors';
+import { restoreProfileFromServer } from '@/features/profile/profile-content';
 import { storage } from '@/lib/storage';
 import type { AppBootstrapState, OpenDatingServiceRole } from '@/types/opendating';
 
@@ -87,6 +88,10 @@ export function useBootstrap(): BootstrapResult {
       try {
         const profile = await client.getProfile();
         if (profile && profile.status !== 'deleted') {
+          // A reinstall or new device has the identity but no cached content.
+          // Adopt the server's copy so the app opens on the real profile
+          // instead of an empty one.
+          await restoreProfileFromServer();
           setAppState('ready');
           return;
         }
