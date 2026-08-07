@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenDating — Privacy-first decentralized dating</title>
+<meta name="description" content="A dating app with Tinder-quality UX built on decentralized infrastructure. Your identity belongs to you. Your location is private. Your messages are encrypted. No surveillance, no data harvesting.">
+<meta name="keywords" content="opendating, dating app, privacy, decentralized, nostr, encrypted dating, private dating, self-sovereign, no surveillance">
+<meta property="og:title" content="OpenDating — Privacy-first decentralized dating">
+<meta property="og:description" content="A dating app where you own your identity, your location stays private, and your messages are encrypted. No surveillance. No data harvesting.">
+<meta property="og:url" content="https://opendating.org">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://opendating.org/images/lockup-coral.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OpenDating — Privacy-first decentralized dating">
+<meta name="twitter:description" content="Tinder-quality UX with decentralized privacy. Own your identity. Encrypted messages. No surveillance.">
+<link rel="canonical" href="https://opendating.org">
+<link rel="icon" type="image/png" href="/images/favicon-32.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon-180.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "OpenDating",
+  "description": "Privacy-first decentralized dating app with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity on Nostr.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "iOS, Android",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<style>
+  :root {
+    --coral: #E8735A;
+    --coral-light: #FDF0ED;
+    --coral-muted: #F8D5CD;
+    --bg: #FAF9F7;
+    --surface: #FFFFFF;
+    --text: #1A1A19;
+    --text-secondary: #6B6B68;
+    --text-tertiary: #9B9B98;
+    --border: #E8E7E4;
+    --success: #2E7D32;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Google Sans', 'Roboto', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413;
+      --surface: #1C1C1B;
+      --text: #F5F4F2;
+      --text-secondary: #9B9B98;
+      --text-tertiary: #6B6B68;
+      --border: #2E2E2C;
+      --coral-light: #2D1F1A;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .container-narrow { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Nav ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .inner {
+    max-width: 1100px; margin: 0 auto; padding: 16px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav .brand { font-weight: 700; font-size: 20px; color: var(--text); text-decoration: none; letter-spacing: -0.3px; }
+  nav .brand span { color: var(--coral); }
+  nav .links { display: flex; gap: 24px; align-items: center; }
+  nav .links a { color: var(--text-secondary); text-decoration: none; font-size: 15px; font-weight: 500; }
+  nav .links a:hover { color: var(--text); }
+  nav .links a.cta-nav {
+    background: var(--coral); color: #fff; padding: 8px 18px;
+    border-radius: var(--radius-sm); font-weight: 600; text-decoration: none;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center; padding: 80px 24px 60px;
+  }
+  .hero img.logo { width: 480px; max-width: 90%; margin-bottom: 24px; }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px); font-weight: 700;
+    line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px;
+    color: var(--text);
+  }
+  .hero .sub {
+    font-size: clamp(17px, 2.5vw, 21px); color: var(--text-secondary);
+    max-width: 640px; margin: 0 auto 32px; line-height: 1.5;
+  }
+  .hero .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 16px; text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .btn-primary { background: var(--coral); color: #fff; }
+  .btn-outline { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-outline:hover { border-color: var(--coral); }
+
+  /* ── Sections ── */
+  section { padding: 80px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  section h2 {
+    font-size: clamp(24px, 4vw, 34px); font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 12px; text-align: center;
+  }
+  section .section-sub {
+    text-align: center; color: var(--text-secondary); font-size: 18px;
+    max-width: 560px; margin: 0 auto 48px;
+  }
+
+  /* ── Feature grid ── */
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px; margin-top: 24px;
+  }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+  }
+  .feature-card .icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--coral-light); display: flex; align-items: center;
+    justify-content: center; font-size: 24px; margin-bottom: 14px;
+  }
+  .feature-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .feature-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.55; }
+
+  /* ── How it works ── */
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px; counter-reset: step;
+  }
+  .step {
+    text-align: center; padding: 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); position: relative;
+  }
+  .step .num {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--coral); color: #fff; font-weight: 700; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
+  .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .step p { color: var(--text-secondary); font-size: 14px; }
+
+  /* ── Comparison table ── */
+  .compare {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  .compare th, .compare td {
+    padding: 14px 16px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare th { font-weight: 600; color: var(--text-secondary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .compare .check { color: var(--success); font-weight: 600; }
+  .compare .cross { color: var(--text-tertiary); }
+  .compare tr td:first-child { font-weight: 500; }
+  @media (max-width: 640px) {
+    .compare { font-size: 12px; }
+    .compare th, .compare td { padding: 10px 8px; }
+  }
+
+  /* ── Privacy callout ── */
+  .privacy-callout {
+    background: var(--coral-light); border: 1.5px solid var(--coral-muted);
+    border-radius: var(--radius); padding: 32px; text-align: center;
+  }
+  .privacy-callout h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .privacy-callout p { color: var(--text-secondary); font-size: 15px; max-width: 520px; margin: 0 auto; }
+  .privacy-list {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px; margin-top: 32px; text-align: left;
+  }
+  .privacy-list .item { display: flex; gap: 12px; align-items: flex-start; }
+  .privacy-list .check-icon { color: var(--success); font-weight: 700; font-size: 18px; margin-top: 1px; }
+
+  /* ── Download ── */
+  .download-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; margin-top: 16px;
+  }
+  .download-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 32px; text-align: center;
+  }
+  .download-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .download-card p { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; }
+  .download-card .store-btn {
+    display: inline-block; background: var(--text); color: var(--bg);
+    padding: 12px 24px; border-radius: var(--radius-sm);
+    font-weight: 600; text-decoration: none; font-size: 15px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border); padding: 48px 0 32px;
+    color: var(--text-tertiary); font-size: 14px;
+  }
+  footer .inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ── Blog cards ── */
+  .blog-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .blog-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    text-decoration: none; color: var(--text);
+    transition: border-color 0.15s, transform 0.15s;
+    display: block;
+  }
+  .blog-card:hover { border-color: var(--coral); transform: translateY(-2px); }
+  .blog-card .date { font-size: 12px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .blog-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .blog-card p { color: var(--text-secondary); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a href="/" class="brand"><span>●</span> OpenDating</a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/jongan69/opendating-mobile" class="cta-nav">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="/images/lockup-dark.png">
+    <img src="/images/lockup-coral.png" alt="OpenDating" class="logo" width="480" height="99">
+  </picture>
+  <p class="sub">
+    A dating app you can trust. Your identity belongs to <strong>you</strong>.
+    Your exact location <strong>never</strong> leaves your phone. Your messages are
+    <strong>end-to-end encrypted</strong>. No surveillance, no data harvesting, no
+    company that owns your profile.
+  </p>
+  <div class="actions">
+    <a href="https://github.com/jongan69/opendating-mobile" class="btn btn-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      View on GitHub
+    </a>
+    <a href="#get" class="btn btn-outline">Get the App</a>
+  </div>
+</header>
+
+<section id="features">
+  <div class="container">
+    <h2>Why OpenDating</h2>
+    <p class="section-sub">A dating app that respects you — not your data.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">🔑</div>
+        <h3>Own Your Identity</h3>
+        <p>Your account is a cryptographic keypair stored only on your device. Move it to any OpenDating client. No company can lock you out or delete your profile.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📍</div>
+        <h3>Location Privacy</h3>
+        <p>Only your general area (~5 km) is shared. Your exact GPS coordinates <em>never</em> leave your phone. Not to us, not to advertisers, not to anyone.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔒</div>
+        <h3>Encrypted Messages</h3>
+        <p>All conversations are end-to-end encrypted with NIP-44. Nobody — not even the relay operator — can read your messages.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🛡️</div>
+        <h3>Private Safety</h3>
+        <p>Likes are private — the other person only knows if you match. Blocks happen instantly and are never announced. Reports are encrypted to moderation.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📱</div>
+        <h3>Native Experience</h3>
+        <p>Tinder-quality swipe gestures, photo-first cards, and smooth animations. iOS feels like SwiftUI. Android feels like Material 3.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🌐</div>
+        <h3>Built on Nostr</h3>
+        <p>Runs on a decentralized protocol with no central server. Your data isn't in a corporate database — it's encrypted events on a censorship-resistant relay network.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container">
+    <h2>OpenDating vs Traditional Dating Apps</h2>
+    <p class="section-sub">Most dating apps are surveillance businesses. OpenDating isn't.</p>
+
+    <div style="overflow-x:auto">
+    <table class="compare">
+      <thead>
+        <tr><th>Feature</th><th>Tinder</th><th>Bumble</th><th>Hinge</th><th>OpenDating</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>You own your identity</td>            <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>Exact location never shared</td>       <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>End-to-end encrypted messages</td>     <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>Likes are private</td>                 <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>Portable profile</td>                  <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>No ads or data harvesting</td>         <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>Open source</td>                       <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+        <tr><td>Blocks are private</td>                <td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="container-narrow">
+    <h2>Privacy by Design</h2>
+    <p class="section-sub">Every architectural decision was made to protect you — not to monetize you.</p>
+
+    <div class="privacy-callout">
+      <h3>🔐 What OpenDating <em>never</em> sees</h3>
+      <div class="privacy-list">
+        <div class="item"><span class="check-icon">✓</span><span><strong>Your exact location</strong> — only a ~5 km geohash prefix is sent</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Your messages</strong> — end-to-end encrypted, not stored in plaintext</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Your private key</strong> — lives only in your device's secure storage</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Who you like</strong> — one-way likes are encrypted gift wraps</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Who you block</strong> — blocks are private and enforced locally first</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Your report details</strong> — encrypted to the moderation service</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container">
+    <h2>How It Works</h2>
+    <p class="section-sub">You don't need to understand Nostr. Just create an account and start discovering.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Create Account</h3>
+        <p>A secure keypair is generated on your phone. No email. No password. No phone number.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Build Profile</h3>
+        <p>Add photos, a bio, interests, and what you're looking for. Your data stays with you.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Set Your Area</h3>
+        <p>Share only your general area (~5 km). Your exact coordinates never leave your phone.</p>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <h3>Discover & Swipe</h3>
+        <p>Browse real people nearby. Like privately. Match when the feeling is mutual.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="get">
+  <div class="container-narrow">
+    <h2>Get OpenDating</h2>
+    <p class="section-sub">Free. Open source. No ads. No data harvesting. No subscriptions.</p>
+
+    <div class="download-grid">
+      <div class="download-card">
+        <h3>📱 iOS</h3>
+        <p>Coming to the App Store. For now, build from source or join the TestFlight beta.</p>
+        <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">Build from Source</a>
+      </div>
+      <div class="download-card">
+        <h3>🤖 Android</h3>
+        <p>Coming to Google Play. Build from source or use the development build.</p>
+        <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">Build from Source</a>
+      </div>
+    </div>
+
+    <p style="text-align:center; margin-top: 24px; color: var(--text-secondary); font-size: 14px;">
+      Open source under MIT. <a href="https://github.com/jongan69/opendating-mobile">View on GitHub →</a>
+    </p>
+  </div>
+</section>
+
+<section class="alt" id="blog-preview">
+  <div class="container">
+    <h2>From the Blog</h2>
+    <p class="section-sub">Thoughts on privacy, decentralized dating, and building ethical technology.</p>
+
+    <div class="blog-grid">
+      <a href="/blog/why-privacy-matters-in-dating" class="blog-card">
+        <div class="date">2026</div>
+        <h3>Why Privacy Matters in Dating Apps</h3>
+        <p>Traditional dating apps know more about you than your therapist. Here's why that matters and what decentralized alternatives offer.</p>
+      </a>
+      <a href="/blog/how-decentralized-dating-works" class="blog-card">
+        <div class="date">2026</div>
+        <h3>How Decentralized Dating Works</h3>
+        <p>Nostr isn't just for social media. Here's how OpenDating uses encrypted gift wraps, service roles, and relay enforcement to build a dating app without a central server.</p>
+      </a>
+      <a href="/blog/tinder-vs-bumble-vs-opendating" class="blog-card">
+        <div class="date">2026</div>
+        <h3>Comparing Dating Apps Through a Privacy Lens</h3>
+        <p>A side-by-side look at what the major dating apps collect, store, and share — and how OpenDating does things differently.</p>
+      </a>
+    </div>
+
+    <p style="text-align:center; margin-top: 28px;">
+      <a href="/blog" class="btn btn-outline">Read All Articles →</a>
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>© 2026 OpenDating. Built for privacy, portability, and genuine human connection.</span>
+    <span>
+      <a href="https://github.com/jongan69/opendating-mobile">GitHub</a> ·
+      <a href="https://github.com/jongan69/OpenDating">Protocol</a> ·
+      <a href="/blog">Blog</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

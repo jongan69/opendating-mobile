@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Decentralized Dating Works — OpenDating Blog</title>
+<meta name="description" content="OpenDating runs on Nostr, a decentralized protocol. But you don't need to understand Nostr to use it. Here's how the technology works under the hood.">
+<meta name="keywords" content="decentralized dating, nostr dating, how opendating works, nip-44, nip-59, nip-17, encrypted dating">
+<meta property="og:title" content="How Decentralized Dating Works">
+<meta property="og:description" content="Nostr isn't just for social media — it powers OpenDating's private, decentralized dating experience. Here's how encrypted gift wraps, service roles, and relay enforcement work.">
+<link rel="canonical" href="https://opendating.org/blog/how-decentralized-dating-works">
+<style>
+  :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  nav { border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 40px; }
+  nav a { color: var(--coral); text-decoration: none; font-weight: 600; font-size: 15px; }
+  article h1 { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .date { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; }
+  p { margin: 14px 0; }
+  ul, ol { margin: 12px 0; padding-left: 24px; }
+  li { margin: 6px 0; }
+  code { background: var(--border); padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+  footer { border-top: 1px solid var(--border); padding: 32px 0; margin-top: 64px; color: var(--text-secondary); font-size: 14px; text-align: center; }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav><a href="/blog">← Blog</a></nav>
+  <article>
+    <h1>How Decentralized Dating Works</h1>
+    <div class="date">August 2026</div>
+
+    <p>OpenDating is built on <strong>Nostr</strong> — a decentralized protocol for censorship-resistant communication. But here's the key insight: <strong>you never need to know that.</strong> The app looks and feels like any modern dating app. The decentralization is infrastructure, not UX.</p>
+
+    <h2>The Problem With Centralized Dating</h2>
+    <p>Every major dating app runs on a central server owned by a company. That company stores your profile, your messages, your location, your swipes, and your matches in a database they control. They can read your messages. They can sell your data. They can change the rules or shut down your account. You don't own anything.</p>
+    <p>Decentralized dating replaces the central server with a <strong>relay network</strong> — computers that pass encrypted messages between users without being able to read them.</p>
+
+    <h2>How OpenDating Protects Your Privacy</h2>
+
+    <h3>1. Encrypted Gift Wraps (NIP-59)</h3>
+    <p>Every action you take — creating a profile, liking someone, reporting a user — is wrapped in multiple layers of encryption. The outer layer is addressed to a specific service (like the matcher or moderation service). The inner layer contains the actual message. Relay operators can see <em>that</em> you sent something, but not <em>what</em> you sent.</p>
+
+    <h3>2. End-to-End Encrypted Messages (NIP-44 + NIP-17)</h3>
+    <p>When you message a match, the content is encrypted on your device using NIP-44 — the same encryption standard used by secure messaging apps. Only your match's device can decrypt it. The relay enforces that only matched users can message each other, but it never sees the content.</p>
+
+    <h3>3. Service Roles</h3>
+    <p>Instead of one monolithic server doing everything, OpenDating splits functionality across independent services — profile, discovery, matcher, DM policy, and moderation. Each service only sees the data it needs to function. The discovery service knows your general area but not your messages. The matcher knows about likes but not your location.</p>
+
+    <h3>4. Relay Enforcement</h3>
+    <p>The relay enforces rules at the protocol level: unmatched users can't message each other, blocked users can't discover the blocker, and reports are routed privately to moderation. These aren't app-level features — they're enforced by the infrastructure.</p>
+
+    <h2>What This Means for Users</h2>
+    <p>You create an account (a cryptographic keypair), build a profile, and start discovering people — exactly like any dating app. The difference is invisible: your data isn't in a corporate database. It's encrypted events on a decentralized network that you control.</p>
+
+    <p>If OpenDating disappears tomorrow, your identity — your keypair — still works with any other OpenDating-compatible client. You own your dating life.</p>
+
+    <p><a href="/">Learn more about OpenDating →</a></p>
+  </article>
+  <footer><a href="/">OpenDating</a> · Privacy-first decentralized dating</footer>
+</div>
+</body>
+</html>

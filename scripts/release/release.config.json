@@ -1,0 +1,87 @@
+{
+  "$schema": "./release.schema.json",
+
+  "project": {
+    "name": "OpenDating",
+    "slug": "opendating",
+    "tagline": "Privacy-first decentralized dating",
+    "description": "A dating app with Tinder-quality UX built on decentralized infrastructure. Your identity belongs to you, your exact location never leaves your device, and your messages are end-to-end encrypted. No surveillance, no data harvesting, no central server that owns your profile.",
+    "category": "dating app",
+    "audience": "people who want genuine dating without surveillance capitalism",
+    "platforms": ["iOS", "Android"],
+    "price": "Free",
+    "differentiators": [
+      "Self-sovereign identity — you own your account, not a company",
+      "Coarse location only — your exact GPS never reaches the server",
+      "End-to-end encrypted messages — nobody can read your conversations",
+      "Private likes — one-way likes are never public",
+      "Private blocks and reports — enforced server-side, never notified",
+      "No ads, no data harvesting, no surveillance business model",
+      "Portable profile — export your key and move to any OpenDating client"
+    ]
+  },
+
+  "repo": {
+    "root": "../..",
+    "defaultBranch": "main",
+    "remote": "origin"
+  },
+
+  "verify": {
+    "commands": ["npm run typecheck"],
+    "lint": "npm run lint"
+  },
+
+  "ios": {
+    "enabled": false,
+    "_comment": "iOS build not configured yet"
+  },
+
+  "web": {
+    "enabled": true,
+    "deployCommand": "npm run deploy:web",
+    "productionUrl": "https://opendating.org",
+    "verifyAnchors": ["#privacy", "#features", "#get"]
+  },
+
+  "domain": {
+    "enabled": false,
+    "_comment": "Domain registration pending"
+  },
+
+  "blog": {
+    "enabled": true,
+    "mode": "expo-public",
+    "contentDir": "docs/blog",
+    "publicDir": "public",
+    "basePath": "/blog",
+    "primaryColor": "#E8735A",
+    "_comment": "mode 'expo-public' renders static HTML into public/blog/, which GitHub Pages serves verbatim."
+  },
+
+  "seo": {
+    "enabled": true,
+    "articleCount": 20,
+    "year": 2026,
+    "model": "deepseek-chat",
+    "autoPublish": true,
+    "competitors": [
+      "Tinder",
+      "Bumble",
+      "Hinge",
+      "OkCupid",
+      "Coffee Meets Bagel",
+      "Happn",
+      "Facebook Dating"
+    ],
+    "useCases": [
+      "privacy-focused daters",
+      "people tired of surveillance capitalism",
+      "LGBTQ+ safety and privacy",
+      "long-term relationships",
+      "people who want data portability",
+      "ethical dating app users"
+    ],
+    "_comment": "AI-generated blog articles. Review competitor comparison articles before publishing — claims about named products are your liability."
+  }
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tinder vs Bumble vs Hinge: A Privacy Comparison — OpenDating Blog</title>
+<meta name="description" content="A side-by-side comparison of what Tinder, Bumble, Hinge, and OpenDating collect, store, and share about you. The privacy differences are stark.">
+<meta name="keywords" content="tinder privacy, bumble privacy, hinge privacy, dating app comparison, private dating app, opendating vs tinder">
+<meta property="og:title" content="Tinder vs Bumble vs Hinge: A Privacy Comparison">
+<meta property="og:description" content="What do the major dating apps know about you? A side-by-side comparison of data collection, message privacy, and location tracking.">
+<link rel="canonical" href="https://opendating.org/blog/tinder-vs-bumble-vs-opendating">
+<style>
+  :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  nav { border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 40px; }
+  nav a { color: var(--coral); text-decoration: none; font-weight: 600; font-size: 15px; }
+  article h1 { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .date { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; }
+  p { margin: 14px 0; }
+  ul, ol { margin: 12px 0; padding-left: 24px; }
+  li { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .yes { color: #2E7D32; font-weight: 600; }
+  .no { color: var(--text-secondary); }
+  footer { border-top: 1px solid var(--border); padding: 32px 0; margin-top: 64px; color: var(--text-secondary); font-size: 14px; text-align: center; }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav><a href="/blog">← Blog</a></nav>
+  <article>
+    <h1>Tinder vs Bumble vs Hinge: How They Handle Your Privacy</h1>
+    <div class="date">August 2026</div>
+
+    <p>Most people choose a dating app based on design, user base, or success stories. Almost nobody compares them on <strong>privacy</strong> — which is strange, given how much personal data dating apps collect. Here's an honest comparison.</p>
+
+    <p><strong>Note:</strong> This comparison is based on publicly available privacy policies and app permissions as of 2026. For the most current information, visit each app's privacy page directly.</p>
+
+    <h2>Data Collection at a Glance</h2>
+
+    <table>
+      <tr><th>What They Collect</th><th>Tinder</th><th>Bumble</th><th>Hinge</th><th>OpenDating</th></tr>
+      <tr><td>Precise GPS location</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No (5 km geohash only)</td></tr>
+      <tr><td>Message content readable by company</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No (E2E encrypted)</td></tr>
+      <tr><td>Email or phone required</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No</td></tr>
+      <tr><td>Profile export/portability</td><td class="no">Partial</td><td class="no">Partial</td><td class="no">Partial</td><td class="yes">Full (portable keypair)</td></tr>
+      <tr><td>Swipe/like data stored</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">Likes encrypted</td></tr>
+      <tr><td>Third-party data sharing</td><td class="no">Yes</td><td class="no">Limited</td><td class="no">Yes</td><td class="yes">None</td></tr>
+      <tr><td>Open source</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes (MIT)</td></tr>
+    </table>
+
+    <h2>Location: The Biggest Difference</h2>
+    <p>All three major apps request precise GPS access and update your location frequently — often every time you open the app. This data can reveal where you live, where you work, and your daily routines. OpenDating converts your GPS to a coarse geohash (~5 km precision) entirely on-device and only sends that prefix. The raw coordinates are discarded.</p>
+
+    <h2>Messages: Who Can Read Them</h2>
+    <p>On Tinder, Bumble, and Hinge, messages are stored on company servers and are accessible to employees (subject to internal access controls). Reports of inappropriate behavior include the full conversation history being reviewed by human moderators at the company. OpenDating uses NIP-44 end-to-end encryption — messages are encrypted on your device and can only be decrypted by the recipient. Not even the relay operator can read them.</p>
+
+    <h2>Business Model Implications</h2>
+    <p>Tinder, Bumble, and Hinge are all owned by Match Group, a publicly traded company. Their business model depends on collecting user data for ad targeting, algorithmic recommendations, and upsells (Super Likes, Boosts, premium subscriptions). OpenDating has no advertising, no data monetization, and no premium tiers. It's free and open source.</p>
+
+    <h2>Which App Should You Use?</h2>
+    <p>If you value a large user base and don't mind trading privacy for convenience, the major apps serve that purpose. If you want a dating experience where you control your data, your location stays private, and your messages are genuinely encrypted, OpenDating offers a fundamentally different architecture.</p>
+
+    <p><a href="/">Learn more about OpenDating →</a></p>
+  </article>
+  <footer><a href="/">OpenDating</a> · Privacy-first decentralized dating</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# OpenDating
+
+> Privacy-first decentralized dating
+
+A dating app with Tinder-quality UX built on decentralized infrastructure (Nostr). Your identity belongs to you, your exact location never leaves your device, and your messages are end-to-end encrypted. No surveillance, no data harvesting, no central server that owns your profile.
+
+## What it is
+- Category: dating app
+- Platforms: iOS, Android
+- Price: Free
+- Built for: people who want genuine dating without surveillance capitalism
+
+## Key properties
+- Self-sovereign identity — you own your account, not a company
+- Coarse location only — your exact GPS never reaches the server
+- End-to-end encrypted messages — nobody can read your conversations
+- Private likes — one-way likes are never public
+- Private blocks and reports — enforced server-side, never notified
+- No ads, no data harvesting, no surveillance business model
+- Portable profile — export your key and move to any OpenDating client
+
+## Links
+- Site: https://opendating.org
+- Blog: https://opendating.org/blog
+- GitHub: https://github.com/jongan69/opendating-mobile
+- Protocol: https://github.com/jongan69/OpenDating

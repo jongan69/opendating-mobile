@@ -86,7 +86,10 @@
     "lint": "expo lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "clean": "expo start --clear"
+    "clean": "expo start --clear",
+    "deploy:web": "echo 'Deploy via GitHub Pages — push to main and the deploy-web workflow handles the rest.'",
+    "blog:generate": "node scripts/release/lib/generate-articles.mjs",
+    "blog:build": "node scripts/release/lib/build-blog.mjs"
   },
   "private": true
 }
