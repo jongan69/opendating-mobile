@@ -59,3 +59,5 @@ coverage/
 # Temporary files
 *.log
 *.tmp
+screenshots/*.png
+screenshots/app-store/
