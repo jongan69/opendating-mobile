@@ -3,6 +3,7 @@
     "name": "OpenDating",
     "slug": "opendating-mobile",
     "version": "0.1.0",
+    "description": "Privacy-first decentralized dating app — Tinder-quality UX with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity on Nostr.",
     "orientation": "portrait",
     "icon": "./assets/brand/ios-app-icon-1024.png",
     "scheme": "opendating",

@@ -1,7 +1,33 @@
 {
   "name": "opendating-mobile",
+  "description": "Privacy-first decentralized dating app — Expo React Native reference client for the OpenDating protocol on Nostr. Tinder-quality UX with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity.",
+  "keywords": [
+    "opendating",
+    "dating-app",
+    "nostr",
+    "privacy",
+    "decentralized",
+    "expo",
+    "react-native",
+    "typescript",
+    "end-to-end-encrypted",
+    "nip-17",
+    "nip-44",
+    "self-sovereign",
+    "mobile"
+  ],
+  "homepage": "https://github.com/jongan69/opendating-mobile#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jongan69/opendating-mobile.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jongan69/opendating-mobile/issues"
+  },
+  "author": "OpenDating",
+  "license": "MIT",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "dependencies": {
     "@cashu/cashu-ts": "^4.7.2",
     "@expo/ui": "~57.0.9",
