@@ -100,10 +100,18 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
     (dir: 'left' | 'right', pubkey: string | undefined, grant: string | undefined) => {
       if (!pubkey) return;
       if (dir === 'right') {
+        // A like is only valid with the grant discovery issued for this
+        // viewer/candidate pair; the server rejects anything else. Sending an
+        // empty string would fail server-side and read to the user as "no
+        // longer available", so treat a missing grant as a pass instead.
+        if (!grant) {
+          onPass(pubkey);
+          return;
+        }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
           () => {}
         );
-        onLike(pubkey, grant ?? '');
+        onLike(pubkey, grant);
       } else {
         Haptics.selectionAsync().catch(() => {});
         onPass(pubkey);

@@ -68,6 +68,10 @@ export default function MatchesScreen() {
   const displayNewMatches = isScreenshotMode ? DEMO_MATCHES : newMatches;
 
   // Feed the chat and candidate screens from match data.
+  // These entries carry no candidate grant: a match is already mutual, so
+  // there is nothing left to like. The empty grant must never reach
+  // intent.like — the server rejects it — and the deck guards against that by
+  // treating a missing grant as a pass.
   useEffect(() => {
     for (const match of displayMatches) {
       cacheCandidate({
