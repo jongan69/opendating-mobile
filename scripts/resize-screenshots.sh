@@ -2,94 +2,101 @@
 set -euo pipefail
 
 # ============================================================
-# Resize screenshots to App Store required dimensions
+# 📐 Screenshot Resizer — Project-Agnostic
 # ============================================================
-# Takes the raw Android screenshots (captured at device
-# resolution) and creates properly-sized versions for the
-# iOS App Store and Google Play Store.
+# Converts raw device screenshots to App Store required sizes.
 #
-# Prerequisites:
-#   - ImageMagick (`brew install imagemagick`)
-#   - Raw screenshots in screenshots/
+# Prerequisites: ImageMagick (`brew install imagemagick`)
 #
 # Usage:
-#   ./scripts/resize-screenshots.sh
+#   ./scripts/resize-screenshots.sh                     # all screenshots
+#   ./scripts/resize-screenshots.sh 01-welcome 02-login # specific files
+#   ./scripts/resize-screenshots.sh --store google       # Google Play sizes
 # ============================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 SCREENSHOT_DIR="$PROJECT_DIR/screenshots"
-STORE_DIR="$SCREENSHOT_DIR/app-store"
+STORE="apple"  # "apple" or "google"
+FILES=()
+
+for arg in "$@"; do
+  case "$arg" in
+    --store) STORE="$2"; shift 2 ;;
+    --store=*) STORE="${arg#*=}" ;;
+    --help|-h)
+      echo "Usage: $0 [--store apple|google] [files...]"
+      echo "  --store apple   iOS App Store sizes (default)"
+      echo "  --store google  Google Play Store sizes"
+      exit 0
+      ;;
+    *) FILES+=("$arg") ;;
+  esac
+done
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info() { echo -e "${CYAN}[→]${NC} $1"; }
 ok()   { echo -e "${GREEN}[✓]${NC} $1"; }
 warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
-# Check ImageMagick
 if ! command -v convert &>/dev/null; then
-  warn "ImageMagick not found. Install with: brew install imagemagick"
-  info "Continuing without resize — raw screenshots are in $SCREENSHOT_DIR"
+  echo "ImageMagick not found. Install with: brew install imagemagick"
   exit 0
 fi
 
-mkdir -p "$STORE_DIR"
+# Default: all PNGs in screenshots/
+if [ ${#FILES[@]} -eq 0 ]; then
+  for f in "$SCREENSHOT_DIR"/*.png; do
+    [ -f "$f" ] && FILES+=("$(basename "$f" .png)")
+  done
+fi
 
-# iOS App Store required dimensions
-# iPhone 6.7" (Pro Max / Plus): 1290×2796
-# iPhone 6.1" (Pro / standard): 1179×2556
-# iPhone 5.5" (SE / older): 1242×2208 (optional)
+[ ${#FILES[@]} -eq 0 ] && { warn "No screenshots found in $SCREENSHOT_DIR"; exit 0; }
 
-info "Resizing screenshots for App Store..."
+case "$STORE" in
+  apple)
+    OUT_DIR="$SCREENSHOT_DIR/app-store"
+    SIZES=(
+      "6.7:1290:2796"
+      "6.1:1179:2556"
+    )
+    info "Resizing ${#FILES[@]} screenshots for iOS App Store..."
+    ;;
+  google)
+    OUT_DIR="$SCREENSHOT_DIR/play-store"
+    SIZES=(
+      "phone:1080:1920"
+    )
+    info "Resizing ${#FILES[@]} screenshots for Google Play..."
+    ;;
+  *) echo "Unknown store: $STORE"; exit 1 ;;
+esac
 
-# Map of screenshot → App Store name
-declare -A SHOTS=(
-  ["01-welcome"]="Welcome Screen"
-  ["02-create-account"]="Create Account"
-  ["03-privacy"]="Privacy"
-  ["12-discover"]="Discover"
-  ["13-matches"]="Matches"
-  ["14-profile"]="Profile"
-  ["15-filters"]="Filters"
-)
+mkdir -p "$OUT_DIR"
 
-for file in "${!SHOTS[@]}"; do
-  src="$SCREENSHOT_DIR/${file}.png"
-  if [ ! -f "$src" ]; then
-    warn "Missing: ${file}.png — skipping"
-    continue
-  fi
+BG_COLOR="#FAF9F7"  # warm off-white — change in your config
 
-  label="${SHOTS[$file]}"
+for name in "${FILES[@]}"; do
+  src="$SCREENSHOT_DIR/${name}.png"
+  [ ! -f "$src" ] && { warn "Missing: ${name}.png"; continue; }
 
-  # iPhone 6.7" (1290×2796)
-  convert "$src" \
-    -resize 1290x2796^ \
-    -gravity center \
-    -extent 1290x2796 \
-    "$STORE_DIR/6.7-${file}.png"
-  ok "6.7\" → ${file}"
+  for size_spec in "${SIZES[@]}"; do
+    label="${size_spec%%:*}"
+    rest="${size_spec#*:}"
+    w="${rest%%:*}"
+    h="${rest#*:}"
 
-  # iPhone 6.1" (1179×2556)
-  convert "$src" \
-    -resize 1179x2556^ \
-    -gravity center \
-    -extent 1179x2556 \
-    "$STORE_DIR/6.1-${file}.png"
-  ok "6.1\" → ${file}"
+    dst="$OUT_DIR/${label}-${name}.png"
+    convert "$src" \
+      -resize "${w}x${h}^" \
+      -gravity center \
+      -extent "${w}x${h}" \
+      -background "$BG_COLOR" \
+      "$dst" 2>/dev/null
+    ok "${label} → ${name}"
+  done
 done
 
-# ── Frame the best 3 for each size ──────────────────────────
-info "Creating device-framed versions..."
-# If you have device frame overlays, apply them here.
-# For now, just the raw resized screenshots work.
-
 echo ""
-ok "App Store screenshots ready!"
-echo "  Location: $STORE_DIR"
-echo "  Count:    $(ls "$STORE_DIR"/*.png 2>/dev/null | wc -l | tr -d ' ') files"
-echo ""
-echo "  Upload to App Store Connect → App Store → Screenshots"
-echo "  Required: 3-5 screenshots per device size"
-echo ""
-ls -lh "$STORE_DIR"/*.png 2>/dev/null | head -20
+ok "Done! $(ls "$OUT_DIR"/*.png 2>/dev/null | wc -l | tr -d ' ') files in $OUT_DIR"
+ls -lh "$OUT_DIR"/*.png 2>/dev/null | head -20

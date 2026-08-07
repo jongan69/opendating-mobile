@@ -1,0 +1,85 @@
+{
+  "package": "com.jongan69.opendating",
+  "name": "OpenDating",
+  "screens": [
+    {
+      "name": "01-welcome",
+      "actions": [],
+      "delay": 2
+    },
+    {
+      "name": "02-create-account",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "03-privacy",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "04-basics",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "05-preferences",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "06-intent",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "07-about",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "08-photos",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 1.5
+    },
+    {
+      "name": "09-location",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 2
+    },
+    {
+      "name": "10-review",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 3
+    },
+    {
+      "name": "11-finish",
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 3
+    },
+    {
+      "name": "12-discover",
+      "actions": [],
+      "delay": 1.5
+    },
+    {
+      "name": "13-matches",
+      "actions": [{ "type": "tap", "x": 50, "y": 96 }],
+      "delay": 1.5
+    },
+    {
+      "name": "14-profile",
+      "actions": [{ "type": "tap", "x": 92, "y": 96 }],
+      "delay": 1.5
+    },
+    {
+      "name": "15-filters",
+      "actions": [
+        { "type": "tap", "x": 5, "y": 96 },
+        { "type": "wait", "seconds": 1 },
+        { "type": "tap", "x": 92, "y": 6 }
+      ],
+      "delay": 1.5
+    }
+  ]
+}
