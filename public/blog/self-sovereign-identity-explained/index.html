@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-Sovereign Identity: What It Means for Dating — OpenDating Blog</title>
+<meta name="description" content="When you own your dating identity as a cryptographic keypair, it's portable across apps. No company lock-in, no lost profiles, no one who can delete your account.">
+<meta name="keywords" content="self-sovereign identity, decentralized identity, dating app portability, nostr identity, opendating">
+<meta property="og:title" content="Self-Sovereign Identity: What It Means for Dating">
+<meta property="og:description" content="Your dating profile shouldn't be owned by a company. Here's how self-sovereign identity gives you control over your dating life.">
+<link rel="canonical" href="https://opendating.org/blog/self-sovereign-identity-explained">
+<style>
+  :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  nav { border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 40px; }
+  nav a { color: var(--coral); text-decoration: none; font-weight: 600; font-size: 15px; }
+  article h1 { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .date { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 14px 0; }
+  ul, ol { margin: 12px 0; padding-left: 24px; }
+  li { margin: 6px 0; }
+  footer { border-top: 1px solid var(--border); padding: 32px 0; margin-top: 64px; color: var(--text-secondary); font-size: 14px; text-align: center; }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav><a href="/blog">← Blog</a></nav>
+  <article>
+    <h1>Self-Sovereign Identity: What It Means for Dating</h1>
+    <div class="date">August 2026</div>
+
+    <p>Every dating app you've ever used owns your profile. Tinder owns your Tinder profile. Bumble owns your Bumble profile. If those companies shut down, ban you, or change their terms, your dating presence disappears. You don't own anything — you're renting space on their servers.</p>
+
+    <p><strong>Self-sovereign identity</strong> flips this. You own your identity as a cryptographic keypair. Your profile is signed by your key. You can take it to any compatible app, at any time.</p>
+
+    <h2>How It Works</h2>
+
+    <p>In OpenDating, your account is a Nostr keypair — a public key (your identity) and a private key (your secret, stored only on your device). When you create a profile, it's cryptographically signed by your private key. Any OpenDating-compatible client can verify that signature and know it's really you.</p>
+
+    <p>This means:</p>
+    <ul>
+      <li><strong>Portability</strong> — take your profile, matches, and conversation history to any OpenDating client</li>
+      <li><strong>No lock-in</strong> — no company can delete your account or hold your data hostage</li>
+      <li><strong>Prove it's you</strong> — your public key is your identity; anyone can verify messages come from you</li>
+      <li><strong>Privacy-preserving</strong> — your private key never leaves your device</li>
+    </ul>
+
+    <h2>Why This Matters for Dating</h2>
+
+    <p>Dating is personal. The idea that a corporation owns your dating profile — your photos, your bio, your preferences, your conversation history — is strange when you think about it. Your dating life shouldn't be an asset on a company's balance sheet.</p>
+
+    <p>Self-sovereign identity means your dating presence is truly yours. If OpenDating disappears, your identity doesn't. If you want to switch to a different OpenDating-compatible client, you can. Your keypair is all you need.</p>
+
+    <h2>What About Lost Keys?</h2>
+
+    <p>This is the trade-off. With a centralized app, you can reset your password. With self-sovereign identity, losing your private key means losing access to your account — permanently. There's no "forgot password" button. This is why OpenDating provides backup and export features, and why you should store your key somewhere safe.</p>
+
+    <p>The upside is that <em>only you</em> can lose your key. No company can accidentally leak it. No hacker can steal it from a database. No employee can misuse it. The responsibility is yours — and so is the security.</p>
+
+    <h2>The Bigger Picture</h2>
+
+    <p>Self-sovereign identity isn't just for dating. It's part of a broader movement toward user-owned digital identity — where you control your online presence across platforms without being locked into any single provider. OpenDating is one of the first consumer applications to put this into practice in a way that feels natural and polished.</p>
+
+    <p><a href="/">Learn more about OpenDating →</a></p>
+  </article>
+  <footer><a href="/">OpenDating</a> · Privacy-first decentralized dating</footer>
+</div>
+</body>
+</html>

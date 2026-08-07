@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Location Privacy in Dating Apps: Why It Matters — OpenDating Blog</title>
+<meta name="description" content="Your dating app knows exactly where you are — down to the meter. OpenDating only shares a ~5 km area. Here's why that difference matters for safety and privacy.">
+<meta name="keywords" content="dating app location privacy, geohash, gps dating safety, coarse location dating, opendating location">
+<meta property="og:title" content="Location Privacy in Dating Apps: Why It Matters">
+<meta property="og:description" content="Most dating apps track your exact GPS coordinates. OpenDating converts them to a coarse geohash on-device. Your precise location never leaves your phone.">
+<link rel="canonical" href="https://opendating.org/blog/location-privacy-dating-apps">
+<style>
+  :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  nav { border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 40px; }
+  nav a { color: var(--coral); text-decoration: none; font-weight: 600; font-size: 15px; }
+  article h1 { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .date { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 14px 0; }
+  ul, ol { margin: 12px 0; padding-left: 24px; }
+  li { margin: 6px 0; }
+  footer { border-top: 1px solid var(--border); padding: 32px 0; margin-top: 64px; color: var(--text-secondary); font-size: 14px; text-align: center; }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav><a href="/blog">← Blog</a></nav>
+  <article>
+    <h1>Location Privacy in Dating Apps: Why It Matters</h1>
+    <div class="date">August 2026</div>
+
+    <p>Most dating apps request your <strong>precise GPS location</strong> — and they update it frequently, often every time you open the app. This data can reveal where you live, where you work, your daily commute, your favorite coffee shop, and when you're home or away.</p>
+
+    <p>OpenDating takes a fundamentally different approach: your exact coordinates are converted to a coarse geohash entirely on your device, and only a 5-character prefix (~5 km area) is shared. Your precise location <strong>never leaves your phone.</strong></p>
+
+    <h2>What Dating Apps Know About Your Location</h2>
+
+    <p>When you grant location permission to a typical dating app, it can access:</p>
+    <ul>
+      <li><strong>Your current location</strong> — precise to within a few meters</li>
+      <li><strong>Your location history</strong> — where you've been while the app is open</li>
+      <li><strong>Your movement patterns</strong> — home, work, gym, social venues</li>
+      <li><strong>Real-time proximity</strong> — exactly how far you are from other users</li>
+    </ul>
+
+    <p>This data is used to show you nearby matches, but it's also stored. In some cases, it's shared with advertising partners. A dating app's database can reveal someone's entire daily routine.</p>
+
+    <h2>How OpenDating's Location Privacy Works</h2>
+
+    <p>OpenDating uses a technique called <strong>geohashing</strong>:</p>
+
+    <ol>
+      <li>Your phone gets your GPS coordinates (e.g., 40.7128, -74.0060)</li>
+      <li>It immediately converts them to a geohash (e.g., "dr5regu4z")</li>
+      <li>Only the first 5 characters are kept ("dr5re")</li>
+      <li>That 5-character prefix represents an area roughly 5 km × 5 km</li>
+      <li>The raw GPS coordinates are discarded from memory</li>
+      <li>Only the prefix is sent to the discovery service</li>
+    </ol>
+
+    <p>The result: the discovery service knows you're <em>somewhere</em> in a ~25 km² area, but not where exactly. It's enough to find people nearby without enabling precise tracking.</p>
+
+    <h2>Why This Matters for Safety</h2>
+
+    <p>Precise location data in a dating app creates several safety risks:</p>
+
+    <ul>
+      <li><strong>Stalking</strong> — someone who can see your exact distance could triangulate your location by moving around and checking the distance change</li>
+      <li><strong>Data breach exposure</strong> — if the app's database is breached, attackers get a map of where every user has been</li>
+      <li><strong>Real-time tracking</strong> — precise GPS + timestamps = a detailed log of your movements</li>
+      <li><strong>Cross-referencing</strong> — location data combined with other public information can de-anonymize users</li>
+    </ul>
+
+    <p>By only sharing a ~5 km area, OpenDating eliminates these risks while still enabling location-based discovery. You can find people in your city without broadcasting your exact coordinates to a server.</p>
+
+    <h2>Distance Display</h2>
+
+    <p>OpenDating shows distance in broad buckets: "nearby," "within 5 mi," "5-10 mi," "10-25 mi." You'll never see "2.17 miles away" — because that level of precision would compromise the privacy of the person you're viewing.</p>
+
+    <h2>Privacy Is the Default</h2>
+
+    <p>Most apps collect precise location because they can — it's useful for ad targeting, analytics, and algorithmic recommendations. OpenDating was designed from the ground up to be location-minimal. The architecture enforces it: the server literally cannot receive precise coordinates because they're truncated on-device before transmission.</p>
+
+    <p><a href="/">Learn more about OpenDating →</a></p>
+  </article>
+  <footer><a href="/">OpenDating</a> · Privacy-first decentralized dating</footer>
+</div>
+</body>
+</html>
