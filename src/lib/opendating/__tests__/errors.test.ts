@@ -177,7 +177,7 @@ describe('error mapping', () => {
 
     it('handles rate-limited prefix', () => {
       expect(getUserMessage('rate-limited: wait please')).toBe(
-        'Please wait a moment before trying again.'
+        'You are doing that too often. Please wait a moment.'
       );
     });
   });
