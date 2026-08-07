@@ -37,9 +37,7 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "jonny2298@live.com",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "appleId": "jonny2298@live.com"
       }
     }
   }
