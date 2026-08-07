@@ -13,6 +13,27 @@ export interface OpenDatingProfile {
   updated_at: number;
 }
 
+/**
+ * The profile content other people actually see.
+ *
+ * The service-side `OpenDatingProfile` above is only a record — status,
+ * timestamps, and a pointer to the event carrying this. This is the payload
+ * of that event, and it mirrors `CandidateProfile` so a published profile
+ * and a received candidate describe the same shape.
+ */
+export interface ProfileContent {
+  display_name: string;
+  age?: number;
+  gender?: string;
+  bio?: string;
+  interests?: string[];
+  relationship_intent?: string;
+  prompts?: ProfilePrompt[];
+  photos?: CandidatePhoto[];
+  /** Schema version, so older clients can skip content they cannot render. */
+  v: string;
+}
+
 // ---- Discovery ----
 
 export interface DiscoveryPreferences {
@@ -126,20 +147,42 @@ export interface ODMessage {
   id: string;
   sender_pubkey: string;
   recipient_pubkey: string;
+  /**
+   * The other party in this conversation, whichever direction the message
+   * went. Routing on the sender alone loses our own sent messages, which
+   * come back to us as self-addressed copies.
+   */
+  conversation_pubkey: string;
   text: string;
   created_at: number;
+  /** True when we authored this message. */
+  outgoing: boolean;
+  /** Shown optimistically, not yet confirmed by the relay. */
+  pending?: boolean;
 }
 
 // ---- Services (from NIP-11) ----
 
-export interface OpenDatingServices {
-  system: { pubkey: string };
-  profile: { pubkey: string };
-  discovery: { pubkey: string };
-  matcher: { pubkey: string };
-  dm_policy: { pubkey: string };
-  moderation: { pubkey: string };
-}
+export type OpenDatingServiceRole =
+  | 'system'
+  | 'profile'
+  | 'discovery'
+  | 'matcher'
+  | 'dm_policy'
+  | 'moderation'
+  | 'verification'
+  | 'media';
+
+/**
+ * Service pubkeys advertised by the relay.
+ *
+ * Partial by design: a relay advertises only the services it actually runs,
+ * and the roster grows as the deployment matures. Callers must check for a
+ * role before using it rather than assuming the full set is present.
+ */
+export type OpenDatingServices = Partial<
+  Record<OpenDatingServiceRole, { pubkey: string }>
+>;
 
 export interface OpenDatingFeatures {
   match_only_dms: boolean;
@@ -152,7 +195,7 @@ export interface OpenDatingFeatures {
 export interface OpenDatingCapabilities {
   protocol_versions: string[];
   roles: OpenDatingServices;
-  features: OpenDatingFeatures;
+  features: Partial<OpenDatingFeatures>;
   server_time?: number;
   protocol_version?: string;
 }
@@ -208,4 +251,10 @@ export type AppBootstrapState =
   | 'checking_profile'
   | 'no_profile'
   | 'ready'
+  /**
+   * Reached the relay, but it does not run the services the app needs. Not
+   * an error — a staged rollout looks exactly like this — so it gets its own
+   * state and its own screen rather than a generic failure.
+   */
+  | 'services_unavailable'
   | 'error';

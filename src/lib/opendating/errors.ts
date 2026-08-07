@@ -164,6 +164,27 @@ const serviceErrorMap: Record<string, DomainError> = {
   },
 };
 
+/**
+ * Raised when the relay does not advertise a service the app needs.
+ *
+ * A relay runs only the services it has deployed, so this is an expected
+ * state during a staged rollout — not a crash. Screens catch it to show a
+ * "not available yet" state rather than a generic failure.
+ */
+export class ServiceUnavailableError extends Error {
+  readonly role: string;
+
+  constructor(role: string, label: string) {
+    super(`${label} isn't available on this relay yet. Please check back soon.`);
+    this.name = 'ServiceUnavailableError';
+    this.role = role;
+  }
+}
+
+export function isServiceUnavailable(err: unknown): err is ServiceUnavailableError {
+  return err instanceof ServiceUnavailableError;
+}
+
 export function mapRelayError(notice: string): DomainError | null {
   // Check for relay-prefixed errors
   for (const [prefix, error] of Object.entries(relayPrefixErrors)) {

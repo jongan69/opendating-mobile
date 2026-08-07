@@ -10,14 +10,16 @@ import NDK, {
 import {
   createEnvelope,
   buildGiftWrap,
-  nip44Decrypt,
   generateKeypair,
+  signEvent,
   type OpenDatingEnvelope,
 } from 'opendating-protocol';
 import * as SecureStore from 'expo-secure-store';
+import { randomUUID } from 'expo-crypto';
 import {
   type OpenDatingCapabilities,
   type OpenDatingServices,
+  type OpenDatingServiceRole,
   type CandidatePage,
   type CandidateQuery,
   type LikeResult,
@@ -27,10 +29,13 @@ import {
   type VerificationClaim,
   type DiscoveryPreferences,
   type OpenDatingProfile,
+  type ProfileContent,
   type ConnectionState,
   type ODMessage,
 } from '@/types/opendating';
-import { mapServiceError } from './errors';
+import { mapServiceError, ServiceUnavailableError } from './errors';
+import { parseCapabilities, serviceLabel } from './capabilities';
+import { unwrapGiftWrap } from './gift-wrap';
 
 // ---- Constants ----
 
@@ -49,6 +54,24 @@ const SERVICES_CACHE_KEY = 'opendating_services_cache';
 
 const CONNECT_TIMEOUT_MS = 15_000;
 const REQUEST_TIMEOUT_MS = 30_000;
+
+/** Inner rumor kinds we route on. */
+const KIND_OD_COMMAND = 78;
+const KIND_DM = 14;
+const KIND_GIFT_WRAP = 1059;
+/** Parameterized-replaceable app data (NIP-78) — carries profile content. */
+const KIND_PROFILE_CONTENT = 30078;
+const PROFILE_CONTENT_TAG = 'opendating:profile:0.1';
+
+/**
+ * NIP-59 randomises seal and wrap timestamps up to two days into the past to
+ * defeat timing analysis. A relay `since` filter matches on that randomised
+ * wrap timestamp, so the window has to be widened by the same amount or
+ * freshly-sent messages are filtered out before they ever reach us.
+ */
+const GIFT_WRAP_BACKDATE_SEC = 2 * 24 * 60 * 60;
+/** How far back to pull the encrypted inbox on connect. */
+const INBOX_HISTORY_SEC = 14 * 24 * 60 * 60;
 
 // ---- Types ----
 
@@ -73,12 +96,12 @@ class OpenDatingClientImpl {
   private capabilities: OpenDatingCapabilities | null = null;
   private connectionState: ConnectionState = 'starting';
   private pendingRequests = new Map<string, PendingRequest>();
-  private responseSub: NDKSubscription | null = null;
-  private matchSub: NDKSubscription | null = null;
-  private messageSub: NDKSubscription | null = null;
+  private inboxSub: NDKSubscription | null = null;
   private stateListeners = new Set<(state: ConnectionState) => void>();
   private matchListeners = new Set<(match: Match) => void>();
   private messageListeners = new Set<(msg: ODMessage) => void>();
+  /** Rumor ids already delivered — relays re-send, and we must not double-fire. */
+  private seenRumorIds = new Set<string>();
 
   // ---- Connection State ----
 
@@ -105,6 +128,7 @@ class OpenDatingClientImpl {
   }
 
   async getPubkey(): Promise<string | null> {
+    if (this.userPubkey) return this.userPubkey;
     return SecureStore.getItemAsync(SECURE_STORE_PUBKEY_KEY);
   }
 
@@ -184,8 +208,8 @@ class OpenDatingClientImpl {
         'Could not verify OpenDating services. Please try again.'
       );
 
-      // Start response subscription
-      await this.startResponseSubscription();
+      // Start the single inbound gift-wrap subscription
+      this.startInboxSubscription();
     } catch (err) {
       this.setState('offline');
       throw err;
@@ -197,10 +221,17 @@ class OpenDatingClientImpl {
     timeoutMs: number,
     message: string
   ): Promise<T> {
-    const timer = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(message)), timeoutMs)
-    );
-    return Promise.race([promise, timer]);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(message)), timeoutMs);
+    });
+    try {
+      return await Promise.race([promise, timeout]);
+    } finally {
+      // Without this the pending timer keeps the JS timer queue alive well
+      // past a fast success, which shows up as a stalled splash on reconnect.
+      if (timer) clearTimeout(timer);
+    }
   }
 
   private async waitForRelay(): Promise<void> {
@@ -210,9 +241,10 @@ class OpenDatingClientImpl {
   }
 
   async disconnect(): Promise<void> {
-    this.responseSub?.stop();
-    this.matchSub?.stop();
-    this.messageSub?.stop();
+    this.inboxSub?.stop();
+    // Drop the handle too: a later connect() must be able to re-subscribe,
+    // which a stale non-null ref would silently skip.
+    this.inboxSub = null;
 
     // Reject all pending requests
     for (const [, pending] of this.pendingRequests) {
@@ -220,6 +252,7 @@ class OpenDatingClientImpl {
       pending.reject(new Error('Disconnected'));
     }
     this.pendingRequests.clear();
+    this.seenRumorIds.clear();
 
     // NDK manages relay connections via its pool; no explicit disconnect() method.
     // Just drop the reference and let GC handle cleanup.
@@ -241,28 +274,22 @@ class OpenDatingClientImpl {
         throw new Error(`NIP-11 fetch failed: ${response.status}`);
       }
 
-      const nip11 = await response.json();
-      const odInfo = nip11?.opendating;
+      const parsed = parseCapabilities(await response.json());
 
-      if (!odInfo) {
+      if (!parsed) {
         throw new Error('Relay does not advertise OpenDating support');
       }
 
       // Validate protocol version
-      const versions: string[] = odInfo.protocol_versions ?? [];
-      if (!versions.includes(PROTOCOL_VERSION)) {
+      if (!parsed.protocol_versions.includes(PROTOCOL_VERSION)) {
         this.setState('protocol_incompatible');
         throw new Error(
-          `Protocol version ${PROTOCOL_VERSION} not supported. Relay supports: ${versions.join(', ')}`
+          `Protocol version ${PROTOCOL_VERSION} not supported. Relay supports: ${parsed.protocol_versions.join(', ')}`
         );
       }
 
-      this.services = odInfo.roles as OpenDatingServices;
-      this.capabilities = {
-        protocol_versions: versions,
-        roles: this.services,
-        features: odInfo.features ?? {},
-      };
+      this.services = parsed.roles;
+      this.capabilities = parsed;
 
       // Cache services
       try {
@@ -300,6 +327,11 @@ class OpenDatingClientImpl {
     return this.services;
   }
 
+  /** True when the relay advertises the service backing a given feature. */
+  hasService(role: OpenDatingServiceRole): boolean {
+    return !!this.services?.[role]?.pubkey;
+  }
+
   getRelayUrl(): string {
     return RELAY_URL;
   }
@@ -322,7 +354,7 @@ class OpenDatingClientImpl {
   // ---- Core Request / Response ----
 
   private async sendRequest(
-    service: keyof OpenDatingServices,
+    service: OpenDatingServiceRole,
     type: string,
     payload: Record<string, unknown>
   ): Promise<OpenDatingEnvelope> {
@@ -335,21 +367,25 @@ class OpenDatingClientImpl {
 
     const servicePubkey = this.services[service]?.pubkey;
     if (!servicePubkey) {
-      throw new Error(`Service pubkey not found for: ${service}`);
+      // The relay simply doesn't run this service. Callers turn this into a
+      // "not available yet" state rather than a generic error.
+      throw new ServiceUnavailableError(service, serviceLabel(service));
     }
 
-    const requestId = crypto.randomUUID();
+    const requestId = randomUUID();
     const envelope = createEnvelope(type, requestId, payload);
 
     const { giftWrap } = await buildGiftWrap(
-      78, // kind 78 = OpenDating rumor
+      KIND_OD_COMMAND,
       JSON.stringify(envelope),
       this.userPrivkey,
       this.userPubkey,
       servicePubkey
     );
 
-    // Create promise for response
+    // Register the pending request BEFORE publishing: a fast service can
+    // answer before publish() resolves, and the response would otherwise
+    // arrive with nothing waiting for it.
     const responsePromise = new Promise<OpenDatingEnvelope>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingRequests.delete(requestId);
@@ -359,96 +395,144 @@ class OpenDatingClientImpl {
       this.pendingRequests.set(requestId, { resolve, reject, timer });
     });
 
-    // Publish gift wrap through NDK
-    const ndkEvent = new NDKEvent(this.ndk, giftWrap);
-    await ndkEvent.publish();
+    try {
+      const ndkEvent = new NDKEvent(this.ndk, giftWrap);
+      await ndkEvent.publish();
+    } catch (err) {
+      const pending = this.pendingRequests.get(requestId);
+      if (pending) {
+        clearTimeout(pending.timer);
+        this.pendingRequests.delete(requestId);
+      }
+      throw err;
+    }
 
     return responsePromise;
   }
 
-  private async startResponseSubscription(): Promise<void> {
-    if (!this.ndk || !this.userPubkey) return;
+  // ---- Inbound gift wraps ----
 
-    // Subscribe to kind 1059 gift wraps addressed to us
+  /**
+   * One subscription carries everything addressed to us: service responses,
+   * server pushes, and direct messages. They are indistinguishable on the
+   * wire (all kind 1059), so they are routed after unwrapping by rumor kind.
+   */
+  private startInboxSubscription(): void {
+    if (this.inboxSub || !this.ndk || !this.userPubkey) return;
+
     const filter: NDKFilter = {
-      kinds: [1059],
+      kinds: [KIND_GIFT_WRAP],
       '#p': [this.userPubkey],
-      since: Math.floor(Date.now() / 1000),
+      since:
+        Math.floor(Date.now() / 1000) - INBOX_HISTORY_SEC - GIFT_WRAP_BACKDATE_SEC,
     };
 
-    this.responseSub = this.ndk.subscribe(filter, {
-      closeOnEose: false,
-    });
-
-    this.responseSub.on('event', async (event: NDKEvent) => {
-      try {
-        await this.handleIncomingGiftWrap(event);
-      } catch {
-        // Silently skip undecryptable events
-      }
+    this.inboxSub = this.ndk.subscribe(filter, { closeOnEose: false });
+    this.inboxSub.on('event', (event: NDKEvent) => {
+      this.handleIncomingGiftWrap(event);
     });
   }
 
-  private async handleIncomingGiftWrap(event: NDKEvent): Promise<void> {
-    // Try to unwrap as a gift wrap addressed to us
-    // The gift wrap contains: outer (kind 1059) → seal (kind 13) → rumor (kind 78)
-    // We need to decrypt the outer to get the seal, then the rumor
-    try {
-      const decrypted = await this.decryptGiftWrap(event);
-      if (!decrypted) return;
+  private handleIncomingGiftWrap(event: NDKEvent): void {
+    const unwrapped = unwrapGiftWrap(
+      { pubkey: event.pubkey, content: event.content },
+      this.userPrivkey
+    );
+    // Not addressed to us, or not a well-formed seal/rumor pair. Relays fan
+    // out gift wraps broadly, so this is the common case, not an error.
+    if (!unwrapped) return;
 
-      const envelope = JSON.parse(decrypted) as OpenDatingEnvelope;
+    // Relays re-deliver; the rumor id is deterministic, so it dedupes across
+    // reconnects as well as within a session.
+    if (unwrapped.rumorId) {
+      if (this.seenRumorIds.has(unwrapped.rumorId)) return;
+      this.seenRumorIds.add(unwrapped.rumorId);
+    }
 
-      // Check if this is a response to a pending request
-      const pending = this.pendingRequests.get(envelope.request_id);
-      if (pending) {
-        clearTimeout(pending.timer);
-        this.pendingRequests.delete(envelope.request_id);
+    if (unwrapped.kind === KIND_OD_COMMAND) {
+      this.handleCommandEnvelope(unwrapped.content);
+      return;
+    }
 
-        if (envelope.type === 'service.error') {
-          const errPayload = envelope.payload as { code?: string; message?: string };
-          const mapped = mapServiceError(errPayload.code ?? 'unknown');
-          pending.reject(new Error(mapped.userMessage));
-        } else {
-          pending.resolve(envelope);
-        }
-        return;
-      }
-
-      // Check if this is a server-pushed event
-      if (envelope.type === 'match.created') {
-        this.handleMatchCreatedPush(envelope);
-      }
-    } catch {
-      // Not decryptable by us, or not a valid envelope
+    if (unwrapped.kind === KIND_DM) {
+      this.handleDirectMessage(unwrapped);
     }
   }
 
-  private async decryptGiftWrap(event: NDKEvent): Promise<string | null> {
-    // NIP-59 gift wrap: use nip44Decrypt with conversation key
-    // The gift wrap is encrypted to us (the recipient)
+  private handleCommandEnvelope(content: string): void {
+    let envelope: OpenDatingEnvelope;
     try {
-      // For incoming gift wraps, the sender is the service and we're the recipient
-      // We need to try decrypting with each service key
-      if (!this.services) return null;
-
-      const allServiceKeys = Object.values(this.services).map((s) => s.pubkey);
-      // Also try with our own pubkey for user-to-user messages
-      allServiceKeys.push(this.userPubkey);
-
-      for (const senderPubkey of allServiceKeys) {
-        try {
-          const decrypted = nip44Decrypt(event.content, this.userPrivkey, senderPubkey);
-          if (decrypted && decrypted.length > 0) {
-            return decrypted;
-          }
-        } catch {
-          continue;
-        }
-      }
-      return null;
+      envelope = JSON.parse(content) as OpenDatingEnvelope;
     } catch {
-      return null;
+      return;
+    }
+    if (!envelope || typeof envelope.type !== 'string') return;
+
+    const pending = this.pendingRequests.get(envelope.request_id);
+    if (pending) {
+      clearTimeout(pending.timer);
+      this.pendingRequests.delete(envelope.request_id);
+
+      // The protocol emits `system.error`; older builds emitted
+      // `service.error`. Accept both so an error is never mistaken for a
+      // successful result.
+      if (envelope.type === 'system.error' || envelope.type === 'service.error') {
+        const errPayload = envelope.payload as { code?: string; message?: string };
+        const mapped = mapServiceError(errPayload?.code ?? 'unknown');
+        pending.reject(new Error(mapped.userMessage));
+      } else {
+        pending.resolve(envelope);
+      }
+      return;
+    }
+
+    // Server push (no request waiting on it).
+    if (envelope.type === 'match.created') {
+      this.handleMatchCreatedPush(envelope);
+    }
+  }
+
+  private handleDirectMessage(unwrapped: {
+    senderPubkey: string;
+    content: string;
+    createdAt: number;
+    rumorId: string;
+  }): void {
+    let text: string | undefined;
+    let to: string | undefined;
+    try {
+      const parsed = JSON.parse(unwrapped.content) as {
+        text?: unknown;
+        to?: unknown;
+      };
+      if (typeof parsed?.text === 'string') text = parsed.text;
+      if (typeof parsed?.to === 'string') to = parsed.to;
+    } catch {
+      // Tolerate a rumor carrying bare text rather than a JSON body.
+      text = unwrapped.content;
+    }
+    if (!text) return;
+
+    // Our own sent messages come back as self-addressed copies, so the peer
+    // is the `to` field for those and the sender for everything else.
+    const outgoing = unwrapped.senderPubkey === this.userPubkey;
+    const conversationPubkey = outgoing ? to : unwrapped.senderPubkey;
+    if (!conversationPubkey) return; // Unroutable — drop rather than misfile.
+
+    const msg: ODMessage = {
+      // The rumor id is stable across re-delivery; the wrap id is not, since
+      // the same message is re-wrapped under a fresh ephemeral key each time.
+      id: unwrapped.rumorId,
+      sender_pubkey: unwrapped.senderPubkey,
+      recipient_pubkey: outgoing ? conversationPubkey : this.userPubkey,
+      conversation_pubkey: conversationPubkey,
+      text,
+      created_at: unwrapped.createdAt,
+      outgoing,
+    };
+
+    for (const listener of this.messageListeners) {
+      listener(msg);
     }
   }
 
@@ -484,6 +568,39 @@ class OpenDatingClientImpl {
     await this.sendRequest('profile', 'profile.update', {
       profile_event_id: profileEventId,
     });
+  }
+
+  /**
+   * Publish the user's profile content as a NIP-78 replaceable event and
+   * register the resulting event id with the profile service.
+   *
+   * Content lives in its own Nostr event rather than in the command payload
+   * because that is what `profile.update { profile_event_id }` points at —
+   * the service stores a reference, and discovery reads the event to build
+   * the card other people see.
+   */
+  async publishProfileContent(content: ProfileContent): Promise<string> {
+    if (!this.ndk) throw new Error('Not connected. Call connect() first.');
+    if (!this.userPrivkey || !this.userPubkey) {
+      throw new Error('No identity loaded.');
+    }
+
+    const unsigned = {
+      pubkey: this.userPubkey,
+      created_at: Math.floor(Date.now() / 1000),
+      kind: KIND_PROFILE_CONTENT,
+      // `d` makes this replaceable: a later publish supersedes this one
+      // instead of accumulating stale profiles on the relay.
+      tags: [['d', PROFILE_CONTENT_TAG]],
+      content: JSON.stringify(content),
+    };
+
+    const { id, sig } = signEvent(unsigned, this.userPrivkey);
+    const ndkEvent = new NDKEvent(this.ndk, { ...unsigned, id, sig });
+    await ndkEvent.publish();
+
+    await this.updateProfile(id);
+    return id;
   }
 
   async pauseProfile(): Promise<void> {
@@ -613,75 +730,46 @@ class OpenDatingClientImpl {
   // ---- Messaging (NIP-17) ----
 
   async sendMessage(recipientPubkey: string, text: string): Promise<void> {
-    // NIP-17: kind 14 rumor → NIP-59 gift wrap → kind 1059 outer
+    const ndk = this.ndk;
+    if (!ndk) throw new Error('Not connected');
+
+    // NIP-17: kind 14 rumor → NIP-59 gift wrap → kind 1059 outer.
+    // `to` names the peer so a self-addressed copy can be filed against the
+    // right conversation; the rumor's own tags are empty by NIP-59 rule.
     const rumorContent = JSON.stringify({
       text,
+      to: recipientPubkey,
       created_at: Math.floor(Date.now() / 1000),
     });
 
-    const { giftWrap } = await buildGiftWrap(
-      14, // kind 14 = NIP-17 DM rumor
-      rumorContent,
-      this.userPrivkey,
-      this.userPubkey,
-      recipientPubkey
-    );
+    const wrapFor = async (audience: string) => {
+      const { giftWrap } = await buildGiftWrap(
+        KIND_DM,
+        rumorContent,
+        this.userPrivkey,
+        this.userPubkey,
+        audience
+      );
+      return new NDKEvent(ndk, giftWrap).publish();
+    };
 
-    if (!this.ndk) throw new Error('Not connected');
-    const ndkEvent = new NDKEvent(this.ndk, giftWrap);
-    await ndkEvent.publish();
+    // The recipient's copy is encrypted to them alone, so without a second
+    // copy addressed to ourselves our own sent messages would be gone the
+    // next time the app starts. NIP-17 specifies both.
+    await wrapFor(recipientPubkey);
+    try {
+      await wrapFor(this.userPubkey);
+    } catch {
+      // The message did reach the recipient; losing only our archive copy
+      // must not surface as a send failure.
+    }
   }
 
   subscribeToMessages(callback: (msg: ODMessage) => void): () => void {
     this.messageListeners.add(callback);
-
-    if (!this.messageSub && this.ndk && this.userPubkey) {
-      const filter: NDKFilter = {
-        kinds: [1059],
-        '#p': [this.userPubkey],
-        since: Math.floor(Date.now() / 1000),
-      };
-
-      this.messageSub = this.ndk.subscribe(filter, { closeOnEose: false });
-
-      this.messageSub.on('event', async (event: NDKEvent) => {
-        try {
-          const decrypted = await this.decryptGiftWrap(event);
-          if (!decrypted) return;
-
-          // Try to parse as a DM or service message
-          try {
-            const envelope = JSON.parse(decrypted) as OpenDatingEnvelope;
-            // Service messages handled by response subscription
-            if (envelope.type) return;
-          } catch {
-            // Not JSON envelope, might be raw DM
-          }
-
-          // Parse as NIP-17 message
-          try {
-            const parsed = JSON.parse(decrypted);
-            if (parsed.text) {
-              const msg: ODMessage = {
-                id: event.id,
-                sender_pubkey: event.pubkey,
-                recipient_pubkey: this.userPubkey,
-                text: parsed.text,
-                created_at: parsed.created_at ?? Math.floor(Date.now() / 1000),
-              };
-              for (const listener of this.messageListeners) {
-                listener(msg);
-              }
-            }
-          } catch {
-            // Not a DM we can parse
-          }
-        } catch {
-          // Can't decrypt
-        }
-      });
-    }
-
+    // The inbox subscription is opened on connect and shared by every
+    // listener, so attaching here never opens a second relay subscription.
+    this.startInboxSubscription();
     return () => {
       this.messageListeners.delete(callback);
     };
@@ -703,10 +791,12 @@ export function getOpenDatingClient(): OpenDatingClientImpl {
   return clientInstance;
 }
 
-export function resetOpenDatingClient(): void {
+export async function resetOpenDatingClient(): Promise<void> {
   if (clientInstance) {
-    clientInstance.disconnect();
+    const instance = clientInstance;
     clientInstance = null;
+    // Awaited so a retry cannot race a half-torn-down subscription.
+    await instance.disconnect();
   }
 }
 

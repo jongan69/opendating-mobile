@@ -40,9 +40,11 @@ export default function AccountScreen() {
 
       await client.deleteAccount();
 
-      // Clear all local state and reset the client singleton.
+      // Clear all local state and reset the client singleton. Awaited so the
+      // relay subscription is torn down before we route away — otherwise it
+      // could still deliver into the freshly-cleared session.
       await storage.clearAll();
-      resetOpenDatingClient();
+      await resetOpenDatingClient();
 
       router.replace('/(onboarding)/welcome');
     } catch (err) {

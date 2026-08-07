@@ -19,8 +19,15 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Button, Host, Picker } from '@expo/ui';
 import { BackHeader } from '@/components/back-header';
-import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { isServiceUnavailable } from '@/lib/opendating/errors';
+import {
+  PROFILE_CONTENT_VERSION,
+  loadProfileContent,
+  publishProfile,
+  saveProfileContentLocally,
+} from '@/features/profile/profile-content';
 import { useTheme } from '@/state/theme-context';
+import type { ProfileContent } from '@/types/opendating';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
@@ -106,8 +113,6 @@ export default function EditProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [profileEventId, setProfileEventId] = useState<string | undefined>(undefined);
-
   const [displayName, setDisplayName] = useState('');
   const [age, setAge] = useState('');
   const [bio, setBio] = useState('');
@@ -119,17 +124,37 @@ export default function EditProfileScreen() {
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [pickingPhotos, setPickingPhotos] = useState(false);
 
+  // Prefill from the locally cached content so the form opens on what the
+  // user already has rather than on blank fields.
   useEffect(() => {
-    const client = getOpenDatingClient();
-    client
-      .getProfile()
-      .then((profile) => {
-        setProfileEventId(profile.profile_event_id);
+    let active = true;
+
+    loadProfileContent()
+      .then((content) => {
+        if (!active || !content) return;
+        setDisplayName(content.display_name ?? '');
+        setAge(content.age != null ? String(content.age) : '');
+        setGender(content.gender ?? '');
+        setIntent(content.relationship_intent ?? '');
+        setBio(content.bio ?? '');
+        setInterests(content.interests ?? []);
+        setPhotos(
+          (content.photos ?? []).map((photo, index) => ({
+            id: photo.id || `${index}`,
+            uri: photo.url,
+          }))
+        );
       })
       .catch(() => {
-        // No profile yet — the form still lets the user compose one.
+        // No cached content — the form still lets the user compose one.
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const addInterest = useCallback(() => {
@@ -199,17 +224,45 @@ export default function EditProfileScreen() {
 
     setSaving(true);
     setError(null);
+
+    const content: ProfileContent = {
+      display_name: name,
+      age: ageText ? Number(ageText) : undefined,
+      gender: gender || undefined,
+      relationship_intent: intent || undefined,
+      bio: bio.trim() || undefined,
+      interests,
+      photos: photos.map((photo, index) => ({
+        id: photo.id,
+        url: photo.uri,
+        order: index,
+      })),
+      v: PROFILE_CONTENT_VERSION,
+    };
+
     try {
-      await getOpenDatingClient().updateProfile(profileEventId);
+      // Publishes the content and registers the new event with the profile
+      // service. Previously this sent only the existing event id, so every
+      // edit was discarded while still reporting success.
+      await publishProfile(content);
       setSaving(false);
       Alert.alert('Profile saved', 'Your profile has been updated.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } catch (err) {
       setSaving(false);
-      setError(err instanceof Error ? err.message : 'Could not save your profile. Please try again.');
+      // The content is cached locally before publishing, so the edit is not
+      // lost — say so rather than implying it has to be retyped.
+      await saveProfileContentLocally(content).catch(() => {});
+      setError(
+        isServiceUnavailable(err)
+          ? `${err.message} Your changes are saved on this device and will publish once it is.`
+          : err instanceof Error
+            ? err.message
+            : 'Could not save your profile. Please try again.'
+      );
     }
-  }, [displayName, age, bio, profileEventId, router]);
+  }, [displayName, age, bio, gender, intent, interests, photos, router]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

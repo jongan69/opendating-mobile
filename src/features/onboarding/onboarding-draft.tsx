@@ -12,6 +12,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { isScreenshotMode } from '@/constants/env';
 
 // ---- Canonical option lists (shared by the onboarding pickers) ----
 
@@ -74,22 +75,43 @@ export interface OnboardingDraft {
   countryCode: string | null;
 }
 
-const DEFAULT_DRAFT: OnboardingDraft = {
-  pubkey: null,
-  displayName: '',
-  age: null,
-  gender: null,
-  genderPreferences: [],
+const DEMO_DRAFT: OnboardingDraft = {
+  pubkey: 'demo-pubkey-0000000000000000000000000000000000000000000000000000000000000000',
+  displayName: 'Alex',
+  age: 28,
+  gender: 'woman',
+  genderPreferences: ['woman', 'man', 'nonbinary'],
   ageRangeMin: 24,
   ageRangeMax: 38,
-  intent: null,
-  bio: '',
-  interests: [],
-  prompts: [],
+  intent: 'long_term',
+  bio: 'Coffee enthusiast, weekend hiker, and lover of bad puns. Looking for someone who laughs at my jokes (even the terrible ones).',
+  interests: ['hiking', 'coffee', 'photography', 'cooking'],
+  prompts: [
+    { question: 'Two truths and a lie', answer: 'I once climbed Kilimanjaro. I speak three languages. I hate chocolate.' },
+  ],
   photos: [],
-  geohashPrefix: null,
-  countryCode: null,
+  geohashPrefix: '9q8yy',
+  countryCode: 'US',
 };
+
+const DEFAULT_DRAFT: OnboardingDraft = isScreenshotMode
+  ? DEMO_DRAFT
+  : {
+      pubkey: null,
+      displayName: '',
+      age: null,
+      gender: null,
+      genderPreferences: [],
+      ageRangeMin: 24,
+      ageRangeMax: 38,
+      intent: null,
+      bio: '',
+      interests: [],
+      prompts: [],
+      photos: [],
+      geohashPrefix: null,
+      countryCode: null,
+    };
 
 // ---- Context ----
 

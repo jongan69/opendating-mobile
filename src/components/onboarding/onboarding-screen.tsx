@@ -28,6 +28,7 @@ import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
+import { isScreenshotMode } from '@/constants/env';
 
 export const ONBOARDING_TOTAL_STEPS = 11;
 
@@ -95,7 +96,8 @@ export function PrimaryButton({
   disabled = false,
 }: PrimaryButtonProps) {
   const { colors } = useTheme();
-  const isDisabled = disabled || loading;
+  // In screenshot mode, never disable — ADB taps need the button to be pressable
+  const isDisabled = isScreenshotMode ? false : (disabled || loading);
 
   return (
     <Pressable

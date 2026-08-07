@@ -52,6 +52,8 @@ const STORAGE_KEYS = {
   LOCATION_PREFIX: 'opendating_location_prefix',
   ONBOARDING_COMPLETE: 'opendating_onboarding_done',
   THEME_PREFERENCE: 'opendating_theme',
+  PROFILE_CONTENT: 'opendating_profile_content',
+  PROFILE_EVENT_ID: 'opendating_profile_event_id',
 } as const;
 
 export const storage = {
@@ -85,6 +87,29 @@ export const storage = {
     } catch {
       return null;
     }
+  },
+
+  // Own profile content.
+  // This is the user's own data, not another member's — unlike decrypted
+  // messages it is kept locally so the app can render and edit the profile
+  // without a round-trip, and so a failed publish is never a lost draft.
+  async saveProfileContent(content: object): Promise<void> {
+    await secureSet(STORAGE_KEYS.PROFILE_CONTENT, JSON.stringify(content));
+  },
+  async getProfileContent<T>(): Promise<T | null> {
+    const raw = await secureGet(STORAGE_KEYS.PROFILE_CONTENT);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
+  },
+  async saveProfileEventId(eventId: string): Promise<void> {
+    await secureSet(STORAGE_KEYS.PROFILE_EVENT_ID, eventId);
+  },
+  async getProfileEventId(): Promise<string | null> {
+    return secureGet(STORAGE_KEYS.PROFILE_EVENT_ID);
   },
 
   // Onboarding

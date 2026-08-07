@@ -26,8 +26,15 @@
   },
   "author": "OpenDating",
   "license": "MIT",
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "version": "0.1.0",
+  "overrides": {
+    "expo-nip55": {
+      "expo": "$expo",
+      "react": "$react",
+      "react-native": "$react-native"
+    }
+  },
   "dependencies": {
     "@cashu/cashu-ts": "^4.7.2",
     "@expo/ui": "~57.0.9",
@@ -35,6 +42,7 @@
     "expo": "~57.0.11",
     "expo-clipboard": "~57.0.1",
     "expo-constants": "~57.0.9",
+    "expo-crypto": "~57.0.1",
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.1",
     "expo-glass-effect": "~57.0.1",
@@ -58,6 +66,7 @@
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-get-random-values": "^1.11.0",
     "react-native-reanimated": "^4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
@@ -90,6 +99,13 @@
     "test:watch": "jest --watch",
     "clean": "expo start --clear",
     "deploy:web": "echo 'Deploy via GitHub Pages — push to main and the deploy-web workflow handles the rest.'",
+    "build:ios": "eas build --profile production --platform ios",
+    "build:ios:preview": "eas build --profile preview --platform ios",
+    "build:ios:screenshot": "eas build --profile screenshot --platform ios",
+    "submit:ios": "eas submit --profile production --platform ios",
+    "screenshots:capture": "./scripts/capture-screenshots.sh",
+    "screenshots:capture:ios": "./scripts/capture-screenshots-ios.sh",
+    "screenshots:resize": "./scripts/resize-screenshots.sh",
     "blog:generate": "node scripts/release/lib/generate-articles.mjs",
     "blog:build": "node scripts/release/lib/build-blog.mjs"
   },

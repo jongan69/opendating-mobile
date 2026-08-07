@@ -10,11 +10,13 @@ interface MessageBubbleProps {
   isSent: boolean;
   /** Pre-formatted timestamp label, e.g. "2:34 PM" */
   time: string;
+  /** Sent optimistically, not yet confirmed by the relay. */
+  pending?: boolean;
 }
 
 const BUBBLE_MAX_WIDTH_PCT = '82%';
 
-export function MessageBubble({ text, isSent, time }: MessageBubbleProps) {
+export function MessageBubble({ text, isSent, time, pending = false }: MessageBubbleProps) {
   const { colors } = useTheme();
 
   return (
@@ -32,6 +34,8 @@ export function MessageBubble({ text, isSent, time }: MessageBubbleProps) {
             borderColor: isSent ? colors.accent : colors.border,
           },
           isSent ? styles.bubbleSent : styles.bubbleReceived,
+          // Unconfirmed messages read as "in flight" rather than delivered.
+          pending && styles.bubblePending,
         ]}
       >
         <Text
@@ -85,6 +89,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radius.lg,
     borderBottomLeftRadius: radius.lg,
     borderBottomRightRadius: radius.lg,
+  },
+  bubblePending: {
+    opacity: 0.62,
   },
   text: {
     ...typography.bodyMedium,

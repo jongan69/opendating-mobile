@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { isServiceUnavailable } from '@/lib/opendating/errors';
 import {
   getCoarseLocation,
   shouldUpdateLocation,
@@ -20,11 +21,16 @@ export interface UseDiscoveryResult {
   candidates: Candidate[];
   loading: boolean;
   error: string | null;
+  /** True when `error` is "this relay doesn't run discovery yet". */
+  unavailable: boolean;
   remainingToday: number;
+  /** True once the first page has resolved, successfully or not. */
+  loaded: boolean;
   fetchCandidates: () => Promise<void>;
   like: (pubkey: string, grant: string) => Promise<boolean>;
   pass: (pubkey: string) => void;
   refreshLocation: () => Promise<void>;
+  clearError: () => void;
   hasMore: boolean;
 }
 
@@ -35,8 +41,12 @@ function toUserMessage(err: unknown): string {
 
 export function useDiscovery(): UseDiscoveryResult {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Starts true: the first page is requested on mount, and starting at false
+  // renders an "all caught up" empty state for a frame before the fetch runs.
+  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unavailable, setUnavailable] = useState(false);
   const [remainingToday, setRemainingToday] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 
@@ -80,12 +90,23 @@ export function useDiscovery(): UseDiscoveryResult {
       const emptyPage = page.candidates.length === 0;
       setHasMore(!emptyPage && !!page.cursor && page.remaining_today > 0);
     } catch (err) {
-      if (mountedRef.current) setError(toUserMessage(err));
+      if (mountedRef.current) {
+        setError(toUserMessage(err));
+        setUnavailable(isServiceUnavailable(err));
+        // Stop paging: retrying a service the relay does not run just
+        // re-times-out every time the stack drains.
+        setHasMore(false);
+      }
     } finally {
       fetchingRef.current = false;
-      if (mountedRef.current) setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+        setLoaded(true);
+      }
     }
   }, []);
+
+  const clearError = useCallback(() => setError(null), []);
 
   // Pre-fetch the next page when the visible stack gets low.
   useEffect(() => {
@@ -96,21 +117,35 @@ export function useDiscovery(): UseDiscoveryResult {
 
   /**
    * Like a candidate. Returns true when a match was created.
-   * The candidate leaves the stack only on success; on failure the error is
-   * surfaced and the card remains so the user can retry.
+   *
+   * The card leaves the stack immediately so the deck never stalls waiting
+   * on the network. If the server rejects the like, the candidate is put
+   * back where it was and the error is surfaced, so a like is never lost
+   * silently.
    */
   const like = useCallback(
     async (pubkey: string, grant: string): Promise<boolean> => {
+      const index = candidates.findIndex((c) => c.pubkey === pubkey);
+      const saved = index === -1 ? null : candidates[index];
+
+      removeFromStack(pubkey);
+
       try {
         const result = await getOpenDatingClient().like(pubkey, grant);
-        removeFromStack(pubkey);
         return result.match_created;
       } catch (err) {
-        setError(toUserMessage(err));
+        if (saved && mountedRef.current) {
+          setCandidates((prev) =>
+            prev.some((c) => c.pubkey === pubkey)
+              ? prev
+              : [...prev.slice(0, index), saved, ...prev.slice(index)]
+          );
+        }
+        if (mountedRef.current) setError(toUserMessage(err));
         return false;
       }
     },
-    [removeFromStack]
+    [candidates, removeFromStack]
   );
 
   /** Local pass — removes the candidate from the stack without a server call. */
@@ -163,11 +198,14 @@ export function useDiscovery(): UseDiscoveryResult {
     candidates,
     loading,
     error,
+    unavailable,
     remainingToday,
+    loaded,
     fetchCandidates,
     like,
     pass,
     refreshLocation,
+    clearError,
     hasMore,
   };
 }

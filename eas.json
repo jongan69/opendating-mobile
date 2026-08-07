@@ -17,6 +17,21 @@
         "simulator": false
       }
     },
+    "screenshot": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SCREENSHOT_MODE": "true",
+        "EXPO_PUBLIC_OPENDATING_RELAY_URL": "wss://opendating-relay.jonathang132298.workers.dev",
+        "EXPO_PUBLIC_OPENDATING_INFO_URL": "https://opendating-relay.jonathang132298.workers.dev",
+        "EXPO_PUBLIC_OPENDATING_PROTOCOL_VERSION": "0.1"
+      }
+    },
     "production": {
       "distribution": "store",
       "autoIncrement": true,

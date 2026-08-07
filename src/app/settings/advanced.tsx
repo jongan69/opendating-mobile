@@ -151,7 +151,11 @@ export default function AdvancedScreen() {
   const infoUrl = getOpenDatingClient().getInfoUrl();
   const protocolVersion = getOpenDatingClient().getProtocolVersion();
   const supportedVersions = capabilities?.protocol_versions ?? [];
-  const services = capabilities?.roles;
+  // The relay advertises only the services it runs, so this list is whatever
+  // is actually deployed rather than a fixed roster.
+  const serviceEntries: [string, string][] = Object.entries(
+    capabilities?.roles ?? {}
+  ).flatMap(([role, entry]) => (entry?.pubkey ? [[role, entry.pubkey]] : []));
 
   return (
     <SafeAreaView
@@ -246,20 +250,18 @@ export default function AdvancedScreen() {
           </Section>
 
           <Section title="Service Identities">
-            {services ? (
-              (Object.keys(services) as (keyof typeof services)[]).map((role, index) => (
+            {serviceEntries.length > 0 ? (
+              serviceEntries.map(([role, pubkey], index) => (
                 <View key={role}>
                   {index > 0 ? (
                     <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                   ) : null}
                   <CopyRow
                     label={role}
-                    value={shortPubkey(services[role].pubkey)}
+                    value={shortPubkey(pubkey)}
                     monospace
                     copied={copiedKey === `service:${role}`}
-                    onCopy={() =>
-                      void copyValue(`service:${role}`, services[role].pubkey)
-                    }
+                    onCopy={() => void copyValue(`service:${role}`, pubkey)}
                   />
                 </View>
               ))

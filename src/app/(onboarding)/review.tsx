@@ -16,6 +16,10 @@ import {
   useOnboardingDraft,
 } from '@/features/onboarding/onboarding-draft';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import {
+  PROFILE_CONTENT_VERSION,
+  publishProfile,
+} from '@/features/profile/profile-content';
 import { storage } from '@/lib/storage';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
@@ -54,6 +58,25 @@ export default function ReviewScreen() {
       await client.connect();
       await client.fetchCapabilities();
       await client.createProfile();
+
+      // Publish what the user actually filled in. Without this the profile
+      // record exists but carries no name, bio, or photos, so nobody would
+      // ever see anything on the card.
+      await publishProfile({
+        display_name: draft.displayName,
+        age: draft.age ?? undefined,
+        gender: draft.gender ?? undefined,
+        bio: draft.bio,
+        interests: draft.interests,
+        relationship_intent: draft.intent ?? undefined,
+        prompts: draft.prompts,
+        photos: draft.photos.map((uri, index) => ({
+          id: `${index}`,
+          url: uri,
+          order: index,
+        })),
+        v: PROFILE_CONTENT_VERSION,
+      });
 
       // Push the collected preferences; best-effort after the profile exists.
       if (draft.geohashPrefix) {

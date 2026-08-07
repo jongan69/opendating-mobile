@@ -160,7 +160,7 @@ export default function SettingsScreen() {
         },
       ]
     );
-  }, [visibility, updateVisibility]);
+  }, [updateVisibility]);
 
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
