@@ -22,6 +22,7 @@ import { BackHeader } from '@/components/back-header';
 import { isServiceUnavailable } from '@/lib/opendating/errors';
 import {
   PROFILE_CONTENT_VERSION,
+  PhotoUploadError,
   loadProfileContent,
   publishProfile,
   saveProfileContentLocally,
@@ -251,8 +252,17 @@ export default function EditProfileScreen() {
       ]);
     } catch (err) {
       setSaving(false);
-      // The content is cached locally before publishing, so the edit is not
-      // lost — say so rather than implying it has to be retyped.
+
+      // The text profile published; only the photos failed. Say exactly that
+      // rather than implying the whole save was lost.
+      if (err instanceof PhotoUploadError) {
+        Alert.alert('Profile saved, photos not uploaded', err.message, [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+        return;
+      }
+
+      // Content is cached locally before publishing, so the edit survives.
       await saveProfileContentLocally(content).catch(() => {});
       setError(
         isServiceUnavailable(err)

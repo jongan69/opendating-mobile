@@ -3,7 +3,7 @@
 // the collected discovery preferences and coarse location to the server.
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import {
@@ -18,6 +18,7 @@ import {
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import {
   PROFILE_CONTENT_VERSION,
+  PhotoUploadError,
   publishProfile,
 } from '@/features/profile/profile-content';
 import { storage } from '@/lib/storage';
@@ -62,7 +63,12 @@ export default function ReviewScreen() {
       // Publish what the user actually filled in. Without this the profile
       // record exists but carries no name, bio, or photos, so nobody would
       // ever see anything on the card.
-      await publishProfile({
+      //
+      // A photo upload failure is deliberately not fatal here: the account and
+      // text profile are live, and blocking the last step of onboarding over
+      // it would strand the member with no way forward. Photos can be added
+      // again from Edit Profile.
+      const publishResult = await publishProfile({
         display_name: draft.displayName,
         age: draft.age ?? undefined,
         gender: draft.gender ?? undefined,
@@ -76,6 +82,9 @@ export default function ReviewScreen() {
           order: index,
         })),
         v: PROFILE_CONTENT_VERSION,
+      }).catch((err) => {
+        if (err instanceof PhotoUploadError) return err;
+        throw err;
       });
 
       // Push the collected preferences; best-effort after the profile exists.
@@ -97,6 +106,16 @@ export default function ReviewScreen() {
       });
 
       await storage.setOnboardingComplete();
+
+      if (publishResult instanceof PhotoUploadError) {
+        Alert.alert(
+          'Profile created, photos pending',
+          `${publishResult.message} You can add them from Edit Profile.`,
+          [{ text: 'Continue', onPress: () => router.replace('/(onboarding)/finish') }]
+        );
+        return;
+      }
+
       router.replace('/(onboarding)/finish');
     } catch (err) {
       setError(

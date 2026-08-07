@@ -20,6 +20,7 @@ import {
   type OpenDatingServices,
   type OpenDatingServiceRole,
   type CandidatePage,
+  type CandidatePhoto,
   type CandidateQuery,
   type LikeResult,
   type Match,
@@ -35,6 +36,7 @@ import {
 import { mapServiceError, ServiceUnavailableError } from './errors';
 import { parseCapabilities, serviceLabel } from './capabilities';
 import { unwrapGiftWrap } from './gift-wrap';
+import { uploadPendingPhotos } from './media';
 
 // ---- Constants ----
 
@@ -571,6 +573,18 @@ class OpenDatingClientImpl {
    */
   async updateProfile(content: ProfileContent): Promise<void> {
     await this.sendRequest('profile', 'profile.update', { profile: content });
+  }
+
+  /**
+   * Upload local photos to the relay's Blossom media endpoint and return the
+   * list with hosted URLs. Device `file://` URIs are meaningless to anyone
+   * else, so this has to happen before a profile is published.
+   */
+  async uploadPhotos(photos: CandidatePhoto[]): Promise<CandidatePhoto[]> {
+    if (!this.userPrivkey || !this.userPubkey) {
+      throw new Error('No identity loaded.');
+    }
+    return uploadPendingPhotos(photos, INFO_URL, this.userPrivkey, this.userPubkey);
   }
 
   async pauseProfile(): Promise<void> {

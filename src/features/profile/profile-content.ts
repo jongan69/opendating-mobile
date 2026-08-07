@@ -19,13 +19,34 @@ import type { CandidatePhoto, ProfileContent } from '@/types/opendating';
 export const PROFILE_CONTENT_VERSION = '0.1';
 
 /**
- * Photos are picked from the device and start life as `file://` URIs, which
- * are meaningless to anyone else. Only photos already hosted somewhere
- * fetchable are worth publishing; local ones stay on device until a media
- * service exists to upload them.
+ * Photos are picked from the device as `file://` URIs, which are meaningless
+ * to anyone else. They are uploaded to the relay's media endpoint first; if
+ * that endpoint is not deployed, the profile still publishes as text rather
+ * than failing outright, and the local copies stay on the device.
  */
-function publishablePhotos(photos: CandidatePhoto[] | undefined): CandidatePhoto[] {
-  return (photos ?? []).filter((p) => /^https?:\/\//i.test(p.url));
+async function hostPhotos(
+  photos: CandidatePhoto[] | undefined,
+): Promise<{ photos: CandidatePhoto[]; uploadError: string | null }> {
+  const list = photos ?? [];
+  if (list.length === 0) return { photos: [], uploadError: null };
+
+  try {
+    return { photos: await getOpenDatingClient().uploadPhotos(list), uploadError: null };
+  } catch (err) {
+    return {
+      photos: list.filter((p) => /^https?:\/\//i.test(p.url)),
+      uploadError:
+        err instanceof Error ? err.message : 'Your photos could not be uploaded.',
+    };
+  }
+}
+
+/** Raised when the profile saved but its photos did not. */
+export class PhotoUploadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PhotoUploadError';
+  }
 }
 
 export function emptyProfileContent(): ProfileContent {
@@ -60,10 +81,13 @@ export async function publishProfile(content: ProfileContent): Promise<void> {
 
   await saveProfileContentLocally(normalised);
 
-  await getOpenDatingClient().updateProfile({
-    ...normalised,
-    photos: publishablePhotos(normalised.photos),
-  });
+  const { photos, uploadError } = await hostPhotos(normalised.photos);
+
+  await getOpenDatingClient().updateProfile({ ...normalised, photos });
+
+  // The text profile is live either way; surface the photo failure separately
+  // so the caller can say what actually happened rather than "save failed".
+  if (uploadError) throw new PhotoUploadError(uploadError);
 }
 
 /**
