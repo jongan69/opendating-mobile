@@ -20,7 +20,7 @@ A dating app with Tinder-quality UX built on decentralized infrastructure (Nostr
 - Portable profile — export your key and move to any OpenDating client
 
 ## Links
-- Site: https://opendating.org
-- Blog: https://opendating.org/blog
+- Site: https://jongan69.github.io/opendating-mobile
+- Blog: https://jongan69.github.io/opendating-mobile/blog
 - GitHub: https://github.com/jongan69/opendating-mobile
 - Protocol: https://github.com/jongan69/OpenDating
