@@ -1,0 +1,46 @@
+{
+  "cli": {
+    "version": ">= 15.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      }
+    },
+    "production": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "ios": {
+        "image": "latest",
+        "simulator": false
+      },
+      "android": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_OPENDATING_RELAY_URL": "wss://opendating-relay.jonathang132298.workers.dev",
+        "EXPO_PUBLIC_OPENDATING_INFO_URL": "https://opendating-relay.jonathang132298.workers.dev",
+        "EXPO_PUBLIC_OPENDATING_PROTOCOL_VERSION": "0.1"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "jonny2298@live.com",
+        "ascAppId": "",
+        "appleTeamId": ""
+      }
+    }
+  }
+}

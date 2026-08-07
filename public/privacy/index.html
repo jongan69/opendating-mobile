@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — OpenDating</title>
+<meta name="description" content="OpenDating privacy policy — how we handle your data, what we collect, and what we never see.">
+<link rel="canonical" href="https://jongan69.github.io/opendating-mobile/privacy">
+<style>
+  :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  nav { border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 40px; }
+  nav a { color: var(--coral); text-decoration: none; font-weight: 600; font-size: 15px; }
+  h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .date { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 20px; font-weight: 600; margin: 36px 0 10px; }
+  h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 12px 0; }
+  ul { margin: 10px 0; padding-left: 24px; }
+  li { margin: 6px 0; }
+  footer { border-top: 1px solid var(--border); padding: 32px 0; margin-top: 64px; color: var(--text-secondary); font-size: 14px; text-align: center; }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav><a href="../">← OpenDating</a></nav>
+  <article>
+    <h1>Privacy Policy</h1>
+    <div class="date">Last updated: August 7, 2026</div>
+
+    <h2>Our Approach to Privacy</h2>
+    <p>OpenDating is designed so that we <strong>cannot</strong> collect most of the data that traditional dating apps collect. Our architecture makes surveillance impossible by design — not just by policy.</p>
+
+    <h2>What We Collect</h2>
+    <p><strong>We collect essentially nothing.</strong> OpenDating does not require an email address, phone number, or any personal identifier. Your account is a cryptographic keypair generated on your device.</p>
+
+    <h3>Information you provide</h3>
+    <ul>
+      <li><strong>Profile data</strong> — Display name, age range, gender, bio, interests, relationship intent, and photos. This is what you choose to share on your dating profile.</li>
+      <li><strong>Coarse location</strong> — A 5-character geohash prefix (~5 km precision). Your exact GPS coordinates are converted to this coarse representation entirely on your device and then discarded. We never receive your precise location.</li>
+      <li><strong>Messages</strong> — End-to-end encrypted. We cannot read them. Message content is encrypted with NIP-44 before transmission and can only be decrypted by the intended recipient.</li>
+    </ul>
+
+    <h3>Information we do NOT collect</h3>
+    <ul>
+      <li>Email address</li>
+      <li>Phone number</li>
+      <li>Real name</li>
+      <li>Precise GPS location</li>
+      <li>Contact lists or address books</li>
+      <li>Browsing history</li>
+      <li>Device advertising identifiers</li>
+      <li>Payment information (the app is free)</li>
+      <li>Any data from other apps on your device</li>
+    </ul>
+
+    <h2>How We Use Information</h2>
+    <p>The limited information shared with the relay is used exclusively to provide the dating service:</p>
+    <ul>
+      <li>Your coarse location enables discovery of people in your general area</li>
+      <li>Your profile is shown to other users in discovery (according to your visibility settings)</li>
+      <li>Encrypted likes are routed to the matcher service to create matches</li>
+      <li>Encrypted messages are routed between matched users</li>
+    </ul>
+    <p>We do not use your data for advertising, analytics, machine learning, or any purpose other than providing the dating service.</p>
+
+    <h2>Data Storage and Security</h2>
+    <ul>
+      <li>Your private key is stored exclusively in your device's secure storage (iOS Keychain / Android Keystore). It never leaves your device.</li>
+      <li>Messages are end-to-end encrypted using NIP-44. The relay stores only encrypted ciphertext.</li>
+      <li>Likes are private — encrypted as NIP-59 gift wraps to the matcher service.</li>
+      <li>Blocks and reports are private — encrypted to their respective services.</li>
+      <li>The relay operates on Cloudflare's infrastructure. Encrypted data may be cached at Cloudflare edge locations for performance.</li>
+    </ul>
+
+    <h2>Data Sharing</h2>
+    <p>We do not sell, rent, or share your data with third parties. We do not have advertising partners. We do not use analytics services. There are no third-party SDKs in the app that collect data.</p>
+
+    <h2>Your Control</h2>
+    <ul>
+      <li><strong>Pause discovery</strong> — Hide your profile from new discovery at any time while keeping existing matches.</li>
+      <li><strong>Delete account</strong> — Permanently removes your presence from the relay. Your keypair remains yours.</li>
+      <li><strong>Export identity</strong> — Your keypair is portable. Take it to any OpenDating-compatible client.</li>
+      <li><strong>Location permission</strong> — You can deny or revoke at any time. Discovery requires coarse location.</li>
+    </ul>
+
+    <h2>Children's Privacy</h2>
+    <p>OpenDating is not intended for anyone under 18. We do not knowingly collect information from minors.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>We will update this policy if our practices change. Because our architecture prevents data collection by design, material changes are unlikely.</p>
+
+    <h2>Contact</h2>
+    <p>For privacy questions or data requests: <a href="https://github.com/jongan69/opendating-mobile/issues">GitHub Issues</a> or <a href="mailto:jonny2298@live.com">jonny2298@live.com</a>.</p>
+  </article>
+  <footer><a href="../">OpenDating</a> · Privacy-first decentralized dating</footer>
+</div>
+</body>
+</html>

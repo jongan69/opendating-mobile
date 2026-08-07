@@ -9,14 +9,38 @@
     "scheme": "opendating",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.jongan69.opendating",
       "supportsTablet": true,
+      "privacyManifests": {
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryLocation",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["0A2A.1"]
+          }
+        ]
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "OpenDating uses your general area to help you discover people nearby. Your exact location is never shared.",
         "NSPhotoLibraryUsageDescription": "OpenDating needs access to your photos to set up your dating profile.",
         "NSCameraUsageDescription": "OpenDating can use your camera to take new profile photos."
       }
     },
+    "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy",
+    "supportUrl": "https://github.com/jongan69/opendating-mobile/issues",
+    "marketingUrl": "https://jongan69.github.io/opendating-mobile",
     "android": {
+      "package": "com.jongan69.opendating",
       "adaptiveIcon": {
         "backgroundColor": "#FAF9F7",
         "foregroundImage": "./assets/brand/android-adaptive-foreground-432.png",
