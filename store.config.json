@@ -1,0 +1,48 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 OpenDating",
+    "categories": ["SOCIAL_NETWORKING", "LIFESTYLE"],
+    "info": {
+      "en-US": {
+        "title": "OpenDating",
+        "subtitle": "Private dating, no ads",
+        "description": "OpenDating is a privacy-first dating app for meeting people nearby without turning your love life into an advertising profile.\n\nCreate an account in the app, build a profile, discover nearby people, match when the interest is mutual, and message with end-to-end encryption. Your exact location never leaves your device. OpenDating uses only a coarse area so discovery can work without exposing your precise location.\n\nWhat makes OpenDating different:\n\n- Self-owned account with a recovery key\n- Coarse location instead of exact location sharing\n- End-to-end encrypted private messages\n- Private likes until there is a match\n- Local blocks, reports, and unmatch controls\n- No ads and no tracking-based business model\n- Built on open, portable dating infrastructure\n\nOpenDating is an early production release for people who want a calmer, more private way to meet. Bring the human part. The app handles the privacy plumbing.",
+        "keywords": ["singles,match,chat,nearby,secure,photos,profile,ethical,local,relationships,privacy"],
+        "releaseNotes": "Initial 0.1 release: account creation with a recovery key, privacy-first onboarding, nearby discovery using coarse location, mutual matches, end-to-end encrypted messages, blocks, reports, and profile controls.",
+        "promoText": "Meet people nearby with a dating app built around coarse location, encrypted messages, and no advertising profile.",
+        "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
+        "supportUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
+        "marketingUrl": "https://jongan69.github.io/opendating-mobile/"
+      }
+    },
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gambling": false,
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "FREQUENT_OR_INTENSE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "INFREQUENT_OR_MILD",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "INFREQUENT_OR_MILD",
+      "kidsAgeBand": null,
+      "ageRatingOverride": "SEVENTEEN_PLUS",
+      "koreaAgeRatingOverride": "NONE",
+      "lootBox": false,
+      "advertising": false,
+      "ageAssurance": false,
+      "messagingAndChat": true,
+      "userGeneratedContent": true,
+      "unrestrictedWebAccess": false,
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE"
+    },
+    "release": {
+      "automaticRelease": false,
+      "phasedRelease": true
+    }
+  }
+}

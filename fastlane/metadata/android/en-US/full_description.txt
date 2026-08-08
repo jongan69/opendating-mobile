@@ -1,0 +1,15 @@
+OpenDating is a privacy-first dating app for meeting people nearby without turning your love life into an advertising profile.
+
+Create an account in the app, build a profile, discover nearby people, match when the interest is mutual, and message with end-to-end encryption. Your exact location never leaves your device. OpenDating uses only a coarse area so discovery can work without exposing your precise location.
+
+What makes OpenDating different:
+
+- Self-owned account with a recovery key
+- Coarse location instead of exact location sharing
+- End-to-end encrypted private messages
+- Private likes until there is a match
+- Local blocks, reports, and unmatch controls
+- No ads and no tracking-based business model
+- Built on open, portable dating infrastructure
+
+OpenDating is an early production release for people who want a calmer, more private way to meet. Bring the human part. The app handles the privacy plumbing.

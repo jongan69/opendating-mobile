@@ -49,7 +49,7 @@ Nothing secret is ever read from the config file.
 | `domain` | `NAMECHEAP_API_USER` `NAMECHEAP_API_KEY` `NAMECHEAP_USERNAME` `NAMECHEAP_CLIENT_IP` `NAMECHEAP_ENV` |
 | `domain` | `NC_REGISTRANT_FIRST_NAME` `_LAST_NAME` `_ADDRESS1` `_CITY` `_STATE_PROVINCE` `_POSTAL_CODE` `_COUNTRY` `_PHONE` `_EMAIL_ADDRESS` |
 | `seo` | `AI_PROVIDER` `AI_API_KEY` `AI_MODEL` (optionally `AI_BASE_URL`) |
-| `ios-submit` | EAS credentials (`eas login`), `ASC_API_KEY_PATH` `ASC_API_KEY_ISSUER_ID` |
+| `ios-submit` | EAS credentials (`eas login`), `ASC_API_KEY_PATH` `ASC_API_KEY_ISSUER_ID`, numeric `ascAppId` in `eas.json` |
 | `android-submit` | EAS credentials (`eas login`), `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` |
 
 `NC_REGISTRANT_PHONE` must be formatted `+NNN.NNNNNNNNNN` — Namecheap rejects
@@ -84,6 +84,12 @@ A cloud build fails with *"Distribution Certificate is not validated for
 non-interactive builds"* and never reaches the queue. Run `eas credentials
 --platform ios` interactively once — it needs an Apple Developer login, so it
 cannot be part of an automated pipeline.
+
+**iOS submits also need an App Store Connect app record.** Once the record exists
+for the bundle ID, run `npm run store:ios:lookup-asc-app-id` with
+`ASC_API_KEY_PATH`, `ASC_API_KEY_ISSUER_ID`, and `ASC_API_KEY_ID` available. Run
+it again with `-- --write-eas-json` to save the numeric `ascAppId` before
+`ios-submit`.
 
 ## The blog stage, and why it writes to `public/`
 

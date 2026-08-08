@@ -183,11 +183,11 @@ Uses the `screenshot` EAS profile which sets `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
 | Android keystore | ✅ Managed by Expo (Build Credentials 7eb19zjEJ1) |
 | iOS builds (EAS) | ✅ v0.1.0 build 2 **finished**, App Store IPA, commit `2c9a9e4` |
 | iOS IPA verification | ✅ App Store signed locally (`builds/opendating-ios-0.1.0-2.ipa`) |
-| iOS submissions | ❌ Blocked — `ascApiKeyIssuerId` is empty |
-| iOS App Store listing | ❌ Not set up |
+| iOS submissions | ❌ Blocked — no App Store Connect app record/`ascAppId` for `com.jongan69.opendating` |
+| iOS App Store listing | ✅ Copy and metadata prepared in `docs/STORE_LISTING.md` and `store.config.json`; not pushed because the app record does not exist yet |
 | `ship.sh` Android stages | ✅ `android-build`, `android-submit` |
 | `eas.json` submit config | ✅ Both platforms, env-var driven |
-| App Store Connect API key | ✅ `AuthKey_563GUURUSD.p8` present — issuer ID still needed |
+| App Store Connect API key | ✅ `AuthKey_563GUURUSD.p8` present; matching issuer ID verified locally; app record ID still needed |
 | Google Play service account | ❌ `~/.google-play/` does not exist |
 | `build.config.env` | ❌ Missing — only needed for the local-build path |
 | `ios/exportOptions.plist` | ❌ Missing — only needed for the local-build path |
@@ -211,26 +211,43 @@ Neither can be automated, and neither is a code problem. Everything else in
 this repo is ready; these two gates are what stand between the current state
 and a build sitting in each store's console.
 
-### 1. iOS — App Store Connect issuer ID and app record
+### 1. iOS — App Store Connect app record and `ascAppId`
 
-The App Store signed IPA is built and locally verified. `eas submit` stops
-before upload because `ascApiKeyIssuerId` is empty. The key itself already
-exists at `~/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8`.
+The App Store signed IPA is built and locally verified. A retry with the local
+App Store Connect issuer ID got past credential validation, then stopped because
+there is no App Store Connect app record for `com.jongan69.opendating`.
 
-Find the issuer ID at App Store Connect → Users and Access → Integrations →
-App Store Connect API. It is the UUID shown above the key table and is per-team,
-not per-key.
+This was verified through the App Store Connect API on 2026-08-08:
+
+- Bundle ID exists: `com.jongan69.opendating`
+- Matching App Store Connect app records: `0`
+- Apple's current OpenAPI spec exposes `GET /v1/apps`, but no `POST /v1/apps`,
+  so the app record still needs to be created in App Store Connect or through an
+  interactive Apple Developer flow.
+
+Create the app record in App Store Connect with:
+
+- Name: `OpenDating`
+- Bundle ID: `com.jongan69.opendating`
+- SKU: `com.jongan69.opendating`
+- Primary locale: `en-US`
 
 ```bash
 export ASC_API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8"
 export ASC_API_KEY_ISSUER_ID="<the UUID>"
 
+npm run store:ios:lookup-asc-app-id
+npm run store:ios:lookup-asc-app-id -- --write-eas-json
+
 eas submit --platform ios --id c51e102b-4592-448e-8f42-3127ceead80f \
   --profile production --non-interactive --wait
 ```
 
-An app record must also exist in App Store Connect for
-`com.jongan69.opendating` before an upload can attach to anything.
+After the binary upload succeeds, push the prepared App Store metadata:
+
+```bash
+npm run store:metadata:push -- --non-interactive
+```
 
 ### 2. Android — no Google Play service account, and no app in the console
 
@@ -264,8 +281,8 @@ nothing reaches the public until it is promoted in the console.
 
 ### Blocked on your login (cannot be scripted)
 
-1. Export `ASC_API_KEY_ISSUER_ID`
-2. Create the App Store Connect app record for `com.jongan69.opendating`
+1. Create the App Store Connect app record for `com.jongan69.opendating`
+2. Export `ASC_API_KEY_ISSUER_ID` and write the numeric `ascAppId` to `eas.json`
 3. Upload the Android AAB to Play Console once, by hand
 4. Create the Play service account JSON and export `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
 
@@ -279,8 +296,9 @@ nothing reaches the public until it is promoted in the console.
 ### Before First App Store Review
 
 - [ ] Create `build.config.env` using the template above
-- [ ] Export the App Store Connect API issuer ID for key `563GUURUSD`
-- [ ] Set up iOS app listing in App Store Connect (screenshots, description, privacy policy URL, age rating)
+- [ ] Create App Store Connect app record and write `ascAppId` to `eas.json`
+- [x] Prepare iOS App Store listing copy and metadata (`docs/STORE_LISTING.md`, `store.config.json`)
+- [ ] Push iOS metadata after the app record/binary exists
 - [ ] Generate Google Play service account JSON for automated uploads
 - [ ] Set up Google Play listing (screenshots, description, content rating)
 - [ ] Create `ios/exportOptions.plist` for local builds

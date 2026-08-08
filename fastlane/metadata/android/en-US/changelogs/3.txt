@@ -1,0 +1,1 @@
+Initial 0.1 release: account creation with a recovery key, privacy-first onboarding, nearby discovery using coarse location, mutual matches, end-to-end encrypted messages, blocks, reports, and profile controls.
