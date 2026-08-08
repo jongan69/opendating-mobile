@@ -7,7 +7,7 @@
 | iPhone 6.7" (Pro Max) | 1290×2796 | Yes (3-5 screenshots) |
 | iPhone 6.1" (Pro) | 1179×2556 | Yes (3-5 screenshots) |
 | iPhone 5.5" (SE) | 1242×2208 | Optional |
-| iPad 12.9" (6th gen) | 2048×2732 | Optional |
+| iPad 13" / 12.9" | 2048×2732 | Required as `APP_IPAD_PRO_3GEN_129` when iPad is supported |
 
 ## How to capture
 

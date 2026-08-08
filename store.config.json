@@ -29,6 +29,20 @@
             "./screenshots/app-store/6.1-12-discover.png",
             "./screenshots/app-store/6.1-13-matches.png",
             "./screenshots/app-store/6.1-14-profile.png"
+          ],
+          "APP_IPAD_PRO_129": [
+            "./screenshots/app-store/ipad-13-01-welcome.png",
+            "./screenshots/app-store/ipad-13-02-create-account.png",
+            "./screenshots/app-store/ipad-13-12-discover.png",
+            "./screenshots/app-store/ipad-13-13-matches.png",
+            "./screenshots/app-store/ipad-13-14-profile.png"
+          ],
+          "APP_IPAD_PRO_3GEN_129": [
+            "./screenshots/app-store/ipad-13-01-welcome.png",
+            "./screenshots/app-store/ipad-13-02-create-account.png",
+            "./screenshots/app-store/ipad-13-12-discover.png",
+            "./screenshots/app-store/ipad-13-13-matches.png",
+            "./screenshots/app-store/ipad-13-14-profile.png"
           ]
         }
       }

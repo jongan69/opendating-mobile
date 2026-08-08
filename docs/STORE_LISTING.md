@@ -108,6 +108,7 @@ Prepared screenshots are in `screenshots/app-store/`:
 
 - `6.7-01-welcome.png` through `6.7-14-profile.png` at 1290 x 2796
 - `6.1-01-welcome.png` through `6.1-14-profile.png` at 1179 x 2556
+- `ipad-13-01-welcome.png` through `ipad-13-14-profile.png` at 2048 x 2732 for `APP_IPAD_PRO_3GEN_129`
 
 The selected flow is welcome, account creation, discovery, matches, and profile.
 
