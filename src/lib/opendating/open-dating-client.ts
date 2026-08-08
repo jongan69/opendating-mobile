@@ -1,5 +1,5 @@
 // OpenDating Client Facade
-// Wraps NDK Mobile + opendating-protocol into a clean domain API.
+// Wraps NDK + opendating-protocol into a clean domain API.
 // Screens never construct Nostr events, gift wraps, or envelopes directly.
 
 // NDK core, not @nostr-dev-kit/ndk-mobile. The mobile wrapper adds React
@@ -12,6 +12,9 @@
 import NDK, {
   NDKEvent,
   NDKFilter,
+  NDKPrivateKeySigner,
+  NDKRelayAuthPolicies,
+  NDKRelayStatus,
   NDKSubscription,
 } from '@nostr-dev-kit/ndk';
 import {
@@ -61,6 +64,8 @@ const SECURE_STORE_PUBKEY_KEY = 'opendating_pubkey';
 const SERVICES_CACHE_KEY = 'opendating_services_cache';
 
 const CONNECT_TIMEOUT_MS = 15_000;
+/** How long to wait for NIP-42 before proceeding without it. */
+const AUTH_TIMEOUT_MS = 10_000;
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /** Inner rumor kinds we route on. */
@@ -78,8 +83,6 @@ const GIFT_WRAP_BACKDATE_SEC = 2 * 24 * 60 * 60;
 /** How far back to pull the encrypted inbox on connect. */
 const INBOX_HISTORY_SEC = 14 * 24 * 60 * 60;
 
-// ---- Lazy NDK loader ----
-// NDK Mobile's module body accesses PlatformConstants synchronously, which
 // ---- Types ----
 
 interface PendingRequest {
@@ -109,6 +112,8 @@ class OpenDatingClientImpl {
   private messageListeners = new Set<(msg: ODMessage) => void>();
   /** Rumor ids already delivered — relays re-send, and we must not double-fire. */
   private seenRumorIds = new Set<string>();
+  /** From the relay's NIP-11 `limitation.auth_required`. */
+  private relayRequiresAuth = true;
 
   // ---- Connection State ----
 
@@ -187,12 +192,27 @@ class OpenDatingClientImpl {
       // Talk to exactly one relay. The outbox model would discover and connect
       // to a user's own relay list, which for a dating app means leaking who
       // you are to servers outside the service boundary.
+      //
+      // The signer exists for NIP-42 only. Every event this client publishes is
+      // already signed by hand — gift wraps are sealed with an ephemeral key,
+      // and profile content is signed before it reaches NDK — but the relay
+      // sets auth_required, and answering its challenge means signing a kind
+      // 22242 event. Without a signer NDK cannot answer, the relay rejects
+      // everything, and publish fails with "Not enough relays received the
+      // event (0 publish, 1 required)".
       this.ndk = new NDK({
         explicitRelayUrls: [RELAY_URL],
         autoConnectUserRelays: false,
         enableOutboxModel: false,
+        signer: new NDKPrivateKeySigner(this.userPrivkey),
         clientName: 'OpenDating Mobile',
         clientNip89: undefined,
+      });
+
+      // Sign the challenge rather than dropping the connection. Without an
+      // explicit policy NDK leaves an authenticating relay unauthenticated.
+      this.ndk.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
+        ndk: this.ndk,
       });
 
       // Connect with timeout — don't hang forever if the relay is unreachable
@@ -243,10 +263,36 @@ class OpenDatingClientImpl {
     }
   }
 
+  /**
+   * Wait until the relay has actually completed NIP-42, not just opened a
+   * socket.
+   *
+   * This used to sleep for a second and hope. That is not good enough on two
+   * counts: a slow handshake means the first publish is rejected outright
+   * ("Not enough relays received the event"), and a REQ sent before auth
+   * completes is dropped *silently* — the subscription looks established, no
+   * error is raised, and every service response afterwards arrives with
+   * nobody listening. Polling a real status is the difference between a
+   * working session and one that times out on every request.
+   */
   private async waitForRelay(): Promise<void> {
-    // NDK Mobile handles relay connection and NIP-42 AUTH internally.
-    // We wait a moment for connection to stabilize.
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const deadline = Date.now() + AUTH_TIMEOUT_MS;
+
+    while (Date.now() < deadline) {
+      const relay = this.ndk?.pool?.relays?.get(RELAY_URL);
+      if (relay?.status === NDKRelayStatus.AUTHENTICATED) return;
+      // The relay may not require auth at all; a plain connection is then the
+      // terminal state and waiting for AUTHENTICATED would hang until timeout.
+      if (relay?.status === NDKRelayStatus.CONNECTED && !this.relayRequiresAuth) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+
+    // Proceed anyway rather than failing the whole connect: some operations
+    // (reading the NIP-11 document, cached capabilities) still work, and the
+    // individual request that needs auth will surface its own error.
+    console.warn('[OpenDating] Relay did not authenticate before timeout.');
   }
 
   async disconnect(): Promise<void> {
@@ -283,7 +329,15 @@ class OpenDatingClientImpl {
         throw new Error(`NIP-11 fetch failed: ${response.status}`);
       }
 
-      const parsed = parseCapabilities(await response.json());
+      const doc = await response.json();
+      // Drives how long connect() waits for NIP-42: a relay that does not
+      // demand auth reaches its terminal state at CONNECTED, and waiting for
+      // AUTHENTICATED would stall until timeout on every launch.
+      this.relayRequiresAuth =
+        (doc as { limitation?: { auth_required?: boolean } })?.limitation
+          ?.auth_required !== false;
+
+      const parsed = parseCapabilities(doc);
 
       if (!parsed) {
         throw new Error('Relay does not advertise OpenDating support');
