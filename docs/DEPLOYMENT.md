@@ -176,80 +176,35 @@ Uses the `screenshot` EAS profile which sets `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
 | EAS login | ✅ `jongan69` |
 | `eas.json` production profile | ✅ Configured |
 | TypeScript | ✅ 0 errors |
-| ESLint | ✅ 0 errors, 9 warnings |
+| ESLint | ✅ 0 errors, 11 known warnings |
 | Tests | ✅ 81 tests, 6 suites |
 | Android builds (EAS) | ✅ v0.1.0 build 3 **finished**, store AAB, commit `2c9a9e4` |
-| Android submissions | ❌ Blocked — `serviceAccountKeyPath` is empty; no Play service account/app record available locally |
+| Android submissions | ⚠️ Play Console UI handoff — AAB and screenshots are ready; no service account available for API submit |
 | Android keystore | ✅ Managed by Expo (Build Credentials 7eb19zjEJ1) |
-| iOS builds (EAS) | ✅ v0.1.0 build 2 **finished**, App Store IPA, commit `2c9a9e4` |
-| iOS IPA verification | ✅ App Store signed locally (`builds/opendating-ios-0.1.0-2.ipa`) |
-| iOS submissions | ❌ Blocked — no App Store Connect app record/`ascAppId` for `com.jongan69.opendating` |
-| iOS App Store listing | ✅ Copy and metadata prepared in `docs/STORE_LISTING.md` and `store.config.json`; not pushed because the app record does not exist yet |
+| iOS builds (EAS) | ✅ v0.1.0 build 4 **finished**, App Store IPA |
+| iOS submissions | ✅ Resubmitted; App Store Connect state `WAITING_FOR_REVIEW` |
+| iOS App Store listing | ✅ Metadata and screenshots synced, including `APP_IPAD_PRO_3GEN_129` |
 | `ship.sh` Android stages | ✅ `android-build`, `android-submit` |
 | `eas.json` submit config | ✅ Both platforms, env-var driven |
-| App Store Connect API key | ✅ `AuthKey_563GUURUSD.p8` present; matching issuer ID verified locally; app record ID still needed |
-| Google Play service account | ❌ `~/.google-play/` does not exist |
+| App Store Connect API key | ✅ `AuthKey_563GUURUSD.p8` present; matching issuer ID verified locally |
+| Google Play service account | ❌ Not configured locally |
 | `build.config.env` | ❌ Missing — only needed for the local-build path |
 | `ios/exportOptions.plist` | ❌ Missing — only needed for the local-build path |
 | `ios/` directory | ❌ Doesn't exist locally (EAS generates in cloud) |
 
-Current finished binaries:
+Current finished/submitted binaries:
 
-- iOS: build `c51e102b-4592-448e-8f42-3127ceead80f`, IPA
-  `https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/c51e102b-4592-448e-8f42-3127ceead80f`
+- iOS: App Store Connect app `6799451889`, version `0.1.0`, build `4`,
+  state `WAITING_FOR_REVIEW`
 - Android: build `f5b79c72-91ee-4dd3-96e7-0343911e2ca2`, AAB
   `https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/f5b79c72-91ee-4dd3-96e7-0343911e2ca2`
 
-Both are built from commit `2c9a9e4`. Commit `3f506ce` only adds `builds/` to
-`.gitignore`, so the binaries still match the release code.
+Android was built from commit `2c9a9e4`. The screenshot metadata fix is in the
+current working tree and has already been synced to App Store Connect.
 
 ---
 
-## Two hard blockers, both requiring store-console access
-
-Neither can be automated, and neither is a code problem. Everything else in
-this repo is ready; these two gates are what stand between the current state
-and a build sitting in each store's console.
-
-### 1. iOS — App Store Connect app record and `ascAppId`
-
-The App Store signed IPA is built and locally verified. A retry with the local
-App Store Connect issuer ID got past credential validation, then stopped because
-there is no App Store Connect app record for `com.jongan69.opendating`.
-
-This was verified through the App Store Connect API on 2026-08-08:
-
-- Bundle ID exists: `com.jongan69.opendating`
-- Matching App Store Connect app records: `0`
-- Apple's current OpenAPI spec exposes `GET /v1/apps`, but no `POST /v1/apps`,
-  so the app record still needs to be created in App Store Connect or through an
-  interactive Apple Developer flow.
-
-Create the app record in App Store Connect with:
-
-- Name: `OpenDating`
-- Bundle ID: `com.jongan69.opendating`
-- SKU: `com.jongan69.opendating`
-- Primary locale: `en-US`
-
-```bash
-export ASC_API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8"
-export ASC_API_KEY_ISSUER_ID="<the UUID>"
-
-npm run store:ios:lookup-asc-app-id
-npm run store:ios:lookup-asc-app-id -- --write-eas-json
-
-eas submit --platform ios --id c51e102b-4592-448e-8f42-3127ceead80f \
-  --profile production --non-interactive --wait
-```
-
-After the binary upload succeeds, push the prepared App Store metadata:
-
-```bash
-npm run store:metadata:push -- --non-interactive
-```
-
-### 2. Android — no Google Play service account, and no app in the console
+## Remaining Android Handoff
 
 The AAB is built and waiting (v0.1.0 build 3, commit `2c9a9e4`, store
 distribution). Two things block the upload:
@@ -279,31 +234,34 @@ nothing reaches the public until it is promoted in the console.
 
 ## What To Do Next
 
-### Blocked on your login (cannot be scripted)
+### Remaining Manual/Console Work
 
-1. Create the App Store Connect app record for `com.jongan69.opendating`
-2. Export `ASC_API_KEY_ISSUER_ID` and write the numeric `ascAppId` to `eas.json`
-3. Upload the Android AAB to Play Console once, by hand
-4. Create the Play service account JSON and export `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
+1. Finish the Google Play release in the already-open Play Console tab.
+2. Upload the five `screenshots/play-store/phone-*.png` assets if Play Console
+   does not already show them.
+3. Create the Play service account JSON and export
+   `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` for future automated submits.
 
 ### Then, fully automated
 
 ```bash
 ./scripts/release/ship.sh --only android-build,android-submit
-./scripts/release/ship.sh --only ios-build,ios-verify,ios-submit
 ```
 
 ### Before First App Store Review
 
 - [ ] Create `build.config.env` using the template above
-- [ ] Create App Store Connect app record and write `ascAppId` to `eas.json`
+- [x] Create App Store Connect app record and write `ascAppId` to `eas.json`
 - [x] Prepare iOS App Store listing copy and metadata (`docs/STORE_LISTING.md`, `store.config.json`)
-- [ ] Push iOS metadata after the app record/binary exists
+- [x] Push iOS metadata after the app record/binary exists
+- [x] Submit iOS version `0.1.0` build `4` for review
 - [ ] Generate Google Play service account JSON for automated uploads
-- [ ] Set up Google Play listing (screenshots, description, content rating)
+- [ ] Set up Google Play listing (description, content rating, and final console review)
 - [ ] Create `ios/exportOptions.plist` for local builds
 - [ ] Fix Android SDK location (move from exFAT to APFS) for local Android builds
-- [ ] Capture App Store screenshots using `scripts/capture-screenshots.sh`
+- [x] Capture and verify Android screenshots using `scripts/capture-screenshots.sh`
+- [x] Generate App Store screenshots in `screenshots/app-store/`, including 13-inch iPad
+- [x] Generate Google Play phone screenshots in `screenshots/play-store/`
 - [x] Set up privacy/support URL:
       `https://jongan69.github.io/opendating-mobile/privacy/`
 - [x] Add Android stages to `ship.sh`

@@ -1,5 +1,5 @@
 // Profile tab — shows the user's own profile with actions
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +18,7 @@ import { useTheme } from '@/state/theme-context';
 import { useProfileContent } from '@/features/profile/profile-content';
 import { useProfile } from '@/features/profile/use-profile';
 import { isScreenshotMode } from '@/constants/env';
+import { getScreenshotProfileContent } from '@/constants/screenshot-demo';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
@@ -55,6 +56,8 @@ export default function ProfileScreen() {
   const [toggling, setToggling] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const { content, reload: reloadContent } = useProfileContent();
+  const screenshotContent = useMemo(() => getScreenshotProfileContent(), []);
+  const displayContent = isScreenshotMode ? screenshotContent : content;
 
   // Verification claims live separately from the profile hook.
   useEffect(() => {
@@ -100,17 +103,17 @@ export default function ProfileScreen() {
     }
   };
 
-  const heroPhoto = content?.photos?.find((p) => p.url.length > 0)?.url;
-  const heroInitial = content?.display_name?.trim()?.[0]?.toUpperCase() ?? '?';
-  const heroTitle = content?.display_name?.trim() || 'Your Profile';
+  const heroPhoto = displayContent?.photos?.find((p) => p.url.length > 0)?.url;
+  const heroInitial = displayContent?.display_name?.trim()?.[0]?.toUpperCase() ?? '?';
+  const heroTitle = displayContent?.display_name?.trim() || 'Your Profile';
   const heroSubtitle = [
-    content?.age ? `${content.age}` : null,
-    content?.gender ? GENDER_LABELS[content.gender] ?? content.gender : null,
+    displayContent?.age ? `${displayContent.age}` : null,
+    displayContent?.gender ? GENDER_LABELS[displayContent.gender] ?? displayContent.gender : null,
   ]
     .filter(Boolean)
     .join(' · ');
 
-  if (loading) {
+  if (loading && !isScreenshotMode) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.center}>
@@ -133,7 +136,7 @@ export default function ProfileScreen() {
               {heroSubtitle}
             </Text>
           ) : null}
-          {content?.bio ? (
+          {displayContent?.bio ? (
             <Text
               style={[
                 typography.bodySmall,
@@ -142,7 +145,7 @@ export default function ProfileScreen() {
               ]}
               numberOfLines={3}
             >
-              {content.bio}
+              {displayContent.bio}
             </Text>
           ) : null}
           {isPaused && (
@@ -259,16 +262,16 @@ export default function ProfileScreen() {
                 {heroSubtitle}
               </Text>
             ) : null}
-            {content?.bio ? (
+            {displayContent?.bio ? (
               <Text
                 style={[typography.bodySmall, styles.heroBio, { color: colors.textSecondary }]}
               >
-                {content.bio}
+                {displayContent.bio}
               </Text>
             ) : null}
-            {content?.interests && content.interests.length > 0 ? (
+            {displayContent?.interests && displayContent.interests.length > 0 ? (
               <View style={styles.badges}>
-                {content.interests.slice(0, 6).map((interest) => (
+                {displayContent.interests.slice(0, 6).map((interest) => (
                   <View
                     key={interest}
                     style={[styles.badge, { backgroundColor: colors.surfaceSheet }]}

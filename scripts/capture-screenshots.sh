@@ -37,13 +37,30 @@ APK_PATH=""
 USE_MONITOR=false
 CONFIG_FILE=""
 
-for arg in "$@"; do
-  case "$arg" in
-    --apk) APK_PATH="$2"; shift 2 ;;
-    --apk=*) APK_PATH="${arg#*=}" ;;
-    --monitor) USE_MONITOR=true ;;
-    --config) CONFIG_FILE="$2"; shift 2 ;;
-    --config=*) CONFIG_FILE="${arg#*=}" ;;
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --apk)
+      [ "$#" -ge 2 ] || { echo "--apk requires a path"; exit 1; }
+      APK_PATH="$2"
+      shift 2
+      ;;
+    --apk=*)
+      APK_PATH="${1#*=}"
+      shift
+      ;;
+    --monitor)
+      USE_MONITOR=true
+      shift
+      ;;
+    --config)
+      [ "$#" -ge 2 ] || { echo "--config requires a path"; exit 1; }
+      CONFIG_FILE="$2"
+      shift 2
+      ;;
+    --config=*)
+      CONFIG_FILE="${1#*=}"
+      shift
+      ;;
     --help|-h)
       echo "Usage: $0 [--apk <path>] [--monitor] [--config <json>]"
       echo ""
@@ -51,6 +68,9 @@ for arg in "$@"; do
       echo "  --monitor       Open scrcpy for visual monitoring"
       echo "  --config <json> Path to screenshots.config.json"
       exit 0
+      ;;
+    *)
+      fail "Unknown argument: $1"
       ;;
   esac
 done
@@ -84,6 +104,9 @@ info "Checking for Android device..."
 DEVICE=$(adb devices | grep -v "List of devices" | grep "device$" | head -1 | awk '{print $1}')
 [ -z "$DEVICE" ] && fail "No Android device found."
 ok "Device: $DEVICE"
+adb shell svc power stayon usb >/dev/null 2>&1 || true
+adb shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+adb shell wm dismiss-keyguard >/dev/null 2>&1 || true
 
 # ── Screen dimensions ────────────────────────────────────────
 info "Getting screen dimensions..."
@@ -110,6 +133,7 @@ screenshot() {
   local name="$1"
   local remote_path="/sdcard/screenshot_${name}.png"
   local local_path="$SCREENSHOT_DIR/${name}.png"
+  ensure_app_visible
   adb shell screencap -p "$remote_path"
   adb pull "$remote_path" "$local_path" > /dev/null 2>&1
   adb shell rm "$remote_path" 2>/dev/null || true
@@ -121,6 +145,23 @@ launch_app() {
   adb shell am start -n "${PACKAGE}/.MainActivity" 2>/dev/null || \
     adb shell monkey -p "$PACKAGE" -c android.intent.category.LAUNCHER 1
   sleep 4
+}
+
+ensure_app_visible() {
+  adb shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+  adb shell wm dismiss-keyguard >/dev/null 2>&1 || true
+  adb shell cmd statusbar collapse >/dev/null 2>&1 || true
+
+  local window_state
+  window_state="$(adb shell dumpsys window 2>/dev/null || true)"
+
+  if echo "$window_state" | grep -Eq 'isKeyguardShowing=true|mDreamingLockscreen=true'; then
+    fail "Android device is locked. Unlock it once, keep it connected, and rerun this script."
+  fi
+
+  if ! echo "$window_state" | grep -Eq "m(CurrentFocus|FocusedApp)=.*$PACKAGE"; then
+    warn "App activity is not reported focused; continuing for visual audit"
+  fi
 }
 
 # ── Build and install ────────────────────────────────────────
@@ -148,6 +189,10 @@ else
   adb install -r "$APK_PATH" 2>&1 | tail -1
   ok "App installed"
 fi
+
+info "Resetting app data..."
+adb shell pm clear "$PACKAGE" >/dev/null 2>&1 || true
+ok "App data reset"
 
 # ── Monitor ─────────────────────────────────────────────────
 if [ "$USE_MONITOR" = true ]; then

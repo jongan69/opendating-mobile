@@ -10,6 +10,7 @@ import {
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import { useOnboardingDraft } from '@/features/onboarding/onboarding-draft';
+import { isScreenshotMode } from '@/constants/env';
 import { getCoarseLocation } from '@/lib/location';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
@@ -66,9 +67,9 @@ export default function LocationScreen() {
       step={9}
       title="Your area"
       subtitle="Where you are — roughly."
-      primaryLabel={area ? 'Update My Area' : 'Share My Area'}
-      onPrimaryPress={shareLocation}
-      primaryLoading={sharing}
+      primaryLabel={isScreenshotMode ? 'Continue' : area ? 'Update My Area' : 'Share My Area'}
+      onPrimaryPress={isScreenshotMode ? handleContinue : shareLocation}
+      primaryLoading={!isScreenshotMode && sharing}
       footer={
         <Pressable
           accessibilityRole="button"

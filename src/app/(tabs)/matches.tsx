@@ -22,41 +22,11 @@ import { cacheCandidate } from '@/features/discovery/candidate-cache';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useTheme } from '@/state/theme-context';
 import { isScreenshotMode } from '@/constants/env';
+import { getScreenshotMatches } from '@/constants/screenshot-demo';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { shortPubkey, formatTimestamp } from '@/lib/format';
 import type { Match } from '@/types/opendating';
-
-const DEMO_MATCHES: Match[] = [
-  {
-    match_id: 'demo-match-1',
-    pubkey: 'demo-candidate-1',
-    created_at: Math.floor(Date.now() / 1000) - 3600,
-    profile: {
-      display_name: 'Emma',
-      age: 25,
-      gender: 'woman',
-      bio: 'Dog mom 🐕 | Yoga teacher',
-      photos: [],
-      interests: ['yoga', 'dogs', 'brunch'],
-      relationship_intent: 'long_term',
-    },
-  },
-  {
-    match_id: 'demo-match-2',
-    pubkey: 'demo-candidate-2',
-    created_at: Math.floor(Date.now() / 1000) - 7200,
-    profile: {
-      display_name: 'Marcus',
-      age: 31,
-      gender: 'man',
-      bio: 'Rock climber by weekend',
-      photos: [],
-      interests: ['climbing', 'music'],
-      relationship_intent: 'long_term',
-    },
-  },
-];
 
 export default function MatchesScreen() {
   const router = useRouter();
@@ -64,8 +34,9 @@ export default function MatchesScreen() {
   const { matches, newMatches, loading, error, refresh, markMessaged } = useMatches();
   const conversationLog = useConversationLog();
 
-  const displayMatches = isScreenshotMode ? DEMO_MATCHES : matches;
-  const displayNewMatches = isScreenshotMode ? DEMO_MATCHES : newMatches;
+  const screenshotMatches = useMemo(() => getScreenshotMatches(), []);
+  const displayMatches = isScreenshotMode ? screenshotMatches : matches;
+  const displayNewMatches = isScreenshotMode ? screenshotMatches : newMatches;
 
   // Feed the chat and candidate screens from match data.
   // These entries carry no candidate grant: a match is already mutual, so

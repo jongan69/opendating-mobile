@@ -1,22 +1,33 @@
-# App Store Screenshots
+# Store Screenshots
 
-## Required sizes for iOS App Store
+## Required sizes
 
 | Device | Resolution | Required |
 |---|---|---|
-| iPhone 6.7" (Pro Max) | 1290×2796 | Yes (3-5 screenshots) |
-| iPhone 6.1" (Pro) | 1179×2556 | Yes (3-5 screenshots) |
-| iPhone 5.5" (SE) | 1242×2208 | Optional |
-| iPad 13" / 12.9" | 2048×2732 | Required as `APP_IPAD_PRO_3GEN_129` when iPad is supported |
+| iPhone 6.7" (Pro Max) | 1290x2796 | Yes, `APP_IPHONE_67` |
+| iPhone 6.1" (Pro) | 1179x2556 | Yes, `APP_IPHONE_61` |
+| iPad 13" / 12.9" | 2048x2732 | Yes, `APP_IPAD_PRO_129` and `APP_IPAD_PRO_3GEN_129` |
+| Google Play phone | 1080x1920 | Yes |
 
 ## How to capture
 
-1. Build a preview build with EAS: `eas build --profile preview --platform ios`
-2. Install on a real device or iOS Simulator
-3. Take screenshots of key screens:
-   - Discover (card deck with a profile)
-   - Candidate detail (full profile view)
-   - Matches (match celebration screen)
-   - Chat (conversation view)
-   - Privacy screen
-4. Place PNG files in this directory named like: `6.7-discover.png`, `6.7-matches.png`, etc.
+1. Build or provide an Android APK with `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
+2. Connect and unlock the Android device.
+3. Run:
+
+   ```bash
+   ./scripts/capture-screenshots.sh --apk android/app/build/outputs/apk/release/app-release.apk
+   ```
+
+4. Verify the generated raw captures in `screenshots/`.
+5. Generate the store assets:
+
+   ```bash
+   ./scripts/resize-screenshots.sh 01-welcome 02-create-account 12-discover 13-matches 14-profile
+   ./scripts/resize-screenshots.sh --store google 01-welcome 02-create-account 12-discover 13-matches 14-profile
+   ```
+
+`screenshots/app-store/` must contain 15 files: five each for `6.7`, `6.1`,
+and `ipad-13`. `store.config.json` references those same App Store files.
+
+`screenshots/play-store/` must contain the five `phone-*` files for Google Play.

@@ -9,7 +9,7 @@
     },
     {
       "name": "02-create-account",
-      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "actions": [{ "type": "tap", "x": 50, "y": 85 }],
       "delay": 1.5
     },
     {
@@ -59,23 +59,23 @@
     },
     {
       "name": "12-discover",
-      "actions": [],
-      "delay": 1.5
+      "actions": [{ "type": "tap", "x": 50, "y": 88 }],
+      "delay": 2
     },
     {
       "name": "13-matches",
-      "actions": [{ "type": "tap", "x": 50, "y": 96 }],
+      "actions": [{ "type": "tap", "x": 50, "y": 91 }],
       "delay": 1.5
     },
     {
       "name": "14-profile",
-      "actions": [{ "type": "tap", "x": 92, "y": 96 }],
+      "actions": [{ "type": "tap", "x": 85, "y": 91 }],
       "delay": 1.5
     },
     {
       "name": "15-filters",
       "actions": [
-        { "type": "tap", "x": 5, "y": 96 },
+        { "type": "tap", "x": 15, "y": 91 },
         { "type": "wait", "seconds": 1 },
         { "type": "tap", "x": 92, "y": 6 }
       ],

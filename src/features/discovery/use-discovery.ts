@@ -11,6 +11,7 @@ import {
   shouldUpdateLocation,
   hasSignificantChange,
 } from '@/lib/location';
+import { isScreenshotMode } from '@/constants/env';
 import { subscribeDiscoveryPreferences } from '@/features/discovery/discovery-preferences';
 import type { Candidate } from '@/types/opendating';
 
@@ -66,6 +67,16 @@ export function useDiscovery(): UseDiscoveryResult {
    * Pages are deduped by pubkey in case the server overlaps cursors.
    */
   const fetchCandidates = useCallback(async () => {
+    if (isScreenshotMode) {
+      setLoading(false);
+      setLoaded(true);
+      setError(null);
+      setUnavailable(false);
+      setRemainingToday(99);
+      setHasMore(false);
+      return;
+    }
+
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     setLoading(true);
@@ -166,6 +177,8 @@ export function useDiscovery(): UseDiscoveryResult {
    * returning, so the meaningful comparison is against what we last sent.
    */
   const refreshLocation = useCallback(async () => {
+    if (isScreenshotMode) return;
+
     try {
       const loc = await getCoarseLocation();
       const needsUpdate =

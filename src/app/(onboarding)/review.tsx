@@ -22,6 +22,7 @@ import {
   publishProfile,
 } from '@/features/profile/profile-content';
 import { storage } from '@/lib/storage';
+import { isScreenshotMode } from '@/constants/env';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
@@ -44,6 +45,12 @@ export default function ReviewScreen() {
 
   const handleSubmit = async () => {
     if (submitting) return;
+
+    if (isScreenshotMode) {
+      router.replace('/(onboarding)/finish');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {

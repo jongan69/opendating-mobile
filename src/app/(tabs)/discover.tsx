@@ -14,58 +14,11 @@ import { useDiscovery } from '@/features/discovery/use-discovery';
 import { cacheCandidates, getCachedCandidate } from '@/features/discovery/candidate-cache';
 import { useTheme } from '@/state/theme-context';
 import { isScreenshotMode } from '@/constants/env';
+import { getScreenshotCandidates } from '@/constants/screenshot-demo';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { typography } from '@/theme/typography';
 import type { Candidate } from '@/types/opendating';
-
-const DEMO_CANDIDATES: Candidate[] = [
-  {
-    pubkey: 'demo-candidate-1',
-    candidate_grant: 'demo-grant-1',
-    distance_bucket: 'nearby',
-    profile: {
-      display_name: 'Emma',
-      age: 25,
-      gender: 'woman',
-      bio: 'Dog mom 🐕 | Yoga teacher | Always looking for the best brunch spots',
-      photos: [],
-      interests: ['yoga', 'dogs', 'brunch', 'travel'],
-      relationship_intent: 'long_term',
-      prompts: [{ question: 'My simple pleasures', answer: 'Morning coffee, rainy Sundays, and fresh sourdough.' }],
-    },
-  },
-  {
-    pubkey: 'demo-candidate-2',
-    candidate_grant: 'demo-grant-2',
-    distance_bucket: 'within 5 mi',
-    profile: {
-      display_name: 'Marcus',
-      age: 31,
-      gender: 'man',
-      bio: 'Software engineer by day, rock climber by weekend. Looking for a partner in crime.',
-      photos: [],
-      interests: ['climbing', 'music', 'road trips', 'tacos'],
-      relationship_intent: 'long_term',
-      prompts: [{ question: "I'm weirdly good at…", answer: 'Parallel parking and remembering useless movie quotes.' }],
-    },
-  },
-  {
-    pubkey: 'demo-candidate-3',
-    candidate_grant: 'demo-grant-3',
-    distance_bucket: 'nearby',
-    profile: {
-      display_name: 'Jordan',
-      age: 27,
-      gender: 'nonbinary',
-      bio: 'Art curator 🎨 | Vinyl collector | Cat person',
-      photos: [],
-      interests: ['art', 'vinyl', 'cats', 'coffee'],
-      relationship_intent: 'figuring_out',
-      prompts: [{ question: 'A fun fact about me', answer: 'I once got lost in the Louvre for 6 hours and loved every minute.' }],
-    },
-  },
-];
 
 export default function DiscoverScreen() {
   const router = useRouter();
@@ -84,10 +37,12 @@ export default function DiscoverScreen() {
   } = useDiscovery();
   const deckRef = useRef<SwipeDeckHandle>(null);
 
+  const screenshotCandidates = useMemo(() => getScreenshotCandidates(), []);
+
   // In screenshot mode, use demo candidates to show a populated deck
   const displayCandidates = useMemo(
-    () => (isScreenshotMode ? DEMO_CANDIDATES : candidates),
-    [candidates]
+    () => (isScreenshotMode ? screenshotCandidates : candidates),
+    [candidates, screenshotCandidates]
   );
 
   // Feed the detail screens from whatever the deck has shown.

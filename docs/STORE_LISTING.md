@@ -106,11 +106,13 @@ Use a 17+ / Mature teen posture for the first release:
 
 Prepared screenshots are in `screenshots/app-store/`:
 
-- `6.7-01-welcome.png` through `6.7-14-profile.png` at 1290 x 2796
-- `6.1-01-welcome.png` through `6.1-14-profile.png` at 1179 x 2556
-- `ipad-13-01-welcome.png` through `ipad-13-14-profile.png` at 2048 x 2732 for `APP_IPAD_PRO_3GEN_129`
+- `6.7-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 1290 x 2796
+- `6.1-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 1179 x 2556
+- `ipad-13-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 2048 x 2732 for `APP_IPAD_PRO_129` and `APP_IPAD_PRO_3GEN_129`
 
 The selected flow is welcome, account creation, discovery, matches, and profile.
+Google Play phone screenshots are in `screenshots/play-store/phone-*.png` at
+1080 x 1920 for the same five screens.
 
 ## Built Binaries
 

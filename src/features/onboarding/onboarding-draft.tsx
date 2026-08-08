@@ -144,6 +144,8 @@ export function OnboardingDraftProvider({
   // on the review step with empty fields and a permanently disabled button and
   // no way to understand why.
   useEffect(() => {
+    if (isScreenshotMode) return;
+
     let active = true;
     storage
       .getOnboardingDraft<Partial<OnboardingDraft>>()
