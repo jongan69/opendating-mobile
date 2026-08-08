@@ -10,6 +10,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.jongan69.opendating",
+      "appleTeamId": "97N6GR4YEK",
       "supportsTablet": true,
       "config": {
         "usesNonExemptEncryption": true

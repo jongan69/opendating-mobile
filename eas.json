@@ -54,6 +54,7 @@
     "production": {
       "ios": {
         "appleId": "jonny2298@live.com",
+        "appleTeamId": "97N6GR4YEK",
         "ascApiKeyPath": "$ASC_API_KEY_PATH",
         "ascApiKeyId": "563GUURUSD",
         "ascApiKeyIssuerId": "$ASC_API_KEY_ISSUER_ID",
