@@ -2,7 +2,7 @@
 // "Create Profile" connects to the relay, creates the profile, then pushes
 // the collected discovery preferences and coarse location to the server.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -128,7 +128,23 @@ export default function ReviewScreen() {
     }
   };
 
-  const canSubmit = draft.pubkey !== null && draft.displayName.length > 0;
+  // pubkey is set by create-account / import-account, but if the draft was
+  // lost mid-onboarding (e.g. the app was killed), load it from secure storage
+  // so the Create Profile button is never dead with no explanation.
+  const [resolvedPubkey, setResolvedPubkey] = useState<string | null>(draft.pubkey);
+  useEffect(() => {
+    if (draft.pubkey) return;
+    let active = true;
+    getOpenDatingClient()
+      .getPubkey()
+      .then((pk) => {
+        if (active && pk) setResolvedPubkey(pk);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [draft.pubkey]);
+
+  const canSubmit = resolvedPubkey !== null && draft.displayName.length > 0;
 
   return (
     <OnboardingScreen

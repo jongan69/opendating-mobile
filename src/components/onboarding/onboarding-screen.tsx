@@ -6,6 +6,11 @@
 // the universal Button sizes to its intrinsic content (SwiftUI frame modifiers
 // cannot stretch full-width), and its tint is the system accent, not the
 // OpenDating coral.
+//
+// On Android, @expo/ui components (Slider, Picker, Button) are Jetpack
+// Compose views that require a <Host> ancestor. Without it they render
+// nothing at all, silently. Every onboarding screen gets a Host so no
+// individual screen has to remember.
 
 import React from 'react';
 import {
@@ -21,6 +26,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Host } from '@expo/ui';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/state/theme-context';
@@ -175,10 +181,11 @@ export function OnboardingScreen({
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <Host colorScheme={isDark ? 'dark' : 'light'} style={styles.flex}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
         {/* Header: back + step count */}
         <View style={styles.header}>
           {showBack ? (
@@ -258,6 +265,7 @@ export function OnboardingScreen({
           </View>
         ) : null}
       </KeyboardAvoidingView>
+      </Host>
     </SafeAreaView>
   );
 }
