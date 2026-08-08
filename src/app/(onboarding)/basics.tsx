@@ -2,14 +2,12 @@
 // The first profile data the user shares; Continue is gated on all three.
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Picker, TextInput } from '@expo/ui';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { OptionSelector } from '@/components/ui/option-selector';
 import { useRouter } from 'expo-router';
 import {
   ErrorBanner,
   FieldLabel,
-  makeInputStyle,
-  makeInputTextStyle,
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import {
@@ -22,16 +20,24 @@ import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
-
-const AGE_VALUES = Array.from(
-  { length: MAX_AGE - MIN_AGE + 1 },
-  (_, i) => MIN_AGE + i
-);
+import { radius } from '@/theme/radius';
 
 function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
     fieldGroup: {
       marginBottom: spacing.xl,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      fontSize: (typography.bodyLarge.fontSize as number) ?? 17,
+    },
+    ageInput: {
+      width: 96,
     },
   });
 }
@@ -42,21 +48,35 @@ export default function BasicsScreen() {
   const { draft, update } = useOnboardingDraft();
 
   const [name, setName] = useState(draft.displayName);
-  const [age, setAge] = useState(draft.age ?? 24);
+  const [age, setAge] = useState(draft.age != null ? String(draft.age) : '');
   const [gender, setGender] = useState<string | null>(draft.gender);
   const [error, setError] = useState<string | null>(null);
 
   const styles = makeStyles(colors);
 
-  const canContinue = name.trim().length > 0 && gender !== null;
+  const ageNumber = Number(age);
+  const ageValid =
+    age.length > 0 && Number.isInteger(ageNumber) &&
+    ageNumber >= MIN_AGE && ageNumber <= MAX_AGE;
+  const canContinue = name.trim().length > 0 && ageValid && gender !== null;
 
   const handleContinue = () => {
-    if (!canContinue) {
-      setError('Add a display name and pick a gender to continue.');
+    if (name.trim().length === 0) {
+      setError('Add a display name to continue.');
+      return;
+    }
+    // Stated separately from the generic message: an 18+ service must be
+    // explicit about why an age was rejected.
+    if (!ageValid) {
+      setError(`Enter an age between ${MIN_AGE} and ${MAX_AGE}.`);
+      return;
+    }
+    if (gender === null) {
+      setError('Pick a gender to continue.');
       return;
     }
     update('displayName', name.trim());
-    update('age', age);
+    update('age', ageNumber);
     update('gender', gender);
     router.push('/(onboarding)/preferences');
   };
@@ -75,47 +95,39 @@ export default function BasicsScreen() {
       <View style={styles.fieldGroup}>
         <FieldLabel>Display name</FieldLabel>
         <TextInput
-          defaultValue={draft.displayName}
+          value={name}
           onChangeText={setName}
           placeholder="How should people call you?"
           placeholderTextColor={colors.textTertiary}
           autoCapitalize="words"
           autoCorrect={false}
           maxLength={40}
-          style={makeInputStyle(colors)}
-          textStyle={makeInputTextStyle(colors)}
+          style={[styles.input, { color: colors.text }]}
         />
       </View>
 
       <View style={styles.fieldGroup}>
         <FieldLabel>Age</FieldLabel>
-        <Picker
-          selectedValue={age}
-          onValueChange={(value) => setAge(value as number)}
-          testID="age-picker"
-        >
-          {AGE_VALUES.map((value) => (
-            <Picker.Item key={value} label={`${value}`} value={value} />
-          ))}
-        </Picker>
+        <TextInput
+          value={age}
+          onChangeText={(text) => setAge(text.replace(/[^0-9]/g, ''))}
+          placeholder={`${MIN_AGE}+`}
+          placeholderTextColor={colors.textTertiary}
+          keyboardType="number-pad"
+          maxLength={2}
+          testID="age-input"
+          style={[styles.input, styles.ageInput, { color: colors.text }]}
+        />
       </View>
 
       <View style={styles.fieldGroup}>
         <FieldLabel>Gender</FieldLabel>
-        <Picker
-          selectedValue={gender ?? ''}
-          onValueChange={(value) => setGender(value as string)}
-          testID="gender-picker"
-        >
-          <Picker.Item label="Select your gender" value="" />
-          {GENDER_OPTIONS.map((option) => (
-            <Picker.Item
-              key={option.value}
-              label={option.label}
-              value={option.value}
-            />
-          ))}
-        </Picker>
+        <OptionSelector
+          label="Gender"
+          options={GENDER_OPTIONS}
+          value={gender}
+          onChange={setGender}
+        />
       </View>
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>

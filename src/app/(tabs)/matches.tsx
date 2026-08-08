@@ -14,14 +14,49 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useMatches } from '@/features/matching/use-matches';
-import { useConversationLog } from '@/features/messaging/conversation-log';
+import {
+  markConversationRead,
+  useConversationLog,
+} from '@/features/messaging/conversation-log';
 import { cacheCandidate } from '@/features/discovery/candidate-cache';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useTheme } from '@/state/theme-context';
+import { isScreenshotMode } from '@/constants/env';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { shortPubkey, formatTimestamp } from '@/lib/format';
 import type { Match } from '@/types/opendating';
+
+const DEMO_MATCHES: Match[] = [
+  {
+    match_id: 'demo-match-1',
+    pubkey: 'demo-candidate-1',
+    created_at: Math.floor(Date.now() / 1000) - 3600,
+    profile: {
+      display_name: 'Emma',
+      age: 25,
+      gender: 'woman',
+      bio: 'Dog mom 🐕 | Yoga teacher',
+      photos: [],
+      interests: ['yoga', 'dogs', 'brunch'],
+      relationship_intent: 'long_term',
+    },
+  },
+  {
+    match_id: 'demo-match-2',
+    pubkey: 'demo-candidate-2',
+    created_at: Math.floor(Date.now() / 1000) - 7200,
+    profile: {
+      display_name: 'Marcus',
+      age: 31,
+      gender: 'man',
+      bio: 'Rock climber by weekend',
+      photos: [],
+      interests: ['climbing', 'music'],
+      relationship_intent: 'long_term',
+    },
+  },
+];
 
 export default function MatchesScreen() {
   const router = useRouter();
@@ -29,9 +64,16 @@ export default function MatchesScreen() {
   const { matches, newMatches, loading, error, refresh, markMessaged } = useMatches();
   const conversationLog = useConversationLog();
 
+  const displayMatches = isScreenshotMode ? DEMO_MATCHES : matches;
+  const displayNewMatches = isScreenshotMode ? DEMO_MATCHES : newMatches;
+
   // Feed the chat and candidate screens from match data.
+  // These entries carry no candidate grant: a match is already mutual, so
+  // there is nothing left to like. The empty grant must never reach
+  // intent.like — the server rejects it — and the deck guards against that by
+  // treating a missing grant as a pass.
   useEffect(() => {
-    for (const match of matches) {
+    for (const match of displayMatches) {
       cacheCandidate({
         pubkey: match.pubkey,
         profile: match.profile,
@@ -39,11 +81,12 @@ export default function MatchesScreen() {
         candidate_grant: '',
       });
     }
-  }, [matches]);
+  }, [displayMatches]);
 
   const openChat = useCallback(
     (match: Match) => {
       markMessaged(match.match_id);
+      markConversationRead(match.pubkey);
       router.push(`/chat/${match.pubkey}`);
     },
     [markMessaged, router]
@@ -52,18 +95,18 @@ export default function MatchesScreen() {
   // Conversations ordered by activity: messaged matches by last-message
   // time, then unmessaged matches newest first.
   const conversations = useMemo(() => {
-    const withMessages = matches
+    const withMessages = displayMatches
       .filter((m) => conversationLog.has(m.pubkey))
       .sort(
         (a, b) =>
           (conversationLog.get(b.pubkey)?.lastAt ?? 0) -
           (conversationLog.get(a.pubkey)?.lastAt ?? 0)
       );
-    const withoutMessages = matches.filter((m) => !conversationLog.has(m.pubkey));
+    const withoutMessages = displayMatches.filter((m) => !conversationLog.has(m.pubkey));
     return [...withMessages, ...withoutMessages];
-  }, [matches, conversationLog]);
+  }, [displayMatches, conversationLog]);
 
-  if (loading && matches.length === 0) {
+  if (loading && displayMatches.length === 0 && !isScreenshotMode) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
@@ -84,7 +127,7 @@ export default function MatchesScreen() {
     );
   }
 
-  if (error && matches.length === 0) {
+  if (error && displayMatches.length === 0 && !isScreenshotMode) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
@@ -100,7 +143,7 @@ export default function MatchesScreen() {
     );
   }
 
-  if (matches.length === 0) {
+  if (displayMatches.length === 0) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
@@ -124,20 +167,23 @@ export default function MatchesScreen() {
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.match_id}
-        renderItem={({ item }) => (
-          <ConversationRow
-            match={item}
-            preview={conversationLog.get(item.pubkey)?.lastText}
-            previewAt={
-              conversationLog.get(item.pubkey)?.lastAt ?? item.created_at
-            }
-            onPress={() => openChat(item)}
-          />
-        )}
+        renderItem={({ item }) => {
+          const entry = conversationLog.get(item.pubkey);
+          return (
+            <ConversationRow
+              match={item}
+              preview={entry?.lastText}
+              previewPrefix={entry?.lastOutgoing ? 'You: ' : ''}
+              previewAt={entry?.lastAt ?? item.created_at}
+              unread={entry?.unread ?? 0}
+              onPress={() => openChat(item)}
+            />
+          );
+        }}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
-          newMatches.length > 0 ? (
-            <NewMatchesRow matches={newMatches} onPress={openChat} />
+          displayNewMatches.length > 0 ? (
+            <NewMatchesRow matches={displayNewMatches} onPress={openChat} />
           ) : null
         }
         ListEmptyComponent={
@@ -215,13 +261,24 @@ function NewMatchesRow({ matches, onPress }: NewMatchesRowProps) {
 interface ConversationRowProps {
   match: Match;
   preview?: string;
+  previewPrefix?: string;
   previewAt: number;
+  unread: number;
   onPress: () => void;
 }
 
-function ConversationRow({ match, preview, previewAt, onPress }: ConversationRowProps) {
+function ConversationRow({
+  match,
+  preview,
+  previewPrefix = '',
+  previewAt,
+  unread,
+  onPress,
+}: ConversationRowProps) {
   const { colors } = useTheme();
   const hasPreview = preview !== undefined;
+  const hasUnread = unread > 0;
+  const name = displayNameOf(match);
 
   return (
     <Pressable
@@ -231,28 +288,61 @@ function ConversationRow({ match, preview, previewAt, onPress }: ConversationRow
         { backgroundColor: pressed ? colors.surfaceSheet : colors.surface },
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`Open conversation with ${displayNameOf(match)}`}
+      accessibilityLabel={
+        hasUnread
+          ? `Open conversation with ${name}, ${unread} unread message${unread === 1 ? '' : 's'}`
+          : `Open conversation with ${name}`
+      }
     >
       <Avatar match={match} size={56} />
       <View style={styles.rowBody}>
         <View style={styles.rowHeader}>
-          <Text style={[typography.titleSmall, styles.rowName, { color: colors.text }]} numberOfLines={1}>
-            {displayNameOf(match)}
+          <Text
+            style={[
+              typography.titleSmall,
+              styles.rowName,
+              { color: colors.text },
+              hasUnread && styles.rowNameUnread,
+            ]}
+            numberOfLines={1}
+          >
+            {name}
           </Text>
-          <Text style={[typography.caption, { color: colors.textTertiary }]}>
+          <Text
+            style={[
+              typography.caption,
+              { color: hasUnread ? colors.accent : colors.textTertiary },
+            ]}
+          >
             {formatTimestamp(previewAt)}
           </Text>
         </View>
-        <Text
-          style={[
-            typography.bodySmall,
-            styles.rowPreview,
-            { color: hasPreview ? colors.textSecondary : colors.textTertiary },
-          ]}
-          numberOfLines={1}
-        >
-          {hasPreview ? preview : 'Say hello!'}
-        </Text>
+        <View style={styles.rowPreviewLine}>
+          <Text
+            style={[
+              typography.bodySmall,
+              styles.rowPreview,
+              {
+                color: hasUnread
+                  ? colors.text
+                  : hasPreview
+                    ? colors.textSecondary
+                    : colors.textTertiary,
+              },
+              hasUnread && styles.rowPreviewUnread,
+            ]}
+            numberOfLines={1}
+          >
+            {hasPreview ? `${previewPrefix}${preview}` : 'Say hello!'}
+          </Text>
+          {hasUnread ? (
+            <View style={[styles.unreadDot, { backgroundColor: colors.accent }]}>
+              <Text style={[typography.labelSmall, { color: colors.textInverse }]}>
+                {unread > 9 ? '9+' : unread}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
     </Pressable>
   );
@@ -367,8 +457,27 @@ const styles = StyleSheet.create({
   rowName: {
     flexShrink: 1,
   },
+  rowNameUnread: {
+    fontWeight: '700',
+  },
+  rowPreviewLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   rowPreview: {
-    paddingRight: spacing.sm,
+    flex: 1,
+  },
+  rowPreviewUnread: {
+    fontWeight: '600',
+  },
+  unreadDot: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatar: {
     overflow: 'hidden',

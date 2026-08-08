@@ -8,24 +8,43 @@ import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import {
   applyDiscoveryPreferences,
+  getDiscoveryPreferences,
+  kmToMiles,
   resetDiscoveryPreferences,
 } from '@/features/discovery/discovery-preferences';
+import { INTENT_OPTIONS } from '@/features/onboarding/onboarding-draft';
 
 const KM_PER_MILE = 1.609344;
 
 const GENDER_OPTIONS = ['woman', 'man', 'nonbinary', 'other'] as const;
-const INTENT_OPTIONS = ['long_term', 'short_term', 'friendship', 'figuring_out'] as const;
 const DISTANCE_OPTIONS = [5, 10, 25, 50, 100] as const;
 
 export default function FiltersScreen() {
   const router = useRouter();
   const { colors } = useTheme();
 
-  const [genders, setGenders] = useState<string[]>([]);
-  const [intents, setIntents] = useState<string[]>([]);
-  const [minAge, setMinAge] = useState(18);
-  const [maxAge, setMaxAge] = useState(55);
-  const [distance, setDistance] = useState(25);
+  // Preload saved preferences so the sheet opens on the current values rather
+  // than on hardcoded defaults.
+  const [genders, setGenders] = useState<string[]>(() => {
+    const saved = getDiscoveryPreferences();
+    return saved.genders ?? [];
+  });
+  const [intents, setIntents] = useState<string[]>(() => {
+    const saved = getDiscoveryPreferences();
+    return saved.relationship_intents ?? [];
+  });
+  const [minAge, setMinAge] = useState(() => {
+    const saved = getDiscoveryPreferences();
+    return saved.min_age ?? 18;
+  });
+  const [maxAge, setMaxAge] = useState(() => {
+    const saved = getDiscoveryPreferences();
+    return saved.max_age != null ? Math.min(saved.max_age, 80) : 55;
+  });
+  const [distance, setDistance] = useState(() => {
+    const saved = getDiscoveryPreferences();
+    return saved.max_distance_km != null ? kmToMiles(saved.max_distance_km) : 25;
+  });
 
   const toggleGender = (g: string) => {
     setGenders((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]));
@@ -60,7 +79,7 @@ export default function FiltersScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Pressable onPress={() => void handleApply()}>
+        <Pressable onPress={() => router.back()}>
           <Text style={[typography.bodyMedium, { color: colors.accent }]}>Cancel</Text>
         </Pressable>
         <Text style={[typography.titleSmall, { color: colors.text }]}>Filters</Text>
@@ -169,20 +188,20 @@ export default function FiltersScreen() {
           Relationship intent
         </Text>
         <View style={styles.chipRow}>
-          {INTENT_OPTIONS.map((i) => (
+          {INTENT_OPTIONS.map((option) => (
             <Pressable
-              key={i}
-              onPress={() => toggleIntent(i)}
+              key={option.value}
+              onPress={() => toggleIntent(option.value)}
               style={[
                 styles.chip,
                 {
-                  backgroundColor: intents.includes(i) ? colors.accent : colors.surface,
-                  borderColor: intents.includes(i) ? colors.accent : colors.border,
+                  backgroundColor: intents.includes(option.value) ? colors.accent : colors.surface,
+                  borderColor: intents.includes(option.value) ? colors.accent : colors.border,
                 },
               ]}
             >
-              <Text style={[typography.labelMedium, { color: intents.includes(i) ? colors.textInverse : colors.text }]}>
-                {i.replace('_', ' ')}
+              <Text style={[typography.labelMedium, { color: intents.includes(option.value) ? colors.textInverse : colors.text }]}>
+                {option.label}
               </Text>
             </Pressable>
           ))}
@@ -190,7 +209,7 @@ export default function FiltersScreen() {
 
         {/* Apply */}
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => void handleApply()}
           style={({ pressed }) => [
             styles.applyBtn,
             { backgroundColor: pressed ? colors.accentMuted : colors.accent, marginTop: spacing.huge },

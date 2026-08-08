@@ -6,6 +6,8 @@
 import { Tabs } from 'expo-router';
 import { SymbolView, type AndroidSymbol, type SFSymbol } from 'expo-symbols';
 import { useTheme } from '@/state/theme-context';
+import { useConversationSync } from '@/features/messaging/use-conversation-sync';
+import { useTotalUnread } from '@/features/messaging/conversation-log';
 import { typography } from '@/theme/typography';
 import type { ColorValue } from 'react-native';
 
@@ -29,6 +31,11 @@ function TabIcon({ ios, android, color, focused }: TabIconProps) {
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+
+  // Keep the conversation log fed for as long as the tabs are mounted, not
+  // just while a chat screen is open.
+  useConversationSync();
+  const unread = useTotalUnread();
 
   return (
     <Tabs
@@ -61,6 +68,8 @@ export default function TabsLayout() {
         options={{
           title: 'Matches',
           headerShown: true,
+          tabBarBadge: unread > 0 ? (unread > 99 ? '99+' : unread) : undefined,
+          tabBarBadgeStyle: { backgroundColor: colors.accent, color: colors.textInverse },
           tabBarIcon: ({ color, focused }) => (
             <TabIcon ios="heart.fill" android="favorite" color={color} focused={focused} />
           ),

@@ -1,12 +1,12 @@
 // Settings — grouped menu with account, discovery, about, and danger sections.
 
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
-import { Host, Switch } from '@expo/ui';
+
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { useTheme } from '@/state/theme-context';
 import { typography } from '@/theme/typography';
@@ -160,7 +160,7 @@ export default function SettingsScreen() {
         },
       ]
     );
-  }, [visibility, updateVisibility]);
+  }, [updateVisibility]);
 
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
@@ -170,7 +170,6 @@ export default function SettingsScreen() {
       edges={['left', 'right', 'bottom']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <View style={styles.content}>
           {/* Account */}
           <SectionHeader>Account</SectionHeader>
@@ -254,7 +253,6 @@ export default function SettingsScreen() {
             OpenDating v{appVersion}
           </Text>
         </View>
-      </Host>
     </SafeAreaView>
   );
 }

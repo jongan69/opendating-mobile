@@ -2,8 +2,8 @@
 // "Create Profile" connects to the relay, creates the profile, then pushes
 // the collected discovery preferences and coarse location to the server.
 
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import {
@@ -16,6 +16,11 @@ import {
   useOnboardingDraft,
 } from '@/features/onboarding/onboarding-draft';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import {
+  PROFILE_CONTENT_VERSION,
+  PhotoUploadError,
+  publishProfile,
+} from '@/features/profile/profile-content';
 import { storage } from '@/lib/storage';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
@@ -55,6 +60,33 @@ export default function ReviewScreen() {
       await client.fetchCapabilities();
       await client.createProfile();
 
+      // Publish what the user actually filled in. Without this the profile
+      // record exists but carries no name, bio, or photos, so nobody would
+      // ever see anything on the card.
+      //
+      // A photo upload failure is deliberately not fatal here: the account and
+      // text profile are live, and blocking the last step of onboarding over
+      // it would strand the member with no way forward. Photos can be added
+      // again from Edit Profile.
+      const publishResult = await publishProfile({
+        display_name: draft.displayName,
+        age: draft.age ?? undefined,
+        gender: draft.gender ?? undefined,
+        bio: draft.bio,
+        interests: draft.interests,
+        relationship_intent: draft.intent ?? undefined,
+        prompts: draft.prompts,
+        photos: draft.photos.map((uri, index) => ({
+          id: `${index}`,
+          url: uri,
+          order: index,
+        })),
+        v: PROFILE_CONTENT_VERSION,
+      }).catch((err) => {
+        if (err instanceof PhotoUploadError) return err;
+        throw err;
+      });
+
       // Push the collected preferences; best-effort after the profile exists.
       if (draft.geohashPrefix) {
         try {
@@ -74,6 +106,19 @@ export default function ReviewScreen() {
       });
 
       await storage.setOnboardingComplete();
+      // The draft has served its purpose; keeping it would repopulate a stale
+      // profile if the member ever re-entered onboarding.
+      await storage.clearOnboardingDraft().catch(() => {});
+
+      if (publishResult instanceof PhotoUploadError) {
+        Alert.alert(
+          'Profile created, photos pending',
+          `${publishResult.message} You can add them from Edit Profile.`,
+          [{ text: 'Continue', onPress: () => router.replace('/(onboarding)/finish') }]
+        );
+        return;
+      }
+
       router.replace('/(onboarding)/finish');
     } catch (err) {
       setError(
@@ -86,7 +131,29 @@ export default function ReviewScreen() {
     }
   };
 
-  const canSubmit = draft.pubkey !== null && draft.displayName.length > 0;
+  // pubkey is set by create-account / import-account, but if the draft was
+  // lost mid-onboarding (e.g. the app was killed), load it from secure storage
+  // so the Create Profile button is never dead with no explanation.
+  const [resolvedPubkey, setResolvedPubkey] = useState<string | null>(draft.pubkey);
+  useEffect(() => {
+    if (draft.pubkey) return;
+    let active = true;
+    getOpenDatingClient()
+      .getPubkey()
+      .then((pk) => {
+        if (active && pk) setResolvedPubkey(pk);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [draft.pubkey]);
+
+  const canSubmit = resolvedPubkey !== null && draft.displayName.length > 0;
+  // A dead button with no explanation is the worst possible last step.
+  const blockedReason = !canSubmit
+    ? draft.displayName.length === 0
+      ? 'Go back to "About you" and add a display name to finish.'
+      : 'Still setting up your account — go back and create one first.'
+    : null;
 
   return (
     <OnboardingScreen
@@ -99,6 +166,7 @@ export default function ReviewScreen() {
       primaryDisabled={!canSubmit}
     >
       {error ? <ErrorBanner message={error} /> : null}
+      {!error && blockedReason ? <ErrorBanner message={blockedReason} /> : null}
 
       {/* Basics */}
       <View style={styles.card}>

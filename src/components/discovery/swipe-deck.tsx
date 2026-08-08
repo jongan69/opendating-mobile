@@ -1,7 +1,7 @@
 // Tinder-style swipe deck — pan gesture with spring-back, off-screen commit,
 // stacked back cards, and UI-thread-only animation via Reanimated.
 /* eslint-disable react-hooks/immutability */ // Reanimated shared value .value = is the library API, not React state
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -79,8 +79,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
   const { width: screenWidth } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
 
-  const [topIndex, setTopIndex] = useState(0);
-
   // Deck-level pose shared values (all animation on the UI thread)
   const tx = useSharedValue(0);
   const ty = useSharedValue(0);
@@ -91,29 +89,29 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
 
   const swipeThreshold = screenWidth * 0.28;
 
-  // Keep index valid if the candidate list shrinks
-  useEffect(() => {
-    setTopIndex((i) => (i > candidates.length ? candidates.length : i));
-  }, [candidates.length]);
-
-  const visible = useMemo(
-    () => candidates.slice(topIndex, topIndex + 3),
-    [candidates, topIndex]
-  );
+  // The parent list is the single source of truth for what is left to show.
+  // The deck deliberately keeps no cursor of its own: when it tracked an
+  // index *and* the parent removed the swiped candidate, both advanced and
+  // every second profile was skipped without ever being seen.
+  const visible = useMemo(() => candidates.slice(0, 3), [candidates]);
   const topCandidate = visible[0];
-
-  const advance = useCallback(() => {
-    setTopIndex((i) => Math.min(i + 1, candidates.length));
-  }, [candidates.length]);
 
   const dispatchSwipe = useCallback(
     (dir: 'left' | 'right', pubkey: string | undefined, grant: string | undefined) => {
       if (!pubkey) return;
       if (dir === 'right') {
+        // A like is only valid with the grant discovery issued for this
+        // viewer/candidate pair; the server rejects anything else. Sending an
+        // empty string would fail server-side and read to the user as "no
+        // longer available", so treat a missing grant as a pass instead.
+        if (!grant) {
+          onPass(pubkey);
+          return;
+        }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
           () => {}
         );
-        onLike(pubkey, grant ?? '');
+        onLike(pubkey, grant);
       } else {
         Haptics.selectionAsync().catch(() => {});
         onPass(pubkey);
@@ -135,27 +133,35 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
     );
   };
 
+  // A plain function, not useCallback: this is a Reanimated worklet reading
+  // shared values, and wrapping it in a memo hook makes the React Compiler
+  // bail out of compiling this component entirely.
   const commit = (dir: 'left' | 'right') => {
     'worklet';
     if (busy.value) return;
     busy.value = 1;
 
     const isRight = dir === 'right';
-    runOnJS(dispatchSwipe)(dir, topCandidate?.pubkey, topCandidate?.candidate_grant);
+    const pubkey = topCandidate?.pubkey;
+    const grant = topCandidate?.candidate_grant;
 
     const targetX = (isRight ? 1 : -1) * screenWidth * 1.35;
     tx.value = withTiming(targetX, COMMIT_CONFIG, (finished) => {
       'worklet';
       if (!finished) return;
-      // Reset pose for the newly promoted top card (back-card pose already
-      // interpolated to the full-size pose, so this snap is invisible).
+      // Reset the pose before handing off, so the card the parent promotes
+      // renders at rest. The back-card pose has already interpolated to the
+      // full-size pose, which makes this snap invisible.
       tx.value = 0;
       ty.value = 0;
       rot.value = 0;
       scale.value = 1;
       progress.value = 0;
       busy.value = 0;
-      runOnJS(advance)();
+      // Dispatched on completion rather than on commit: the parent drops the
+      // candidate synchronously, and doing that mid-flight would yank the
+      // card out from under its own exit animation.
+      runOnJS(dispatchSwipe)(dir, pubkey, grant);
     });
     rot.value = withTiming(
       isRight ? MAX_ROTATION_DEG * 1.5 : -MAX_ROTATION_DEG * 1.5,

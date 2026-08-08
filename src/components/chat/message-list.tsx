@@ -10,14 +10,12 @@ import {
 import { MessageBubble } from '@/components/chat/message-bubble';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useTheme } from '@/state/theme-context';
-import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import type { ODMessage } from '@/types/opendating';
 
 interface MessageListProps {
   messages: ODMessage[];
-  currentUserPubkey: string;
   /** Show a spinner while an initial fetch is in flight */
   loading?: boolean;
 }
@@ -28,12 +26,20 @@ type Row =
 
 const DAY_MS = 86_400_000;
 
+/**
+ * Message timestamps are Nostr seconds; JS Date wants milliseconds. Passing
+ * seconds straight to Date dates every message to 1970.
+ */
+function toDate(createdAtSec: number): Date {
+  return new Date(createdAtSec * 1000);
+}
+
 function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
 function dayLabel(timestamp: number, now: Date = new Date()): string {
-  const date = new Date(timestamp);
+  const date = toDate(timestamp);
   const diffDays = Math.round(
     (startOfDay(now) - startOfDay(date)) / DAY_MS
   );
@@ -48,7 +54,7 @@ function dayLabel(timestamp: number, now: Date = new Date()): string {
 }
 
 function timeLabel(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString(undefined, {
+  return toDate(timestamp).toLocaleTimeString(undefined, {
     hour: 'numeric',
     minute: '2-digit',
   });
@@ -57,30 +63,26 @@ function timeLabel(timestamp: number): string {
 function buildRows(messages: ODMessage[]): Row[] {
   const rows: Row[] = [];
   let lastDay: string | null = null;
-  let lastSender: string | null = null;
+  let lastOutgoing: boolean | null = null;
 
   for (const message of messages) {
     const day = dayLabel(message.created_at);
     if (day !== lastDay) {
       rows.push({ kind: 'day', label: day, timestamp: message.created_at });
       lastDay = day;
-      lastSender = null; // reset grouping across day boundaries
+      lastOutgoing = null; // reset grouping across day boundaries
     }
     rows.push({
       kind: 'message',
       message,
-      grouped: message.sender_pubkey === lastSender,
+      grouped: message.outgoing === lastOutgoing,
     });
-    lastSender = message.sender_pubkey;
+    lastOutgoing = message.outgoing;
   }
   return rows;
 }
 
-export function MessageList({
-  messages,
-  currentUserPubkey,
-  loading = false,
-}: MessageListProps) {
+export function MessageList({ messages, loading = false }: MessageListProps) {
   const { colors } = useTheme();
   const listRef = useRef<FlatList<Row>>(null);
   const nearBottomRef = useRef(true);
@@ -159,8 +161,9 @@ export function MessageList({
           >
             <MessageBubble
               text={message.text}
-              isSent={message.sender_pubkey === currentUserPubkey}
-              time={timeLabel(message.created_at)}
+              isSent={message.outgoing}
+              time={message.pending ? 'Sending…' : timeLabel(message.created_at)}
+              pending={message.pending}
             />
           </View>
         );

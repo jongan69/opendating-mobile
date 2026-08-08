@@ -4,14 +4,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
-import type { OpenDatingProfile } from '@/types/opendating';
+import type { OpenDatingProfile, ProfileContent } from '@/types/opendating';
 
 export interface UseProfileResult {
   profile: OpenDatingProfile | null;
   loading: boolean;
   error: string | null;
   refreshProfile: () => Promise<void>;
-  updateProfile: (eventId?: string) => Promise<void>;
+  updateProfile: (content: ProfileContent) => Promise<void>;
   pauseProfile: () => Promise<void>;
   resumeProfile: () => Promise<void>;
   isPaused: boolean;
@@ -24,7 +24,7 @@ function toUserMessage(err: unknown): string {
 
 export function useProfile(): UseProfileResult {
   const [profile, setProfile] = useState<OpenDatingProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
@@ -47,12 +47,12 @@ export function useProfile(): UseProfileResult {
    * Persist a profile update, then re-fetch so local state matches the
    * server's canonical profile.
    */
-  const updateProfile = useCallback(async (eventId?: string) => {
+  const updateProfile = useCallback(async (content: ProfileContent) => {
     setLoading(true);
     setError(null);
 
     try {
-      await getOpenDatingClient().updateProfile(eventId);
+      await getOpenDatingClient().updateProfile(content);
       const updated = await getOpenDatingClient().getProfile();
       if (mountedRef.current) setProfile(updated);
     } catch (err) {
@@ -73,6 +73,7 @@ export function useProfile(): UseProfileResult {
       );
     } catch (err) {
       setError(toUserMessage(err));
+      throw err;
     }
   }, []);
 
@@ -87,6 +88,7 @@ export function useProfile(): UseProfileResult {
       );
     } catch (err) {
       setError(toUserMessage(err));
+      throw err;
     }
   }, []);
 

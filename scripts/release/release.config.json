@@ -33,8 +33,13 @@
   },
 
   "ios": {
-    "enabled": false,
-    "_comment": "iOS build not configured yet"
+    "enabled": true,
+    "bundleId": "com.jongan69.opendating",
+    "version": "0.1.0",
+    "buildNumber": "1",
+    "easProfile": "production",
+    "outputDir": "builds",
+    "local": true
   },
 
   "web": {

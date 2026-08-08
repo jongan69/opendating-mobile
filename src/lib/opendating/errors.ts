@@ -120,6 +120,13 @@ const serviceErrorMap: Record<string, DomainError> = {
     technicalMessage: 'Profile already exists',
     retryable: false,
   },
+  content_rejected: {
+    code: 'CONTENT_REJECTED',
+    domain: 'profile',
+    userMessage: 'Profile content was flagged. Please edit and try again.',
+    technicalMessage: 'AI moderation blocked the bio',
+    retryable: true,
+  },
   invalid_candidate_grant: {
     code: 'INVALID_GRANT',
     domain: 'discovery',
@@ -155,6 +162,34 @@ const serviceErrorMap: Record<string, DomainError> = {
     technicalMessage: 'Location data invalid',
     retryable: true,
   },
+  rate_limited: {
+    code: 'RATE_LIMITED',
+    domain: 'matching',
+    userMessage: "You've reached your daily like limit. Come back tomorrow!",
+    technicalMessage: 'Daily like quota exhausted',
+    retryable: true,
+  },
+  invalid_profile: {
+    code: 'INVALID_PROFILE',
+    domain: 'profile',
+    userMessage: 'Please check your profile and try again.',
+    technicalMessage: 'Profile validation failed',
+    retryable: true,
+  },
+  unsupported_version: {
+    code: 'UNSUPPORTED_VERSION',
+    domain: 'general',
+    userMessage: 'Please update the app to continue.',
+    technicalMessage: 'Protocol version mismatch',
+    retryable: false,
+  },
+  internal_error: {
+    code: 'INTERNAL_ERROR',
+    domain: 'general',
+    userMessage: 'Something went wrong. Please try again.',
+    technicalMessage: 'Unexpected server error',
+    retryable: true,
+  },
   blocked: {
     code: 'IS_BLOCKED',
     domain: 'safety',
@@ -163,6 +198,27 @@ const serviceErrorMap: Record<string, DomainError> = {
     retryable: false,
   },
 };
+
+/**
+ * Raised when the relay does not advertise a service the app needs.
+ *
+ * A relay runs only the services it has deployed, so this is an expected
+ * state during a staged rollout — not a crash. Screens catch it to show a
+ * "not available yet" state rather than a generic failure.
+ */
+export class ServiceUnavailableError extends Error {
+  readonly role: string;
+
+  constructor(role: string, label: string) {
+    super(`${label} isn't available on this relay yet. Please check back soon.`);
+    this.name = 'ServiceUnavailableError';
+    this.role = role;
+  }
+}
+
+export function isServiceUnavailable(err: unknown): err is ServiceUnavailableError {
+  return err instanceof ServiceUnavailableError;
+}
 
 export function mapRelayError(notice: string): DomainError | null {
   // Check for relay-prefixed errors

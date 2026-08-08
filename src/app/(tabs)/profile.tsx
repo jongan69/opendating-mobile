@@ -1,7 +1,8 @@
 // Profile tab — shows the user's own profile with actions
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -10,55 +11,104 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 import { useTheme } from '@/state/theme-context';
+import { useProfileContent } from '@/features/profile/profile-content';
+import { useProfile } from '@/features/profile/use-profile';
+import { isScreenshotMode } from '@/constants/env';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import type { OpenDatingProfile, VerificationClaim } from '@/types/opendating';
 
+const GENDER_LABELS: Record<string, string> = {
+  woman: 'Woman',
+  man: 'Man',
+  nonbinary: 'Non-binary',
+  other: 'Other',
+};
+
+const DEMO_PROFILE: OpenDatingProfile = {
+  member_id: 'demo-member',
+  pubkey: 'demo-pubkey-0000000000000000000000000000000000000000000000000000000000000000',
+  status: 'active',
+  created_at: Math.floor(Date.now() / 1000) - 86400 * 7,
+  updated_at: Math.floor(Date.now() / 1000),
+};
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [profile, setProfile] = useState<OpenDatingProfile | null>(null);
+  const {
+    profile: hookProfile,
+    loading,
+    pauseProfile,
+    resumeProfile,
+    isPaused: hookIsPaused,
+  } = useProfile();
+  const profile = isScreenshotMode ? DEMO_PROFILE : hookProfile;
+  const isPaused = isScreenshotMode ? false : hookIsPaused;
   const [verifications, setVerifications] = useState<VerificationClaim[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const { content, reload: reloadContent } = useProfileContent();
 
+  // Verification claims live separately from the profile hook.
   useEffect(() => {
-    const client = getOpenDatingClient();
-    Promise.all([
-      client.getProfile().catch(() => null),
-      client.getVerificationClaims().catch(() => []),
-    ]).then(([p, v]) => {
-      setProfile(p);
-      setVerifications(v);
-      if (p) setIsPaused(p.status === 'paused');
-      setLoading(false);
-    });
+    if (isScreenshotMode) return;
+    let active = true;
+    getOpenDatingClient()
+      .getVerificationClaims()
+      .then((v) => {
+        if (active) setVerifications(v);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
+
+  // Re-read the cached content whenever this tab regains focus, so an edit
+  // made on the edit screen is reflected the moment the user comes back.
+  useFocusEffect(
+    useCallback(() => {
+      void reloadContent();
+    }, [reloadContent])
+  );
 
   const togglePause = async () => {
     setToggling(true);
-    const client = getOpenDatingClient();
+    const next = !isPaused;
     try {
       if (isPaused) {
-        await client.resumeProfile();
-        setIsPaused(false);
+        await resumeProfile();
       } else {
-        await client.pauseProfile();
-        setIsPaused(true);
+        await pauseProfile();
       }
-    } catch {
-      // Revert on failure
+    } catch (err) {
+      // The switch stays where it was; say why rather than letting it snap
+      // back with no explanation.
+      Alert.alert(
+        next ? "Couldn't pause discovery" : "Couldn't resume discovery",
+        err instanceof Error ? err.message : 'Please try again.'
+      );
     } finally {
       setToggling(false);
     }
   };
+
+  const heroPhoto = content?.photos?.find((p) => p.url.length > 0)?.url;
+  const heroInitial = content?.display_name?.trim()?.[0]?.toUpperCase() ?? '?';
+  const heroTitle = content?.display_name?.trim() || 'Your Profile';
+  const heroSubtitle = [
+    content?.age ? `${content.age}` : null,
+    content?.gender ? GENDER_LABELS[content.gender] ?? content.gender : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   if (loading) {
     return (
@@ -74,13 +124,28 @@ export default function ProfileScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
-          <View style={[styles.photoPlaceholder, { backgroundColor: colors.accentLight }]}>
-            <Text style={[typography.displayLarge, { color: colors.accent }]}>?</Text>
-          </View>
+          <ProfileAvatar photoUrl={heroPhoto} initial={heroInitial} />
           <Text style={[typography.headlineLarge, { color: colors.text, marginTop: spacing.lg }]}>
-            {profile ? 'Your Profile' : 'Your Profile'}
+            {heroTitle}
           </Text>
-          {profile?.status === 'paused' && (
+          {heroSubtitle ? (
+            <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
+              {heroSubtitle}
+            </Text>
+          ) : null}
+          {content?.bio ? (
+            <Text
+              style={[
+                typography.bodySmall,
+                styles.heroBio,
+                { color: colors.textSecondary },
+              ]}
+              numberOfLines={3}
+            >
+              {content.bio}
+            </Text>
+          ) : null}
+          {isPaused && (
             <Text style={[typography.labelSmall, { color: colors.warning }]}>Paused</Text>
           )}
           {verifications.length > 0 && (
@@ -157,7 +222,9 @@ export default function ProfileScreen() {
         </View>
 
         <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', marginTop: spacing.xxl }]}>
-          OpenDating v0.1
+          {profile
+            ? `Member since ${new Date(profile.created_at * 1000).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })} · OpenDating v0.1`
+            : 'OpenDating v0.1'}
         </Text>
       </ScrollView>
 
@@ -183,12 +250,36 @@ export default function ProfileScreen() {
           </View>
 
           <View style={[styles.previewCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <View style={[styles.previewPhoto, { backgroundColor: colors.accentLight }]}>
-              <Text style={[typography.displayLarge, { color: colors.accent }]}>?</Text>
-            </View>
+            <ProfileAvatar photoUrl={heroPhoto} initial={heroInitial} />
             <Text style={[typography.headlineLarge, { color: colors.text, marginTop: spacing.lg }]}>
-              Your Profile
+              {heroTitle}
             </Text>
+            {heroSubtitle ? (
+              <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
+                {heroSubtitle}
+              </Text>
+            ) : null}
+            {content?.bio ? (
+              <Text
+                style={[typography.bodySmall, styles.heroBio, { color: colors.textSecondary }]}
+              >
+                {content.bio}
+              </Text>
+            ) : null}
+            {content?.interests && content.interests.length > 0 ? (
+              <View style={styles.badges}>
+                {content.interests.slice(0, 6).map((interest) => (
+                  <View
+                    key={interest}
+                    style={[styles.badge, { backgroundColor: colors.surfaceSheet }]}
+                  >
+                    <Text style={[typography.labelSmall, { color: colors.textSecondary }]}>
+                      {interest}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
             {verifications.length > 0 && (
               <View style={styles.badges}>
                 {verifications.map((v, i) => (
@@ -211,12 +302,41 @@ export default function ProfileScreen() {
   );
 }
 
+/** Photo when there is one, otherwise the initial — never a bare "?". */
+function ProfileAvatar({ photoUrl, initial }: { photoUrl?: string; initial: string }) {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.photoPlaceholder, { backgroundColor: colors.accentLight }]}>
+      {photoUrl ? (
+        <Image
+          source={{ uri: photoUrl }}
+          style={styles.photoImage}
+          contentFit="cover"
+          transition={150}
+          accessibilityLabel="Your profile photo"
+        />
+      ) : (
+        <Text style={[typography.displayLarge, { color: colors.accent }]}>{initial}</Text>
+      )}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content: { padding: spacing.lg, paddingBottom: spacing.huge },
   hero: { alignItems: 'center', paddingVertical: spacing.xxxl },
-  photoPlaceholder: { width: 120, height: 120, borderRadius: 60, justifyContent: 'center', alignItems: 'center' },
+  photoPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  photoImage: { width: '100%', height: '100%' },
+  heroBio: { textAlign: 'center', marginTop: spacing.sm, paddingHorizontal: spacing.xl },
   badges: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md, flexWrap: 'wrap' },
   badge: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.full },
   section: { borderRadius: radius.lg, borderWidth: 1, marginBottom: spacing.lg, overflow: 'hidden' },

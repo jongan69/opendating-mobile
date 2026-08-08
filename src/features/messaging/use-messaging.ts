@@ -1,16 +1,18 @@
 // NIP-17 messaging hook for a single conversation partner.
-// Subscribes to incoming gift-wrapped DMs, filters for targetPubkey,
-// dedupes by event id, and sends with optimistic local delivery.
+// Subscribes to incoming gift-wrapped DMs, filters to this conversation,
+// dedupes by rumor id, and sends with optimistic local delivery.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { recordConversationEntry } from '@/features/messaging/conversation-log';
+import { mergeMessage, sortByCreatedAtAsc } from '@/features/messaging/message-merge';
 import type { ODMessage } from '@/types/opendating';
 
 export interface UseMessagingResult {
   messages: ODMessage[];
   sendMessage: (text: string) => Promise<void>;
-  /** True while a message is being sent. */
-  loading: boolean;
+  /** True while a message is in flight. */
+  sending: boolean;
   error: string | null;
 }
 
@@ -19,58 +21,49 @@ function toUserMessage(err: unknown): string {
   return 'Something went wrong. Please try again.';
 }
 
-function sortByCreatedAtAsc(messages: ODMessage[]): ODMessage[] {
-  return [...messages].sort((a, b) => a.created_at - b.created_at);
-}
-
 export function useMessaging(targetPubkey: string): UseMessagingResult {
   const [messages, setMessages] = useState<ODMessage[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Event ids already delivered — guards against duplicate events from the
-  // relay and re-delivered pushes.
-  const seenIdsRef = useRef<Set<string>>(new Set());
   const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const handleIncoming = useCallback(
     (msg: ODMessage) => {
       if (!mountedRef.current) return;
-      // Only messages from this conversation partner.
-      if (msg.sender_pubkey !== targetPubkey) return;
-      if (seenIdsRef.current.has(msg.id)) return;
-      seenIdsRef.current.add(msg.id);
-
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev;
-        return sortByCreatedAtAsc([...prev, msg]);
-      });
+      if (msg.conversation_pubkey !== targetPubkey) return;
+      setMessages((prev) => mergeMessage(prev, msg));
     },
     [targetPubkey]
   );
 
-  // Subscribe to incoming messages; the client shares one NDK subscription
-  // across listeners, so unmounting only detaches this hook's callback.
-  useEffect(() => {
-    const unsubscribe = getOpenDatingClient().subscribeToMessages(handleIncoming);
-    return unsubscribe;
-  }, [handleIncoming]);
-
-  // Reset conversation state when the partner changes.
-  useEffect(() => {
-    mountedRef.current = true;
-    seenIdsRef.current = new Set();
+  // Reset when the partner changes. Done during render rather than in an
+  // effect so the cleared list is what renders — an effect would paint the
+  // previous conversation's messages under the new partner's name first.
+  const [renderedTarget, setRenderedTarget] = useState(targetPubkey);
+  if (renderedTarget !== targetPubkey) {
+    setRenderedTarget(targetPubkey);
     setMessages([]);
     setError(null);
-    return () => {
-      mountedRef.current = false;
-    };
-  }, [targetPubkey]);
+  }
+
+  // The client shares one relay subscription across listeners, so attaching
+  // here only registers this hook's callback.
+  useEffect(() => {
+    return getOpenDatingClient().subscribeToMessages(handleIncoming);
+  }, [handleIncoming]);
 
   /**
-   * Send a message to the current partner.
-   * The message appears locally immediately; if the send fails it is rolled
-   * back and the error is surfaced.
+   * Send a message to the current partner. It appears immediately as
+   * pending; the relay's confirmed copy replaces it, and a failure rolls it
+   * back with the error surfaced.
    */
   const sendMessage = useCallback(
     async (text: string) => {
@@ -78,34 +71,41 @@ export function useMessaging(targetPubkey: string): UseMessagingResult {
       if (!trimmed || !mountedRef.current) return;
 
       const client = getOpenDatingClient();
-      const ownPubkey = await client.getPubkey();
+      const ownPubkey = (await client.getPubkey()) ?? '';
+      const localId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
       const local: ODMessage = {
-        id: `local-${Date.now()}`,
-        sender_pubkey: ownPubkey ?? '',
+        id: localId,
+        sender_pubkey: ownPubkey,
         recipient_pubkey: targetPubkey,
+        conversation_pubkey: targetPubkey,
         text: trimmed,
         created_at: Math.floor(Date.now() / 1000),
+        outgoing: true,
+        pending: true,
       };
 
-      seenIdsRef.current.add(local.id);
       setMessages((prev) => sortByCreatedAtAsc([...prev, local]));
-      setLoading(true);
+      setSending(true);
       setError(null);
 
       try {
         await client.sendMessage(targetPubkey, trimmed);
+        recordConversationEntry(targetPubkey, local);
       } catch (err) {
-        // Roll back the optimistic message.
-        seenIdsRef.current.delete(local.id);
-        setMessages((prev) => prev.filter((m) => m.id !== local.id));
+        setMessages((prev) => prev.filter((m) => m.id !== localId));
         if (mountedRef.current) setError(toUserMessage(err));
       } finally {
-        if (mountedRef.current) setLoading(false);
+        if (mountedRef.current) setSending(false);
       }
     },
     [targetPubkey]
   );
 
-  return { messages, sendMessage, loading, error };
+  const value = useMemo(
+    () => ({ messages, sendMessage, sending, error }),
+    [messages, sendMessage, sending, error]
+  );
+
+  return value;
 }

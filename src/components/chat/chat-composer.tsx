@@ -1,7 +1,6 @@
 // Chat input composer — auto-growing multiline input with send button
 import { useCallback, useState } from 'react';
 import {
-  Platform,
   Pressable,
   StyleSheet,
   Text,

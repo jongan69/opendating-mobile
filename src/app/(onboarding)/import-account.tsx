@@ -4,15 +4,12 @@
 // It never leaves the device.
 
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { TextInput } from '@expo/ui';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { bech32, hex } from '@scure/base';
 import { useRouter } from 'expo-router';
 import {
   ErrorBanner,
   FieldLabel,
-  makeInputStyle,
-  makeInputTextStyle,
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import { useTheme } from '@/state/theme-context';
@@ -105,8 +102,7 @@ export default function ImportAccountScreen() {
       <View style={styles.fieldGroup}>
         <FieldLabel>Private key (nsec… or hex)</FieldLabel>
         <TextInput
-          value={undefined}
-          defaultValue={keyText}
+          value={keyText}
           onChangeText={setKeyText}
           placeholder="nsec1… or 64-character hex key"
           placeholderTextColor={colors.textTertiary}
@@ -115,8 +111,7 @@ export default function ImportAccountScreen() {
           autoCorrect={false}
           returnKeyType="done"
           onSubmitEditing={handleImport}
-          style={makeInputStyle(colors)}
-          textStyle={makeInputTextStyle(colors)}
+          style={[styles.input, { color: colors.text }]}
         />
         <Pressable
           onPress={() => setShowKey((v) => !v)}
@@ -158,6 +153,15 @@ function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
     fieldGroup: {
       marginBottom: spacing.xl,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      fontSize: (typography.bodyLarge.fontSize as number) ?? 17,
     },
     showKey: {
       alignSelf: 'flex-end',

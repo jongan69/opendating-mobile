@@ -79,6 +79,13 @@ export default function PhotosScreen() {
     router.push('/(onboarding)/location');
   };
 
+  // Whatever has been chosen so far is kept; the member is not forced back
+  // through this step to reach the rest of onboarding.
+  const handleSkip = () => {
+    update('photos', photos);
+    router.push('/(onboarding)/location');
+  };
+
   const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => i);
   const canContinue = photos.length >= MIN_PHOTOS;
 
@@ -91,11 +98,30 @@ export default function PhotosScreen() {
       onPrimaryPress={handleContinue}
       primaryDisabled={!canContinue}
       footer={
-        <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center' }]}>
-          {canContinue
-            ? 'Photos are shown on your profile.'
-            : `Add at least ${MIN_PHOTOS} photos to continue.`}
-        </Text>
+        <View style={styles.footer}>
+          <Text style={[typography.caption, styles.footerHint, { color: colors.textTertiary }]}>
+            {canContinue
+              ? 'Photos are shown on your profile.'
+              : `Add at least ${MIN_PHOTOS} photos, or add them later.`}
+          </Text>
+          {/* Without an escape hatch, denying the OS photo permission dead-ends
+              onboarding here with no way forward — and reviewers deny
+              permissions as a matter of course. Photos can be added from Edit
+              Profile, so this is a delay rather than a skipped requirement. */}
+          {!canContinue ? (
+            <Pressable
+              onPress={handleSkip}
+              accessibilityRole="button"
+              accessibilityLabel="Add photos later"
+              hitSlop={spacing.md}
+              style={({ pressed }) => [pressed && styles.pressed]}
+            >
+              <Text style={[typography.labelLarge, styles.skip, { color: colors.accent }]}>
+                Add photos later
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       }
     >
       {error ? <ErrorBanner message={error} /> : null}
@@ -153,6 +179,20 @@ export default function PhotosScreen() {
 
 function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    footer: {
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    footerHint: {
+      textAlign: 'center',
+    },
+    skip: {
+      textAlign: 'center',
+      paddingVertical: spacing.xs,
+    },
+    pressed: {
+      opacity: 0.7,
+    },
     grid: {
       flexDirection: 'row',
       flexWrap: 'wrap',

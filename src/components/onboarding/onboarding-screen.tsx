@@ -6,6 +6,14 @@
 // the universal Button sizes to its intrinsic content (SwiftUI frame modifiers
 // cannot stretch full-width), and its tint is the system accent, not the
 // OpenDating coral.
+//
+// This shell deliberately does NOT provide a <Host> for @expo/ui components.
+// A Host ancestor is not sufficient — a Compose view must be a *direct* child
+// of Host, and this shell necessarily puts a KeyboardAvoidingView, a View, and
+// a ScrollView between itself and any screen content. The Host that used to
+// live here looked like it covered every screen and covered none of them:
+// pickers rendered nothing and onboarding was hard-blocked at "About you".
+// Screens that need a Compose view wrap it themselves, tightly.
 
 import React from 'react';
 import {
@@ -28,6 +36,7 @@ import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
+import { isScreenshotMode } from '@/constants/env';
 
 export const ONBOARDING_TOTAL_STEPS = 11;
 
@@ -95,7 +104,8 @@ export function PrimaryButton({
   disabled = false,
 }: PrimaryButtonProps) {
   const { colors } = useTheme();
-  const isDisabled = disabled || loading;
+  // In screenshot mode, never disable — ADB taps need the button to be pressable
+  const isDisabled = isScreenshotMode ? false : (disabled || loading);
 
   return (
     <Pressable
@@ -172,11 +182,10 @@ export function OnboardingScreen({
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
         {/* Header: back + step count */}
         <View style={styles.header}>
           {showBack ? (

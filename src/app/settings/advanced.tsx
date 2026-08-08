@@ -6,7 +6,7 @@ import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
-import { Host } from '@expo/ui';
+
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { connectionStateLabel, hexToNpub, shortPubkey } from '@/lib/format';
 import type { ConnectionState, OpenDatingCapabilities } from '@/types/opendating';
@@ -151,7 +151,11 @@ export default function AdvancedScreen() {
   const infoUrl = getOpenDatingClient().getInfoUrl();
   const protocolVersion = getOpenDatingClient().getProtocolVersion();
   const supportedVersions = capabilities?.protocol_versions ?? [];
-  const services = capabilities?.roles;
+  // The relay advertises only the services it runs, so this list is whatever
+  // is actually deployed rather than a fixed roster.
+  const serviceEntries: [string, string][] = Object.entries(
+    capabilities?.roles ?? {}
+  ).flatMap(([role, entry]) => (entry?.pubkey ? [[role, entry.pubkey]] : []));
 
   return (
     <SafeAreaView
@@ -159,7 +163,6 @@ export default function AdvancedScreen() {
       edges={['left', 'right', 'bottom']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
@@ -246,20 +249,18 @@ export default function AdvancedScreen() {
           </Section>
 
           <Section title="Service Identities">
-            {services ? (
-              (Object.keys(services) as (keyof typeof services)[]).map((role, index) => (
+            {serviceEntries.length > 0 ? (
+              serviceEntries.map(([role, pubkey], index) => (
                 <View key={role}>
                   {index > 0 ? (
                     <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                   ) : null}
                   <CopyRow
                     label={role}
-                    value={shortPubkey(services[role].pubkey)}
+                    value={shortPubkey(pubkey)}
                     monospace
                     copied={copiedKey === `service:${role}`}
-                    onCopy={() =>
-                      void copyValue(`service:${role}`, services[role].pubkey)
-                    }
+                    onCopy={() => void copyValue(`service:${role}`, pubkey)}
                   />
                 </View>
               ))
@@ -297,7 +298,6 @@ export default function AdvancedScreen() {
             </View>
           </Section>
         </ScrollView>
-      </Host>
     </SafeAreaView>
   );
 }

@@ -1,7 +1,7 @@
 // Discover — the main card deck. Minimal chrome: brand header with a
 // filter entry point, the swipe deck, and pass/like controls.
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,21 +13,87 @@ import { BrandMark } from '@/components/brand/brand-mark';
 import { useDiscovery } from '@/features/discovery/use-discovery';
 import { cacheCandidates, getCachedCandidate } from '@/features/discovery/candidate-cache';
 import { useTheme } from '@/state/theme-context';
+import { isScreenshotMode } from '@/constants/env';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { typography } from '@/theme/typography';
 import type { Candidate } from '@/types/opendating';
 
+const DEMO_CANDIDATES: Candidate[] = [
+  {
+    pubkey: 'demo-candidate-1',
+    candidate_grant: 'demo-grant-1',
+    distance_bucket: 'nearby',
+    profile: {
+      display_name: 'Emma',
+      age: 25,
+      gender: 'woman',
+      bio: 'Dog mom 🐕 | Yoga teacher | Always looking for the best brunch spots',
+      photos: [],
+      interests: ['yoga', 'dogs', 'brunch', 'travel'],
+      relationship_intent: 'long_term',
+      prompts: [{ question: 'My simple pleasures', answer: 'Morning coffee, rainy Sundays, and fresh sourdough.' }],
+    },
+  },
+  {
+    pubkey: 'demo-candidate-2',
+    candidate_grant: 'demo-grant-2',
+    distance_bucket: 'within 5 mi',
+    profile: {
+      display_name: 'Marcus',
+      age: 31,
+      gender: 'man',
+      bio: 'Software engineer by day, rock climber by weekend. Looking for a partner in crime.',
+      photos: [],
+      interests: ['climbing', 'music', 'road trips', 'tacos'],
+      relationship_intent: 'long_term',
+      prompts: [{ question: "I'm weirdly good at…", answer: 'Parallel parking and remembering useless movie quotes.' }],
+    },
+  },
+  {
+    pubkey: 'demo-candidate-3',
+    candidate_grant: 'demo-grant-3',
+    distance_bucket: 'nearby',
+    profile: {
+      display_name: 'Jordan',
+      age: 27,
+      gender: 'nonbinary',
+      bio: 'Art curator 🎨 | Vinyl collector | Cat person',
+      photos: [],
+      interests: ['art', 'vinyl', 'cats', 'coffee'],
+      relationship_intent: 'figuring_out',
+      prompts: [{ question: 'A fun fact about me', answer: 'I once got lost in the Louvre for 6 hours and loved every minute.' }],
+    },
+  },
+];
+
 export default function DiscoverScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const { candidates, loading, error, like, pass, fetchCandidates } = useDiscovery();
+  const {
+    candidates,
+    loading,
+    error,
+    unavailable,
+    remainingToday,
+    loaded,
+    like,
+    pass,
+    fetchCandidates,
+    clearError,
+  } = useDiscovery();
   const deckRef = useRef<SwipeDeckHandle>(null);
+
+  // In screenshot mode, use demo candidates to show a populated deck
+  const displayCandidates = useMemo(
+    () => (isScreenshotMode ? DEMO_CANDIDATES : candidates),
+    [candidates]
+  );
 
   // Feed the detail screens from whatever the deck has shown.
   useEffect(() => {
-    cacheCandidates(candidates);
-  }, [candidates]);
+    cacheCandidates(displayCandidates);
+  }, [displayCandidates]);
 
   const presentMatch = useCallback(
     (pubkey: string) => {
@@ -82,8 +148,14 @@ export default function DiscoverScreen() {
     deckRef.current?.swipe(direction);
   }, []);
 
+  // A blocking state only when there is nothing to show. With cards on
+  // screen an error becomes a dismissible banner instead, so a single failed
+  // like never wipes out the deck.
   const showErrorState =
-    !!error && candidates.length === 0 && !loading;
+    !isScreenshotMode && !!error && candidates.length === 0 && !loading;
+  const showErrorBanner =
+    !isScreenshotMode && !!error && candidates.length > 0;
+  const outOfLikes = loaded && !unavailable && remainingToday === 0;
 
   return (
     <SafeAreaView
@@ -118,23 +190,46 @@ export default function DiscoverScreen() {
         </Pressable>
       </View>
 
+      {showErrorBanner ? (
+        <Pressable
+          onPress={clearError}
+          accessibilityRole="button"
+          accessibilityLabel={`${error}. Tap to dismiss.`}
+          style={[styles.errorBanner, { backgroundColor: colors.destructiveLight }]}
+        >
+          <Text style={[typography.bodySmall, { color: colors.destructive, flex: 1 }]}>
+            {error}
+          </Text>
+          <Text style={[typography.labelMedium, { color: colors.destructive }]}>✕</Text>
+        </Pressable>
+      ) : null}
+
       {/* Deck / states */}
       <View style={styles.deckArea}>
         {showErrorState ? (
-          <EmptyState
-            icon="📡"
-            title="Couldn't load candidates"
-            subtitle={error}
-            action={{ label: 'Try again', onPress: () => void fetchCandidates() }}
-          />
+          unavailable ? (
+            <EmptyState
+              icon="🌱"
+              title="Discovery is coming online"
+              subtitle={error}
+              action={{ label: 'Check again', onPress: () => void fetchCandidates() }}
+            />
+          ) : (
+            <EmptyState
+              icon="📡"
+              title="Couldn't load candidates"
+              subtitle={error}
+              action={{ label: 'Try again', onPress: () => void fetchCandidates() }}
+            />
+          )
         ) : (
           <SwipeDeck
             ref={deckRef}
-            candidates={candidates}
+            candidates={displayCandidates}
             onLike={(pubkey, grant) => void handleLike(pubkey, grant)}
             onPass={handlePass}
             onPressCard={handleOpenCandidate}
-            loading={loading && candidates.length === 0}
+            loading={loading && displayCandidates.length === 0 && !isScreenshotMode}
           />
         )}
       </View>
@@ -167,6 +262,21 @@ export default function DiscoverScreen() {
           />
         </ActionButton>
       </View>
+
+      {/* Daily quota — displayed so users know how many likes they have left. */}
+      {!isScreenshotMode && loaded && !unavailable && displayCandidates.length > 0 ? (
+        <Text
+          style={[
+            typography.caption,
+            styles.quota,
+            { color: outOfLikes ? colors.warning : colors.textTertiary },
+          ]}
+        >
+          {outOfLikes
+            ? "That's all your likes for today — more tomorrow"
+            : `${remainingToday} like${remainingToday === 1 ? '' : 's'} left today`}
+        </Text>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -260,5 +370,19 @@ const styles = StyleSheet.create({
   actionLabel: {
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  quota: {
+    textAlign: 'center',
+    paddingBottom: spacing.md,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.xl,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
   },
 });

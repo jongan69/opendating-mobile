@@ -1,6 +1,10 @@
-// Onboarding draft — the profile data collected across onboarding screens.
-// Held in memory (React context) until the review screen submits it via
-// OpenDatingClient.createProfile(). Nothing here is persisted.
+// Onboarding draft — the profile data collected across onboarding screens,
+// submitted by the review screen via OpenDatingClient.
+//
+// Persisted as it changes. Onboarding is eleven steps and people get
+// interrupted; without this, a reload or an OS memory kill discarded
+// everything typed so far and left them on the review step with empty fields
+// and a disabled button they could not explain.
 //
 // Provided by OnboardingDraftProvider in the (onboarding) layout; screens
 // read and update the draft with useOnboardingDraft().
@@ -9,9 +13,12 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
+import { isScreenshotMode } from '@/constants/env';
+import { storage } from '@/lib/storage';
 
 // ---- Canonical option lists (shared by the onboarding pickers) ----
 
@@ -74,22 +81,43 @@ export interface OnboardingDraft {
   countryCode: string | null;
 }
 
-const DEFAULT_DRAFT: OnboardingDraft = {
-  pubkey: null,
-  displayName: '',
-  age: null,
-  gender: null,
-  genderPreferences: [],
+const DEMO_DRAFT: OnboardingDraft = {
+  pubkey: 'demo-pubkey-0000000000000000000000000000000000000000000000000000000000000000',
+  displayName: 'Alex',
+  age: 28,
+  gender: 'woman',
+  genderPreferences: ['woman', 'man', 'nonbinary'],
   ageRangeMin: 24,
   ageRangeMax: 38,
-  intent: null,
-  bio: '',
-  interests: [],
-  prompts: [],
+  intent: 'long_term',
+  bio: 'Coffee enthusiast, weekend hiker, and lover of bad puns. Looking for someone who laughs at my jokes (even the terrible ones).',
+  interests: ['hiking', 'coffee', 'photography', 'cooking'],
+  prompts: [
+    { question: 'Two truths and a lie', answer: 'I once climbed Kilimanjaro. I speak three languages. I hate chocolate.' },
+  ],
   photos: [],
-  geohashPrefix: null,
-  countryCode: null,
+  geohashPrefix: '9q8yy',
+  countryCode: 'US',
 };
+
+const DEFAULT_DRAFT: OnboardingDraft = isScreenshotMode
+  ? DEMO_DRAFT
+  : {
+      pubkey: null,
+      displayName: '',
+      age: null,
+      gender: null,
+      genderPreferences: [],
+      ageRangeMin: 24,
+      ageRangeMax: 38,
+      intent: null,
+      bio: '',
+      interests: [],
+      prompts: [],
+      photos: [],
+      geohashPrefix: null,
+      countryCode: null,
+    };
 
 // ---- Context ----
 
@@ -111,13 +139,45 @@ export function OnboardingDraftProvider({
 }) {
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULT_DRAFT);
 
+  // Rehydrate anything from a previous run. Onboarding is eleven steps; losing
+  // it to a reload, a backgrounded app, or an OS memory kill left the member
+  // on the review step with empty fields and a permanently disabled button and
+  // no way to understand why.
+  useEffect(() => {
+    let active = true;
+    storage
+      .getOnboardingDraft<Partial<OnboardingDraft>>()
+      .then((saved) => {
+        if (!active || !saved) return;
+        // Merged over the defaults so a draft written by an older build that
+        // lacks newer fields still loads.
+        setDraft((current) => ({ ...current, ...saved }));
+      })
+      .catch(() => {
+        // A corrupt draft must not block onboarding — start fresh instead.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const update = useCallback(function update<
     K extends keyof OnboardingDraft,
   >(key: K, value: OnboardingDraft[K]) {
-    setDraft((d) => (d[key] === value ? d : { ...d, [key]: value }));
+    setDraft((d) => {
+      if (d[key] === value) return d;
+      const next = { ...d, [key]: value };
+      // Fire-and-forget: a failed write costs resumability, never the step the
+      // user is on.
+      void storage.saveOnboardingDraft(next).catch(() => {});
+      return next;
+    });
   }, []);
 
-  const reset = useCallback(() => setDraft(DEFAULT_DRAFT), []);
+  const reset = useCallback(() => {
+    setDraft(DEFAULT_DRAFT);
+    void storage.clearOnboardingDraft().catch(() => {});
+  }, []);
 
   const api = useMemo(() => ({ draft, update, reset }), [draft, update, reset]);
 

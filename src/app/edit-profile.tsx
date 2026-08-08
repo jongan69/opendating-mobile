@@ -17,10 +17,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Button, Host, Picker } from '@expo/ui';
+import { AppButton } from '@/components/ui/app-button';
+import { OptionSelector } from '@/components/ui/option-selector';
 import { BackHeader } from '@/components/back-header';
-import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { isServiceUnavailable } from '@/lib/opendating/errors';
+import {
+  PROFILE_CONTENT_VERSION,
+  PhotoUploadError,
+  loadProfileContent,
+  publishProfile,
+  saveProfileContentLocally,
+} from '@/features/profile/profile-content';
 import { useTheme } from '@/state/theme-context';
+import type { ProfileContent } from '@/types/opendating';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
@@ -40,7 +49,7 @@ const GENDER_OPTIONS: { label: string; value: string }[] = [
 const INTENT_OPTIONS: { label: string; value: string }[] = [
   { label: 'Prefer not to say', value: '' },
   { label: 'Long-term relationship', value: 'long_term' },
-  { label: 'Something casual', value: 'casual' },
+  { label: 'Something casual', value: 'short_term' },
   { label: 'New friends', value: 'friendship' },
   { label: 'Figuring it out', value: 'figuring_out' },
 ];
@@ -106,8 +115,6 @@ export default function EditProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [profileEventId, setProfileEventId] = useState<string | undefined>(undefined);
-
   const [displayName, setDisplayName] = useState('');
   const [age, setAge] = useState('');
   const [bio, setBio] = useState('');
@@ -119,17 +126,37 @@ export default function EditProfileScreen() {
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [pickingPhotos, setPickingPhotos] = useState(false);
 
+  // Prefill from the locally cached content so the form opens on what the
+  // user already has rather than on blank fields.
   useEffect(() => {
-    const client = getOpenDatingClient();
-    client
-      .getProfile()
-      .then((profile) => {
-        setProfileEventId(profile.profile_event_id);
+    let active = true;
+
+    loadProfileContent()
+      .then((content) => {
+        if (!active || !content) return;
+        setDisplayName(content.display_name ?? '');
+        setAge(content.age != null ? String(content.age) : '');
+        setGender(content.gender ?? '');
+        setIntent(content.relationship_intent ?? '');
+        setBio(content.bio ?? '');
+        setInterests(content.interests ?? []);
+        setPhotos(
+          (content.photos ?? []).map((photo, index) => ({
+            id: photo.id || `${index}`,
+            uri: photo.url,
+          }))
+        );
       })
       .catch(() => {
-        // No profile yet — the form still lets the user compose one.
+        // No cached content — the form still lets the user compose one.
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const addInterest = useCallback(() => {
@@ -199,22 +226,58 @@ export default function EditProfileScreen() {
 
     setSaving(true);
     setError(null);
+
+    const content: ProfileContent = {
+      display_name: name,
+      age: ageText ? Number(ageText) : undefined,
+      gender: gender || undefined,
+      relationship_intent: intent || undefined,
+      bio: bio.trim() || undefined,
+      interests,
+      photos: photos.map((photo, index) => ({
+        id: photo.id,
+        url: photo.uri,
+        order: index,
+      })),
+      v: PROFILE_CONTENT_VERSION,
+    };
+
     try {
-      await getOpenDatingClient().updateProfile(profileEventId);
+      // Publishes the content and registers the new event with the profile
+      // service. Previously this sent only the existing event id, so every
+      // edit was discarded while still reporting success.
+      await publishProfile(content);
       setSaving(false);
       Alert.alert('Profile saved', 'Your profile has been updated.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } catch (err) {
       setSaving(false);
-      setError(err instanceof Error ? err.message : 'Could not save your profile. Please try again.');
+
+      // The text profile published; only the photos failed. Say exactly that
+      // rather than implying the whole save was lost.
+      if (err instanceof PhotoUploadError) {
+        Alert.alert('Profile saved, photos not uploaded', err.message, [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+        return;
+      }
+
+      // Content is cached locally before publishing, so the edit survives.
+      await saveProfileContentLocally(content).catch(() => {});
+      setError(
+        isServiceUnavailable(err)
+          ? `${err.message} Your changes are saved on this device and will publish once it is.`
+          : err instanceof Error
+            ? err.message
+            : 'Could not save your profile. Please try again.'
+      );
     }
-  }, [displayName, age, bio, profileEventId, router]);
+  }, [displayName, age, bio, gender, intent, interests, photos, router]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <BackHeader title="Edit Profile" />
         {loading ? (
           <View style={styles.center}>
@@ -256,18 +319,24 @@ export default function EditProfileScreen() {
                 </View>
               </FieldRow>
               <FieldRow label="Gender">
-                <Picker selectedValue={gender} onValueChange={setGender}>
-                  {GENDER_OPTIONS.map((option) => (
-                    <Picker.Item key={option.value || 'unspecified'} label={option.label} value={option.value} />
-                  ))}
-                </Picker>
+                <View style={styles.selectorWrap}>
+                  <OptionSelector
+                    label="Gender"
+                    options={GENDER_OPTIONS}
+                    value={gender}
+                    onChange={setGender}
+                  />
+                </View>
               </FieldRow>
               <FieldRow label="Looking for" last>
-                <Picker selectedValue={intent} onValueChange={setIntent}>
-                  {INTENT_OPTIONS.map((option) => (
-                    <Picker.Item key={option.value || 'unspecified'} label={option.label} value={option.value} />
-                  ))}
-                </Picker>
+                <View style={styles.selectorWrap}>
+                  <OptionSelector
+                    label="Looking for"
+                    options={INTENT_OPTIONS}
+                    value={intent}
+                    onChange={setIntent}
+                  />
+                </View>
               </FieldRow>
             </FormSection>
 
@@ -402,8 +471,7 @@ export default function EditProfileScreen() {
               </View>
             ) : null}
 
-            <Button
-              variant="filled"
+            <AppButton
               disabled={saving}
               style={{ backgroundColor: colors.accent, borderRadius: radius.lg }}
               onPress={save}
@@ -411,10 +479,9 @@ export default function EditProfileScreen() {
               <Text style={[typography.button, { color: colors.textInverse, textAlign: 'center' }]}>
                 {saving ? 'Saving…' : 'Save'}
               </Text>
-            </Button>
+            </AppButton>
           </ScrollView>
         )}
-      </Host>
     </SafeAreaView>
   );
 }
@@ -469,6 +536,10 @@ const styles = StyleSheet.create({
   },
   inputWrap: {
     flex: 1,
+  },
+  selectorWrap: {
+    flex: 1,
+    paddingVertical: spacing.sm,
   },
   inputFill: {
     width: '100%',

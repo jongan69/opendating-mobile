@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Slider } from '@expo/ui';
+import { Host, Slider } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import {
   FieldLabel,
@@ -116,28 +116,37 @@ export default function PreferencesScreen() {
           <Text style={[typography.labelMedium, { color: colors.textSecondary }]}>
             Minimum: {minAge}
           </Text>
-          <Slider
-            value={minAge}
-            min={MIN_AGE}
-            max={MAX_AGE}
-            step={1}
-            onValueChange={handleMinAge}
-            testID="min-age-slider"
-          />
+          {/* Slider is a platform view (Jetpack Compose on Android) and must
+              be a *direct* child of Host — any wrapper between the two breaks
+              the composition boundary and it renders nothing at all.
+              matchContents lets Host take its height from the slider instead
+              of collapsing to zero. */}
+          <Host matchContents={{ vertical: true }} seedColor={colors.accent}>
+            <Slider
+              value={minAge}
+              min={MIN_AGE}
+              max={MAX_AGE}
+              step={1}
+              onValueChange={handleMinAge}
+              testID="min-age-slider"
+            />
+          </Host>
         </View>
 
         <View style={styles.sliderGroup}>
           <Text style={[typography.labelMedium, { color: colors.textSecondary }]}>
             Maximum: {maxAge}
           </Text>
-          <Slider
-            value={maxAge}
-            min={MIN_AGE}
-            max={MAX_AGE}
-            step={1}
-            onValueChange={handleMaxAge}
-            testID="max-age-slider"
-          />
+          <Host matchContents={{ vertical: true }} seedColor={colors.accent}>
+            <Slider
+              value={maxAge}
+              min={MIN_AGE}
+              max={MAX_AGE}
+              step={1}
+              onValueChange={handleMaxAge}
+              testID="max-age-slider"
+            />
+          </Host>
         </View>
       </View>
     </OnboardingScreen>

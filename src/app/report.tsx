@@ -15,7 +15,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
-import { Button, Checkbox, Host } from '@expo/ui';
+
+import { AppButton } from '@/components/ui/app-button';
+import { AppCheckbox } from '@/components/ui/app-checkbox';
 import { BackHeader } from '@/components/back-header';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { shortPubkey } from '@/lib/format';
@@ -132,15 +134,14 @@ export default function ReportScreen() {
           <Text style={[typography.bodyMedium, styles.centerBody, { color: colors.textSecondary }]}>
             Please open Report from the profile you'd like to report.
           </Text>
-          <Button
-            variant="filled"
+          <AppButton
             style={{ backgroundColor: colors.accent, borderRadius: radius.lg }}
             onPress={() => router.back()}
           >
             <Text style={[typography.button, { color: colors.textInverse, textAlign: 'center' }]}>
               Go Back
             </Text>
-          </Button>
+          </AppButton>
         </View>
       </SafeAreaView>
     );
@@ -171,15 +172,14 @@ export default function ReportScreen() {
             Thanks for keeping OpenDating safe. Our moderation team reviews every
             report, and the person you reported won't know you filed it.
           </Text>
-          <Button
-            variant="filled"
+          <AppButton
             style={{ backgroundColor: colors.accent, borderRadius: radius.lg }}
             onPress={() => router.back()}
           >
             <Text style={[typography.button, { color: colors.textInverse, textAlign: 'center' }]}>
               Done
             </Text>
-          </Button>
+          </AppButton>
         </View>
       </SafeAreaView>
     );
@@ -188,7 +188,6 @@ export default function ReportScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <BackHeader title="Report" />
         <ScrollView
           style={styles.scroll}
@@ -271,7 +270,7 @@ export default function ReportScreen() {
                           {id}
                         </Text>
                       </View>
-                      <Checkbox
+                      <AppCheckbox
                         value={selectedEvidence.includes(id)}
                         onValueChange={() => toggleEvidence(id)}
                       />
@@ -288,8 +287,7 @@ export default function ReportScreen() {
             </View>
           ) : null}
 
-          <Button
-            variant="filled"
+          <AppButton
             disabled={!reportType || submitting}
             style={{
               backgroundColor: !reportType || submitting ? colors.accentMuted : colors.accent,
@@ -300,14 +298,13 @@ export default function ReportScreen() {
             <Text style={[typography.button, { color: colors.textInverse, textAlign: 'center' }]}>
               {submitting ? 'Submitting…' : 'Submit Report'}
             </Text>
-          </Button>
+          </AppButton>
 
           <Text style={[typography.caption, styles.privacyNote, { color: colors.textTertiary }]}>
             Reports are private and encrypted. The person you report will not
             know who filed it.
           </Text>
         </ScrollView>
-      </Host>
     </SafeAreaView>
   );
 }

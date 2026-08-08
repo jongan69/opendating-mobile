@@ -12,6 +12,7 @@ import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { useOnboardingDraft } from '@/features/onboarding/onboarding-draft';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { isScreenshotMode } from '@/constants/env';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
@@ -29,6 +30,12 @@ export default function CreateAccountScreen() {
     setCreating(true);
     setError(null);
     try {
+      if (isScreenshotMode) {
+        // Skip real key generation — use the demo pubkey from the draft
+        update('pubkey', 'demo-pubkey-0000000000000000000000000000000000000000000000000000000000000000');
+        router.push('/(onboarding)/privacy');
+        return;
+      }
       const client = getOpenDatingClient();
       const { pubkey } = await client.createIdentity();
       update('pubkey', pubkey);
