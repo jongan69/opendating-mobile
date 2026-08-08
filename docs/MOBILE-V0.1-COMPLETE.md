@@ -159,7 +159,7 @@ Per the specification, the following are explicitly excluded:
 
 ## Known Limitations
 
-1. **Media upload** — Profile photo upload/retrieval requires the documented media authorization contract. Media functionality is isolated behind a `ProfileMediaClient` interface ready for implementation.
+1. **Media upload** — Profile photo upload/retrieval is implemented via Blossom (BUD-02) with kind-24242 signed authorization in `src/lib/opendating/media.ts`.
 2. **Expo Go compatibility** — Some dependencies (@expo/ui native components, expo-sqlite for NDK cache) require a development build rather than Expo Go.
 3. **Real device testing** — Needs testing on physical iOS/Android devices for gesture feel, keyboard behavior, and camera integration.
 4. **Alice/Bob/Carol E2E** — Requires three real accounts on the deployed relay; test infrastructure is in place.

@@ -120,6 +120,13 @@ const serviceErrorMap: Record<string, DomainError> = {
     technicalMessage: 'Profile already exists',
     retryable: false,
   },
+  content_rejected: {
+    code: 'CONTENT_REJECTED',
+    domain: 'profile',
+    userMessage: 'Profile content was flagged. Please edit and try again.',
+    technicalMessage: 'AI moderation blocked the bio',
+    retryable: true,
+  },
   invalid_candidate_grant: {
     code: 'INVALID_GRANT',
     domain: 'discovery',
@@ -153,6 +160,34 @@ const serviceErrorMap: Record<string, DomainError> = {
     domain: 'discovery',
     userMessage: 'Unable to determine your area. Please check your location settings.',
     technicalMessage: 'Location data invalid',
+    retryable: true,
+  },
+  rate_limited: {
+    code: 'RATE_LIMITED',
+    domain: 'matching',
+    userMessage: "You've reached your daily like limit. Come back tomorrow!",
+    technicalMessage: 'Daily like quota exhausted',
+    retryable: true,
+  },
+  invalid_profile: {
+    code: 'INVALID_PROFILE',
+    domain: 'profile',
+    userMessage: 'Please check your profile and try again.',
+    technicalMessage: 'Profile validation failed',
+    retryable: true,
+  },
+  unsupported_version: {
+    code: 'UNSUPPORTED_VERSION',
+    domain: 'general',
+    userMessage: 'Please update the app to continue.',
+    technicalMessage: 'Protocol version mismatch',
+    retryable: false,
+  },
+  internal_error: {
+    code: 'INTERNAL_ERROR',
+    domain: 'general',
+    userMessage: 'Something went wrong. Please try again.',
+    technicalMessage: 'Unexpected server error',
     retryable: true,
   },
   blocked: {

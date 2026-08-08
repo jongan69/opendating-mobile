@@ -11,6 +11,7 @@ import {
   shouldUpdateLocation,
   hasSignificantChange,
 } from '@/lib/location';
+import { subscribeDiscoveryPreferences } from '@/features/discovery/discovery-preferences';
 import type { Candidate } from '@/types/opendating';
 
 const PAGE_SIZE = 20;
@@ -183,6 +184,20 @@ export function useDiscovery(): UseDiscoveryResult {
       // Location failures are non-fatal for browsing.
     }
   }, []);
+
+  // Preference changes invalidate the server-side deck (grants deleted,
+  // deck rebuilt per BACKEND-COMPLETE.md). Reset the local stack so the next
+  // fetch gets a fresh deck rather than showing stale cards whose grants will
+  // be rejected.
+  useEffect(() => {
+    return subscribeDiscoveryPreferences(() => {
+      if (!mountedRef.current) return;
+      setCandidates([]);
+      cursorRef.current = undefined;
+      setHasMore(true);
+      fetchCandidates();
+    });
+  }, [fetchCandidates]);
 
   // Initial load: first page of candidates, plus a location sync.
   useEffect(() => {

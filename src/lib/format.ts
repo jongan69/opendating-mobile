@@ -1,6 +1,6 @@
 // Formatting helpers for pubkeys, timestamps, and connection states.
 
-import { NDKUser } from '@nostr-dev-kit/ndk-mobile';
+import { NDKUser } from '@nostr-dev-kit/ndk';
 import type { ConnectionState } from '@/types/opendating';
 
 /**

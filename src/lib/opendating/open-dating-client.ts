@@ -2,11 +2,18 @@
 // Wraps NDK Mobile + opendating-protocol into a clean domain API.
 // Screens never construct Nostr events, gift wraps, or envelopes directly.
 
+// NDK core, not @nostr-dev-kit/ndk-mobile. The mobile wrapper adds React
+// hooks, a session-storage adapter, a SQLite cache, and NIP-55 external-signer
+// support — none of which this app uses, since keys live in SecureStore and
+// every protocol operation is driven from this facade. What it did add was
+// four duplicate module copies (its own expo-image and expo-secure-store, plus
+// react and react-native nested under expo-nip55), and two React Native
+// runtimes in one bundle break TurboModule registration at startup.
 import NDK, {
   NDKEvent,
   NDKFilter,
   NDKSubscription,
-} from '@nostr-dev-kit/ndk-mobile';
+} from '@nostr-dev-kit/ndk';
 import {
   createEnvelope,
   buildGiftWrap,
@@ -71,6 +78,8 @@ const GIFT_WRAP_BACKDATE_SEC = 2 * 24 * 60 * 60;
 /** How far back to pull the encrypted inbox on connect. */
 const INBOX_HISTORY_SEC = 14 * 24 * 60 * 60;
 
+// ---- Lazy NDK loader ----
+// NDK Mobile's module body accesses PlatformConstants synchronously, which
 // ---- Types ----
 
 interface PendingRequest {
@@ -175,18 +184,20 @@ class OpenDatingClientImpl {
     this.setState('connecting');
 
     try {
-      // Initialize NDK
+      // Talk to exactly one relay. The outbox model would discover and connect
+      // to a user's own relay list, which for a dating app means leaking who
+      // you are to servers outside the service boundary.
       this.ndk = new NDK({
         explicitRelayUrls: [RELAY_URL],
         autoConnectUserRelays: false,
-        autoFetchUserMutelist: false,
+        enableOutboxModel: false,
         clientName: 'OpenDating Mobile',
         clientNip89: undefined,
       });
 
       // Connect with timeout — don't hang forever if the relay is unreachable
       await this.withTimeout(
-        this.ndk.connect(),
+        this.ndk!.connect(),
         CONNECT_TIMEOUT_MS,
         'Could not reach the OpenDating relay. Please check your internet connection.'
       );

@@ -24,7 +24,7 @@ function toUserMessage(err: unknown): string {
 
 export function useProfile(): UseProfileResult {
   const [profile, setProfile] = useState<OpenDatingProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(true);
 
@@ -73,6 +73,7 @@ export function useProfile(): UseProfileResult {
       );
     } catch (err) {
       setError(toUserMessage(err));
+      throw err;
     }
   }, []);
 
@@ -87,6 +88,7 @@ export function useProfile(): UseProfileResult {
       );
     } catch (err) {
       setError(toUserMessage(err));
+      throw err;
     }
   }, []);
 

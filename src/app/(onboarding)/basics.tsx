@@ -2,14 +2,12 @@
 // The first profile data the user shares; Continue is gated on all three.
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Picker, TextInput } from '@expo/ui';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Picker } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import {
   ErrorBanner,
   FieldLabel,
-  makeInputStyle,
-  makeInputTextStyle,
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import {
@@ -22,6 +20,7 @@ import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
+import { radius } from '@/theme/radius';
 
 const AGE_VALUES = Array.from(
   { length: MAX_AGE - MIN_AGE + 1 },
@@ -32,6 +31,15 @@ function makeStyles(colors: ThemeColors) {
   return StyleSheet.create({
     fieldGroup: {
       marginBottom: spacing.xl,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      fontSize: (typography.bodyLarge.fontSize as number) ?? 17,
     },
   });
 }
@@ -75,15 +83,14 @@ export default function BasicsScreen() {
       <View style={styles.fieldGroup}>
         <FieldLabel>Display name</FieldLabel>
         <TextInput
-          defaultValue={draft.displayName}
+          value={name}
           onChangeText={setName}
           placeholder="How should people call you?"
           placeholderTextColor={colors.textTertiary}
           autoCapitalize="words"
           autoCorrect={false}
           maxLength={40}
-          style={makeInputStyle(colors)}
-          textStyle={makeInputTextStyle(colors)}
+          style={[styles.input, { color: colors.text }]}
         />
       </View>
 

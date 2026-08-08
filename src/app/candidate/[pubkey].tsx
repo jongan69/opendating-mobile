@@ -6,9 +6,11 @@ import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useTheme } from '@/state/theme-context';
 import { useDiscovery } from '@/features/discovery/use-discovery';
+import { useCachedCandidate } from '@/features/discovery/candidate-cache';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
+import type { Candidate } from '@/types/opendating';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -17,7 +19,13 @@ export default function CandidateDetail() {
   const router = useRouter();
   const { colors } = useTheme();
   const { candidates } = useDiscovery();
-  const candidate = useMemo(() => candidates.find((c) => c.pubkey === pubkey), [candidates, pubkey]);
+  const cached = useCachedCandidate(pubkey);
+  // Look up from the deck first, then the cache — so a candidate opened from a
+  // match or after being swiped still renders rather than showing "not available".
+  const candidate: Candidate | undefined = useMemo(() => {
+    const deck = candidates.find((c) => c.pubkey === pubkey);
+    return deck ?? cached ?? undefined;
+  }, [candidates, cached, pubkey]);
   const [photoIndex, setPhotoIndex] = useState(0);
 
   const isVerified = (candidate?.profile.verification_claims ?? []).length > 0;

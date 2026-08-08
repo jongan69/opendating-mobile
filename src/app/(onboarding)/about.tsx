@@ -1,14 +1,14 @@
 // About — bio, interests (tags), and an optional prompt.
 // Interests are added one at a time as chips; tap a chip to remove it.
+// Uses React Native's built-in TextInput instead of @expo/ui's on Android
+// where the native Material wrapper can block touch events and keyboard input.
 
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Button, Picker, TextInput } from '@expo/ui';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Picker } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import {
   FieldLabel,
-  makeInputStyle,
-  makeInputTextStyle,
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import {
@@ -85,15 +85,15 @@ export default function AboutScreen() {
           </Text>
         </View>
         <TextInput
-          defaultValue={draft.bio}
+          value={bio}
           onChangeText={setBio}
           placeholder="A sentence or two about who you are…"
           placeholderTextColor={colors.textTertiary}
           multiline
           numberOfLines={5}
           maxLength={MAX_BIO_LENGTH}
-          style={makeInputStyle(colors)}
-          textStyle={makeInputTextStyle(colors)}
+          textAlignVertical="top"
+          style={styles.textInput}
         />
       </View>
 
@@ -103,7 +103,7 @@ export default function AboutScreen() {
         <View style={styles.interestInputRow}>
           <View style={styles.interestInput}>
             <TextInput
-              defaultValue={interestText}
+              value={interestText}
               onChangeText={setInterestText}
               placeholder="Hiking, coffee, jazz…"
               placeholderTextColor={colors.textTertiary}
@@ -112,17 +112,29 @@ export default function AboutScreen() {
               maxLength={MAX_INTEREST_LENGTH}
               returnKeyType="done"
               onSubmitEditing={addInterest}
-              style={makeInputStyle(colors)}
-              textStyle={makeInputTextStyle(colors)}
+              style={styles.textInput}
             />
           </View>
-          <Button
-            label="Add"
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add interest"
             onPress={addInterest}
             disabled={interestText.trim().length === 0}
-            style={styles.addButton}
-            testID="add-interest"
-          />
+            style={({ pressed }) => [
+              styles.addButton,
+              {
+                backgroundColor:
+                  interestText.trim().length === 0
+                    ? colors.accentMuted
+                    : colors.accent,
+                opacity: pressed ? 0.85 : 1,
+              },
+            ]}
+          >
+            <Text style={[typography.button, { color: colors.textInverse }]}>
+              Add
+            </Text>
+          </Pressable>
         </View>
 
         {interests.length > 0 ? (
@@ -158,7 +170,6 @@ export default function AboutScreen() {
           <Picker
             selectedValue={promptQuestion}
             onValueChange={(value) => setPromptQuestion(value as string)}
-            testID="prompt-question-picker"
           >
             {PROMPT_QUESTIONS.map((question) => (
               <Picker.Item key={question} label={question} value={question} />
@@ -166,13 +177,12 @@ export default function AboutScreen() {
           </Picker>
         </View>
         <TextInput
-          defaultValue={draft.prompts[0]?.answer ?? ''}
+          value={promptAnswer}
           onChangeText={setPromptAnswer}
           placeholder="Your answer…"
           placeholderTextColor={colors.textTertiary}
           maxLength={MAX_PROMPT_ANSWER}
-          style={makeInputStyle(colors)}
-          textStyle={makeInputTextStyle(colors)}
+          style={styles.textInput}
         />
         <Text style={[typography.caption, { color: colors.textTertiary }]}>
           Leave it empty to skip the prompt.
@@ -193,6 +203,16 @@ function makeStyles(colors: ThemeColors) {
       alignItems: 'center',
       marginBottom: spacing.sm,
     },
+    textInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      color: colors.text,
+      fontSize: (typography.bodyLarge.fontSize as number) ?? 17,
+    },
     interestInputRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',
@@ -203,11 +223,12 @@ function makeStyles(colors: ThemeColors) {
       flex: 1,
     },
     addButton: {
-      backgroundColor: colors.accent,
       borderRadius: radius.md,
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.md,
-      marginTop: 0,
+      height: 48,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     chips: {
       flexDirection: 'row',

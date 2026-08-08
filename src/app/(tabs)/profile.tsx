@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useTheme } from '@/state/theme-context';
 import { useProfileContent } from '@/features/profile/profile-content';
+import { useProfile } from '@/features/profile/use-profile';
 import { isScreenshotMode } from '@/constants/env';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
@@ -41,36 +42,30 @@ const DEMO_PROFILE: OpenDatingProfile = {
 export default function ProfileScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [profile, setProfile] = useState<OpenDatingProfile | null>(null);
+  const {
+    profile: hookProfile,
+    loading,
+    pauseProfile,
+    resumeProfile,
+    isPaused: hookIsPaused,
+  } = useProfile();
+  const profile = isScreenshotMode ? DEMO_PROFILE : hookProfile;
+  const isPaused = isScreenshotMode ? false : hookIsPaused;
   const [verifications, setVerifications] = useState<VerificationClaim[]>([]);
-  const [loading, setLoading] = useState(!isScreenshotMode);
-  const [isPaused, setIsPaused] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const { content, reload: reloadContent } = useProfileContent();
 
+  // Verification claims live separately from the profile hook.
   useEffect(() => {
+    if (isScreenshotMode) return;
     let active = true;
-
-    if (isScreenshotMode) {
-      setProfile(DEMO_PROFILE);
-      setVerifications([]);
-      setLoading(false);
-      return;
-    }
-
-    const client = getOpenDatingClient();
-    Promise.all([
-      client.getProfile().catch(() => null),
-      client.getVerificationClaims().catch(() => []),
-    ]).then(([p, v]) => {
-      if (!active) return;
-      setProfile(p);
-      setVerifications(v);
-      if (p) setIsPaused(p.status === 'paused');
-      setLoading(false);
-    });
-
+    getOpenDatingClient()
+      .getVerificationClaims()
+      .then((v) => {
+        if (active) setVerifications(v);
+      })
+      .catch(() => {});
     return () => {
       active = false;
     };
@@ -86,15 +81,13 @@ export default function ProfileScreen() {
 
   const togglePause = async () => {
     setToggling(true);
-    const client = getOpenDatingClient();
     const next = !isPaused;
     try {
       if (isPaused) {
-        await client.resumeProfile();
+        await resumeProfile();
       } else {
-        await client.pauseProfile();
+        await pauseProfile();
       }
-      setIsPaused(next);
     } catch (err) {
       // The switch stays where it was; say why rather than letting it snap
       // back with no explanation.

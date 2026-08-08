@@ -48,7 +48,7 @@ const GENDER_OPTIONS: { label: string; value: string }[] = [
 const INTENT_OPTIONS: { label: string; value: string }[] = [
   { label: 'Prefer not to say', value: '' },
   { label: 'Long-term relationship', value: 'long_term' },
-  { label: 'Something casual', value: 'casual' },
+  { label: 'Something casual', value: 'short_term' },
   { label: 'New friends', value: 'friendship' },
   { label: 'Figuring it out', value: 'figuring_out' },
 ];

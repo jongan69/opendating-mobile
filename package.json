@@ -1,6 +1,6 @@
 {
   "name": "opendating-mobile",
-  "description": "Privacy-first decentralized dating app — Expo React Native reference client for the OpenDating protocol on Nostr. Tinder-quality UX with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity.",
+  "description": "Privacy-first decentralized dating app \u2014 Expo React Native reference client for the OpenDating protocol on Nostr. Tinder-quality UX with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity.",
   "keywords": [
     "opendating",
     "dating-app",
@@ -28,17 +28,10 @@
   "license": "MIT",
   "main": "index.ts",
   "version": "0.1.0",
-  "overrides": {
-    "expo-nip55": {
-      "expo": "$expo",
-      "react": "$react",
-      "react-native": "$react-native"
-    }
-  },
   "dependencies": {
     "@cashu/cashu-ts": "^4.7.2",
     "@expo/ui": "~57.0.9",
-    "@nostr-dev-kit/ndk-mobile": "^0.8.43",
+    "@nostr-dev-kit/ndk": "^2.15.2",
     "expo": "~57.0.11",
     "expo-clipboard": "~57.0.1",
     "expo-constants": "~57.0.9",
@@ -77,7 +70,6 @@
   },
   "devDependencies": {
     "@react-native/jest-preset": "^0.86.2",
-    "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
@@ -98,7 +90,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "clean": "expo start --clear",
-    "deploy:web": "echo 'Deploy via GitHub Pages — push to main and the deploy-web workflow handles the rest.'",
+    "deploy:web": "echo 'Deploy via GitHub Pages \u2014 push to main and the deploy-web workflow handles the rest.'",
     "build:ios": "eas build --profile production --platform ios",
     "build:ios:preview": "eas build --profile preview --platform ios",
     "build:ios:screenshot": "eas build --profile screenshot --platform ios",
@@ -107,7 +99,9 @@
     "screenshots:capture:ios": "./scripts/capture-screenshots-ios.sh",
     "screenshots:resize": "./scripts/resize-screenshots.sh",
     "blog:generate": "node scripts/release/lib/generate-articles.mjs",
-    "blog:build": "node scripts/release/lib/build-blog.mjs"
+    "blog:build": "node scripts/release/lib/build-blog.mjs",
+    "check:duplicates": "node scripts/check-duplicate-runtimes.mjs",
+    "postinstall": "node scripts/check-duplicate-runtimes.mjs"
   },
   "private": true
 }

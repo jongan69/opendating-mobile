@@ -263,8 +263,7 @@ export default function DiscoverScreen() {
         </ActionButton>
       </View>
 
-      {/* Daily quota — fetched all along but never shown, so users hit the
-          limit with no warning. */}
+      {/* Daily quota — displayed so users know how many likes they have left. */}
       {!isScreenshotMode && loaded && !unavailable && displayCandidates.length > 0 ? (
         <Text
           style={[
