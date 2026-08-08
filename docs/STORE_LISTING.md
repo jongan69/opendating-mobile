@@ -9,7 +9,8 @@ Console records.
 
 | Field | Value |
 |---|---|
-| App name | OpenDating |
+| App Store name | OpenDating Mobile |
+| Google Play name | OpenDating |
 | Subtitle / short description | Private dating, no ads |
 | iOS bundle ID | `com.jongan69.opendating` |
 | Android package | `com.jongan69.opendating` |
