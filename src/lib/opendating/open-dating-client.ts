@@ -219,7 +219,7 @@ class OpenDatingClientImpl {
       await this.withTimeout(
         this.ndk!.connect(),
         CONNECT_TIMEOUT_MS,
-        'Could not reach the OpenDating relay. Please check your internet connection.'
+        'Could not reach OpenDating. Please check your internet connection.'
       );
 
       this.setState('authenticating');

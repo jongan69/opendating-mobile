@@ -210,7 +210,7 @@ export class ServiceUnavailableError extends Error {
   readonly role: string;
 
   constructor(role: string, label: string) {
-    super(`${label} isn't available on this relay yet. Please check back soon.`);
+    super(`${label} isn't available yet. Please check back soon.`);
     this.name = 'ServiceUnavailableError';
     this.role = role;
   }

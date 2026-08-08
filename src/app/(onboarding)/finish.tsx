@@ -51,8 +51,8 @@ export default function FinishScreen() {
       </View>
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
-        Your identity and profile live on your device and the relay — you can
-        delete your account anytime from Settings.
+        Your account belongs to this device and your profile is live on
+        OpenDating. You can delete your account anytime from Settings.
       </Text>
     </OnboardingScreen>
   );

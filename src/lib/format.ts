@@ -43,7 +43,7 @@ const CONNECTION_STATE_LABELS: Record<ConnectionState, string> = {
   connected: 'Connected',
   reconnecting: 'Reconnecting',
   offline: 'Offline',
-  relay_unavailable: 'Relay unavailable',
+  relay_unavailable: 'OpenDating unavailable',
   protocol_incompatible: 'Protocol incompatible',
   fetching_capabilities: 'Checking services',
   account_unavailable: 'Account unavailable',

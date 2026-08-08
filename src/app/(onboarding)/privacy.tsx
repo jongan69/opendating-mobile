@@ -73,8 +73,8 @@ export default function PrivacyScreen() {
       </View>
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
-        Your profile is stored on a public relay by design — that's how others
-        discover you. Only what you choose to share appears there.
+        Other OpenDating members can discover the profile details you choose to
+        share. Your exact location and private likes stay hidden.
       </Text>
     </OnboardingScreen>
   );

@@ -32,8 +32,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // Log for debugging — replace with your crash reporter in production.
-    console.error('[ErrorBoundary]', error.message, info.componentStack);
+    if (__DEV__) {
+      console.error('[ErrorBoundary]', error.message, info.componentStack);
+    }
   }
 
   handleRetry = () => {
@@ -73,7 +74,7 @@ function ErrorScreen({
           The app encountered an unexpected error. This is likely temporary —
           tapping below will restart the app.
         </Text>
-        {error?.message ? (
+        {__DEV__ && error?.message ? (
           <Text style={[styles.errorDetail, { color: c.textSecondary }]}>
             {error.message}
           </Text>

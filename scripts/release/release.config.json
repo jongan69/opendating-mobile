@@ -55,7 +55,7 @@
   "web": {
     "enabled": true,
     "deployCommand": "npm run deploy:web",
-    "productionUrl": "https://opendating.org",
+    "productionUrl": "https://jongan69.github.io/opendating-mobile",
     "verifyAnchors": ["#privacy", "#features", "#get"]
   },
 

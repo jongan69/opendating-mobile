@@ -1,5 +1,5 @@
 // Privacy — explains how location, messages, and reports are handled,
-// with a collapsed technical section showing the user's npub.
+// with a collapsed technical section showing the public account ID.
 
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
 
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
-import { hexToNpub, shortPubkey } from '@/lib/format';
+import { shortPubkey } from '@/lib/format';
 import { AppCollapsible } from '@/components/ui/app-collapsible';
 import { useTheme } from '@/state/theme-context';
 import { typography } from '@/theme/typography';
@@ -41,8 +41,7 @@ function Section({ title, body }: SectionProps) {
 export default function PrivacyScreen() {
   const { colors, isDark } = useTheme();
 
-  const [npub, setNpub] = useState<string | null>(null);
-  const [npubHex, setNpubHex] = useState('');
+  const [publicId, setPublicId] = useState('');
   const [technicalOpen, setTechnicalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -51,23 +50,19 @@ export default function PrivacyScreen() {
     client
       .getPubkey()
       .then((pubkey) => {
-        if (pubkey) {
-          setNpubHex(pubkey);
-          setNpub(hexToNpub(pubkey));
-        }
+        if (pubkey) setPublicId(pubkey);
       })
       .catch(() => {
         // Identity unavailable — technical section will show a placeholder.
       });
   }, []);
 
-  const copyNpub = useCallback(async () => {
-    const value = npub ?? npubHex;
-    if (!value) return;
-    await Clipboard.setStringAsync(value);
+  const copyPublicId = useCallback(async () => {
+    if (!publicId) return;
+    await Clipboard.setStringAsync(publicId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [npub, npubHex]);
+  }, [publicId]);
 
   return (
     <SafeAreaView
@@ -82,11 +77,11 @@ export default function PrivacyScreen() {
         >
           <Section
             title="Your Location"
-            body="Your exact location is never shared. OpenDating only stores a coarse location area (a geohash covering a few miles), which is used to show nearby profiles and estimate distances. Location is never shown on your profile."
+            body="Your exact location is never shared. OpenDating only stores a coarse area covering a few miles, which is used to show nearby profiles and estimate distances. Location is never shown on your profile."
           />
           <Section
             title="Messages"
-            body="Messages are end-to-end encrypted and readable only by you and the person you're chatting with. OpenDating's relay infrastructure can't read your conversations, and messages can't be recovered once deleted."
+            body="Messages are end-to-end encrypted and readable only by you and the person you're chatting with. OpenDating can't read your conversations, and messages can't be recovered once deleted."
           />
           <Section
             title="Blocking & Reporting"
@@ -108,25 +103,25 @@ export default function PrivacyScreen() {
               <AppCollapsible
                 isOpen={technicalOpen}
                 onOpenChange={setTechnicalOpen}
-                label="Your npub (Nostr identity)"
+                label="Your public account ID"
               >
                 <View style={[styles.technicalBody, { borderTopColor: colors.divider }]}>
                   <Text
                     style={[typography.bodySmall, { color: colors.textSecondary }]}
                   >
-                    This is your public Nostr identity. It's safe to share — it
-                    identifies you on the network without exposing your private
-                    key. Your private key never leaves this device.
+                    This public ID helps OpenDating route your profile and
+                    messages without exposing your recovery key. Your recovery
+                    key never leaves this device.
                   </Text>
                   <Pressable
-                    onPress={copyNpub}
-                    disabled={!npub && !npubHex}
+                    onPress={copyPublicId}
+                    disabled={!publicId}
                     style={({ pressed }) => [
-                      styles.npubRow,
+                      styles.publicIdRow,
                       { backgroundColor: colors.surfaceSheet, opacity: pressed ? 0.7 : 1 },
                     ]}
                     accessibilityRole="button"
-                    accessibilityLabel="Copy npub"
+                    accessibilityLabel="Copy public account ID"
                   >
                     <Text
                       style={[
@@ -136,11 +131,7 @@ export default function PrivacyScreen() {
                       ]}
                       numberOfLines={1}
                     >
-                      {npub
-                        ? npub
-                        : npubHex
-                          ? shortPubkey(npubHex, 16, 8)
-                          : 'Identity not available'}
+                      {publicId ? shortPubkey(publicId, 16, 8) : 'Identity not available'}
                     </Text>
                     <Text style={[typography.labelMedium, { color: colors.accent }]}>
                       {copied ? 'Copied' : 'Copy'}
@@ -184,7 +175,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     gap: spacing.md,
   },
-  npubRow: {
+  publicIdRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,

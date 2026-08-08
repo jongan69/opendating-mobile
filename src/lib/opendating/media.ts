@@ -114,7 +114,7 @@ export async function uploadPhoto(
 
   if (!upload.ok) {
     if (upload.status === 503) {
-      throw new Error('Photo uploads are not available on this relay yet.');
+      throw new Error('Photo uploads are not available yet. Please try again later.');
     }
     if (upload.status === 413) {
       throw new Error('That photo is too large. Please choose a smaller one.');

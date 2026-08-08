@@ -1,5 +1,5 @@
 // Review — everything collected across onboarding, one last look.
-// "Create Profile" connects to the relay, creates the profile, then pushes
+// "Create Profile" connects to OpenDating, creates the profile, then pushes
 // the collected discovery preferences and coarse location to the server.
 
 import React, { useEffect, useState } from 'react';
@@ -286,8 +286,8 @@ export default function ReviewScreen() {
       </View>
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
-        Your profile is published to the OpenDating relay. You can edit or
-        delete it anytime from Settings.
+        Your profile is live on OpenDating. You can edit or delete it anytime
+        from Settings.
       </Text>
     </OnboardingScreen>
   );

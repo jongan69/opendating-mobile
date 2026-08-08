@@ -1,5 +1,5 @@
-// Advanced — technical details for Nostr-literate users.
-// Deliberately out of the normal flow; exposes keys, relay, and services.
+// Advanced — account diagnostics and recovery controls.
+// Deliberately out of the normal flow.
 
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
 
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
-import { connectionStateLabel, hexToNpub, shortPubkey } from '@/lib/format';
+import { connectionStateLabel, shortPubkey } from '@/lib/format';
 import type { ConnectionState, OpenDatingCapabilities } from '@/types/opendating';
 import { useTheme } from '@/state/theme-context';
 import { typography } from '@/theme/typography';
@@ -123,10 +123,10 @@ export default function AdvancedScreen() {
         Alert.alert('No identity found', 'There is no account on this device to export.');
         return;
       }
-      await copyValue('privkey', identity.privkey);
+      await copyValue('recovery-key', identity.privkey);
       Alert.alert(
-        'Private key copied',
-        'The private key (hex) is now on your clipboard. Store it somewhere safe, then clear your clipboard.'
+        'Recovery key copied',
+        'Your recovery key is now on your clipboard. Store it somewhere safe, then clear your clipboard.'
       );
     } catch (err) {
       Alert.alert(
@@ -138,8 +138,8 @@ export default function AdvancedScreen() {
 
   const exportPrivateKey = useCallback(async () => {
     Alert.alert(
-      'Export Private Key',
-      'Your private key unlocks full access to your account. Anyone who has it can impersonate you and take over your account. Only export it to a place you fully trust.',
+      'Export Recovery Key',
+      'Your recovery key unlocks full access to your account. Anyone who has it can impersonate you and take over your account. Only export it to a place you fully trust.',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Export', style: 'destructive', onPress: () => void doExportPrivateKey() },
@@ -147,12 +147,11 @@ export default function AdvancedScreen() {
     );
   }, [doExportPrivateKey]);
 
-  const relayUrl = getOpenDatingClient().getRelayUrl();
+  const networkUrl = getOpenDatingClient().getRelayUrl();
   const infoUrl = getOpenDatingClient().getInfoUrl();
   const protocolVersion = getOpenDatingClient().getProtocolVersion();
   const supportedVersions = capabilities?.protocol_versions ?? [];
-  // The relay advertises only the services it runs, so this list is whatever
-  // is actually deployed rather than a fixed roster.
+  // This list reflects what is actually deployed rather than a fixed roster.
   const serviceEntries: [string, string][] = Object.entries(
     capabilities?.roles ?? {}
   ).flatMap(([role, entry]) => (entry?.pubkey ? [[role, entry.pubkey]] : []));
@@ -170,43 +169,29 @@ export default function AdvancedScreen() {
         >
           <View style={[styles.banner, { backgroundColor: colors.accentLight }]}>
             <Text style={[typography.caption, { color: colors.accent }]}>
-              ADVANCED — for technical users. Most people will never need this screen.
+              ADVANCED - for account diagnostics. Most people will never need this screen.
             </Text>
           </View>
 
           <Section title="Identity">
-            {pubkey ? (
-              <>
-                <CopyRow
-                  label="npub"
-                  value={hexToNpub(pubkey)}
-                  monospace
-                  copied={copiedKey === 'npub'}
-                  onCopy={() => void copyValue('npub', hexToNpub(pubkey))}
-                />
-                <View style={[styles.divider, { backgroundColor: colors.divider }]} />
-              </>
-            ) : null}
             <CopyRow
-              label="Pubkey"
+              label="Public ID"
               value={pubkey ? shortPubkey(pubkey, 12, 10) : 'Unavailable'}
               monospace
-
-
-              copied={copiedKey === 'pubkey'}
+              copied={copiedKey === 'public-id'}
               onCopy={() => {
-                if (pubkey) void copyValue('pubkey', pubkey);
+                if (pubkey) void copyValue('public-id', pubkey);
               }}
             />
           </Section>
 
           <Section title="Connection">
             <CopyRow
-              label="Relay"
-              value={relayUrl.replace(/^wss?:\/\//, '')}
+              label="Network"
+              value={networkUrl.replace(/^wss?:\/\//, '')}
               monospace
-              copied={copiedKey === 'relay'}
-              onCopy={() => void copyValue('relay', relayUrl)}
+              copied={copiedKey === 'network'}
+              onCopy={() => void copyValue('network', networkUrl)}
             />
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />
             <CopyRow
@@ -248,7 +233,7 @@ export default function AdvancedScreen() {
             </View>
           </Section>
 
-          <Section title="Service Identities">
+          <Section title="Service IDs">
             {serviceEntries.length > 0 ? (
               serviceEntries.map(([role, pubkey], index) => (
                 <View key={role}>
@@ -267,7 +252,7 @@ export default function AdvancedScreen() {
             ) : (
               <View style={styles.row}>
                 <Text style={[typography.caption, { color: colors.textTertiary }]}>
-                  Service identities unavailable — check your connection.
+                  Service IDs unavailable - check your connection.
                 </Text>
               </View>
             )}
@@ -283,7 +268,7 @@ export default function AdvancedScreen() {
               accessibilityRole="button"
             >
               <Text style={[typography.bodyMedium, { color: colors.text, flex: 1 }]}>
-                Export Private Key
+                Export Recovery Key
               </Text>
               <Text style={[typography.caption, { color: colors.textTertiary }]}>
                 Warning
@@ -292,7 +277,7 @@ export default function AdvancedScreen() {
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />
             <View style={[styles.row, { paddingVertical: spacing.sm }]}>
               <Text style={[typography.caption, { color: colors.textTertiary, flex: 1 }]}>
-                The private key is the only way to restore your account on another device.
+                The recovery key is the only way to restore your account on another device.
                 OpenDating can't recover it for you.
               </Text>
             </View>

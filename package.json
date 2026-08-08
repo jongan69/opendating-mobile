@@ -1,6 +1,6 @@
 {
   "name": "opendating-mobile",
-  "description": "Privacy-first decentralized dating app \u2014 Expo React Native reference client for the OpenDating protocol on Nostr. Tinder-quality UX with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity.",
+  "description": "Privacy-first decentralized dating app — Expo React Native reference client for the OpenDating protocol on Nostr. Tinder-quality UX with end-to-end encrypted messaging, coarse location privacy, and self-sovereign identity.",
   "keywords": [
     "opendating",
     "dating-app",
@@ -61,7 +61,7 @@
     "react-native": "0.86.2",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-get-random-values": "^1.11.0",
-    "react-native-reanimated": "^4.5.1",
+    "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
@@ -90,11 +90,15 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "clean": "expo start --clear",
-    "deploy:web": "echo 'Deploy via GitHub Pages \u2014 push to main and the deploy-web workflow handles the rest.'",
+    "deploy:web": "echo 'Deploy via GitHub Pages — push to main and the deploy-web workflow handles the rest.'",
+    "build:android": "eas build --profile production --platform android",
+    "build:android:preview": "eas build --profile preview --platform android",
+    "submit:android": "eas submit --profile production --platform android",
     "build:ios": "eas build --profile production --platform ios",
     "build:ios:preview": "eas build --profile preview --platform ios",
     "build:ios:screenshot": "eas build --profile screenshot --platform ios",
     "submit:ios": "eas submit --profile production --platform ios",
+    "build:all": "eas build --profile production --platform all",
     "screenshots:capture": "./scripts/capture-screenshots.sh",
     "screenshots:capture:ios": "./scripts/capture-screenshots-ios.sh",
     "screenshots:resize": "./scripts/resize-screenshots.sh",
@@ -103,5 +107,6 @@
     "check:duplicates": "node scripts/check-duplicate-runtimes.mjs",
     "postinstall": "node scripts/check-duplicate-runtimes.mjs"
   },
-  "private": true
+  "private": true,
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

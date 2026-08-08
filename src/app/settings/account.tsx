@@ -98,7 +98,7 @@ export default function AccountScreen() {
               ]}
             >
               Your profile, matches, messages, and verification status will be
-              removed from OpenDating. If you have exported your private key,
+              removed from OpenDating. If you have exported your recovery key,
               you can use it to start fresh later.
             </Text>
           </View>

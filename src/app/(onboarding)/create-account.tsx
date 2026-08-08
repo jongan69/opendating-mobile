@@ -66,7 +66,7 @@ export default function CreateAccountScreen() {
 
       <View style={styles.infoCard}>
         <Text style={[typography.titleSmall, { color: colors.text }]}>
-          Your key stays on this device
+          Your recovery key stays on this device
         </Text>
         <Text
           style={[
@@ -74,7 +74,7 @@ export default function CreateAccountScreen() {
             { color: colors.textSecondary, marginTop: spacing.sm },
           ]}
         >
-          We generate a private key right on your phone. It's stored in your
+          We generate a recovery key right on your phone. It's stored in your
           device's secure storage — not on our servers — and it never leaves
           your phone.
         </Text>
@@ -111,7 +111,7 @@ export default function CreateAccountScreen() {
       </View>
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
-        Your private key is the only way to access your account. There is no
+        Your recovery key is the only way to access your account. There is no
         password reset — keep it safe.
       </Text>
     </OnboardingScreen>

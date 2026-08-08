@@ -44,7 +44,7 @@ function normalizePrivateKey(input: string): string {
     }
     if (decoded.prefix !== 'nsec') {
       throw new Error(
-        'That looks like a public key. Import needs your recovery key, the secret one.'
+        'That looks like a public account ID. Import needs your recovery key, the secret one.'
       );
     }
     const bytes = bech32.fromWords(decoded.words);
@@ -96,7 +96,7 @@ export default function ImportAccountScreen() {
     <OnboardingScreen
       step={2}
       title="Import your account"
-      subtitle="Restore an existing OpenDating identity with your private key."
+      subtitle="Restore an existing OpenDating account with your recovery key."
       primaryLabel="Import Account"
       onPrimaryPress={handleImport}
       primaryLoading={importing}

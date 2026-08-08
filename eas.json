@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 15.0.0",
+    "version": ">= 16.0.1",
     "appVersionSource": "remote"
   },
   "build": {
@@ -40,7 +40,8 @@
         "simulator": false
       },
       "android": {
-        "image": "latest"
+        "image": "latest",
+        "buildType": "app-bundle"
       },
       "env": {
         "EXPO_PUBLIC_OPENDATING_RELAY_URL": "wss://opendating-relay.jonathang132298.workers.dev",
