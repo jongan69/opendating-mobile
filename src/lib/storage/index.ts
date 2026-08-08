@@ -53,6 +53,7 @@ const STORAGE_KEYS = {
   ONBOARDING_COMPLETE: 'opendating_onboarding_done',
   THEME_PREFERENCE: 'opendating_theme',
   PROFILE_CONTENT: 'opendating_profile_content',
+  ONBOARDING_DRAFT: 'opendating_onboarding_draft',
 } as const;
 
 export const storage = {
@@ -103,6 +104,26 @@ export const storage = {
     } catch {
       return null;
     }
+  },
+
+  // In-progress onboarding draft.
+  // Persisted so a reload, a backgrounded app, or an OS memory kill does not
+  // discard everything the user has typed and strand them on the review step
+  // with a permanently disabled button.
+  async saveOnboardingDraft(draft: object): Promise<void> {
+    await secureSet(STORAGE_KEYS.ONBOARDING_DRAFT, JSON.stringify(draft));
+  },
+  async getOnboardingDraft<T>(): Promise<T | null> {
+    const raw = await secureGet(STORAGE_KEYS.ONBOARDING_DRAFT);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
+  },
+  async clearOnboardingDraft(): Promise<void> {
+    await secureDelete(STORAGE_KEYS.ONBOARDING_DRAFT);
   },
 
   // Onboarding

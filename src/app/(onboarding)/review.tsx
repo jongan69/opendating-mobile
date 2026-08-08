@@ -106,6 +106,9 @@ export default function ReviewScreen() {
       });
 
       await storage.setOnboardingComplete();
+      // The draft has served its purpose; keeping it would repopulate a stale
+      // profile if the member ever re-entered onboarding.
+      await storage.clearOnboardingDraft().catch(() => {});
 
       if (publishResult instanceof PhotoUploadError) {
         Alert.alert(
@@ -145,6 +148,12 @@ export default function ReviewScreen() {
   }, [draft.pubkey]);
 
   const canSubmit = resolvedPubkey !== null && draft.displayName.length > 0;
+  // A dead button with no explanation is the worst possible last step.
+  const blockedReason = !canSubmit
+    ? draft.displayName.length === 0
+      ? 'Go back to "About you" and add a display name to finish.'
+      : 'Still setting up your account — go back and create one first.'
+    : null;
 
   return (
     <OnboardingScreen
@@ -157,6 +166,7 @@ export default function ReviewScreen() {
       primaryDisabled={!canSubmit}
     >
       {error ? <ErrorBanner message={error} /> : null}
+      {!error && blockedReason ? <ErrorBanner message={blockedReason} /> : null}
 
       {/* Basics */}
       <View style={styles.card}>
