@@ -36,22 +36,26 @@ function normalizePrivateKey(input: string): string {
     try {
       decoded = bech32.decode(trimmed.toLowerCase() as `${string}1${string}`);
     } catch {
+      // Plain apostrophe: this is a JS string, not JSX, so an HTML entity
+      // would reach the member verbatim.
       throw new Error(
-        "That key doesn&apos;t look valid — double-check it was copied completely."
+        "That key doesn't look valid — double-check it was copied completely."
       );
     }
     if (decoded.prefix !== 'nsec') {
-      throw new Error('Expected a private key (nsec…) for importing an account.');
+      throw new Error(
+        'That looks like a public key. Import needs your recovery key, the secret one.'
+      );
     }
     const bytes = bech32.fromWords(decoded.words);
     if (bytes.length !== 32) {
-      throw new Error('Private key must be 32 bytes.');
+      throw new Error('That key is the wrong length — check it was copied in full.');
     }
     return hex.encode(bytes);
   }
 
   throw new Error(
-    'Enter your private key as nsec… or 64 hex characters.'
+    'That does not look like a recovery key. Paste the whole thing, including the prefix.'
   );
 }
 
@@ -100,11 +104,11 @@ export default function ImportAccountScreen() {
       {error ? <ErrorBanner message={error} /> : null}
 
       <View style={styles.fieldGroup}>
-        <FieldLabel>Private key (nsec… or hex)</FieldLabel>
+        <FieldLabel>Your recovery key</FieldLabel>
         <TextInput
           value={keyText}
           onChangeText={setKeyText}
-          placeholder="nsec1… or 64-character hex key"
+          placeholder="Paste your recovery key"
           placeholderTextColor={colors.textTertiary}
           secureTextEntry={!showKey}
           autoCapitalize="none"
@@ -143,7 +147,7 @@ export default function ImportAccountScreen() {
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
         OpenDating can&apos;t recover a lost key — there is no password reset. Keep
-        a backup of your nsec in a safe place.
+        a backup somewhere safe.
       </Text>
     </OnboardingScreen>
   );

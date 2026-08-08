@@ -30,7 +30,7 @@ const PRIVACY_POINTS: { title: string; detail: string }[] = [
   {
     title: 'Your messages are encrypted',
     detail:
-      'Conversations are end-to-end encrypted. Only you and your match can read them — not us, not the relay.',
+      'Conversations are end-to-end encrypted. Only you and your match can read them — not us, and not whoever carries the message.',
   },
 ];
 

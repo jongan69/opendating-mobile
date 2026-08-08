@@ -10,7 +10,8 @@
 #   ./release/ship.sh --skip seo,domain  # everything except those
 #   ./release/ship.sh --dry-run          # print the plan, touch nothing
 #
-# Stages: cleanup commit verify push domain landing seo web ios-build ios-verify ios-submit
+# Stages: cleanup commit verify push domain seo blog web
+#         ios-build ios-verify ios-submit android-build android-submit
 #
 # Requires: bash 4+, node 18+, git. Stage-specific tools checked at stage start.
 #
@@ -56,7 +57,9 @@ enabled() { [[ "$(cfg "$1.enabled" false)" == "true" ]]; }
 need()    { command -v "$1" >/dev/null 2>&1 || die "$1 is required for this stage but was not found"; }
 
 # ── arg parsing ───────────────────────────────────────────────────────────────
-ALL_STAGES=(cleanup commit verify push domain seo blog web ios-build ios-verify ios-submit)
+ALL_STAGES=(cleanup commit verify push domain seo blog web
+            ios-build ios-verify ios-submit
+            android-build android-submit)
 ONLY=""; SKIP=""; DRY_RUN=false; COMMIT_MSG=""
 
 while [[ $# -gt 0 ]]; do
@@ -216,6 +219,47 @@ if should_run ios-submit && enabled ios; then
     --path "$IPA_PATH" --non-interactive --wait
 fi
 
+# ── android build ─────────────────────────────────────────────────────────────
+# Cloud by default: unlike iOS there is no macOS requirement, but a local build
+# needs the full Android SDK and NDK, and a cloud build needs neither.
+AAB_PATH=""
+if enabled android; then
+  AAB_PATH="$(cfg android.outputDir builds)/$(cfg project.slug app)-android-$(cfg android.version "$(cfg ios.version 0.0.0)").aab"
+fi
+
+if should_run android-build && enabled android; then
+  step "Android production build"
+  EXTRA=""
+  if [[ "$(cfg android.local false)" == "true" ]]; then
+    run mkdir -p "$(cfg android.outputDir builds)"
+    EXTRA="--local --output $AAB_PATH"
+  fi
+  run env EAS_NO_VCS=1 npx eas-cli@latest build \
+    --platform android --profile "$(cfg android.easProfile production)" \
+    $EXTRA --non-interactive
+fi
+
+# ── android submit ────────────────────────────────────────────────────────────
+# Google Play refuses an API upload until the package already exists in the
+# console with one release uploaded by hand. That is a one-time gate per app,
+# and hitting it as a failed upload halfway through a pipeline is confusing, so
+# it is called out here rather than discovered.
+if should_run android-submit && enabled android; then
+  step "Upload to Google Play"
+  if [[ "$(cfg android.local false)" == "true" ]]; then
+    $DRY_RUN || [[ -f "$AAB_PATH" ]] || die "AAB not found at $AAB_PATH"
+    run npx eas-cli@latest submit --platform android \
+      --profile "$(cfg android.easProfile production)" \
+      --path "$AAB_PATH" --non-interactive --wait
+  else
+    # The cloud build's artifact never lands on this machine; --latest resolves
+    # the most recent finished build for the profile.
+    run npx eas-cli@latest submit --platform android \
+      --profile "$(cfg android.easProfile production)" \
+      --latest --non-interactive --wait
+  fi
+fi
+
 # ── done ──────────────────────────────────────────────────────────────────────
 step "Pipeline complete"
 cat <<EOF
@@ -223,6 +267,8 @@ cat <<EOF
   Automated stages finished for $PROJECT_NAME.
 
   "Uploaded" is not "processed", and "processed" is not "submitted for review".
-  Finish in App Store Connect: select the build, attach any review attachment,
-  and submit.
+  Neither store releases anything on its own:
+
+    App Store Connect  select the build, attach any review attachment, submit.
+    Play Console       promote the draft release on its track, then roll out.
 EOF

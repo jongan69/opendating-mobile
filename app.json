@@ -42,9 +42,6 @@
         "NSCameraUsageDescription": "OpenDating can use your camera to take new profile photos."
       }
     },
-    "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy",
-    "supportUrl": "https://github.com/jongan69/opendating-mobile/issues",
-    "marketingUrl": "https://jongan69.github.io/opendating-mobile",
     "android": {
       "package": "com.jongan69.opendating",
       "adaptiveIcon": {
@@ -55,9 +52,10 @@
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": true

@@ -42,6 +42,16 @@
     "local": true
   },
 
+  "android": {
+    "enabled": true,
+    "packageName": "com.jongan69.opendating",
+    "version": "0.1.0",
+    "easProfile": "production",
+    "outputDir": "builds",
+    "local": false,
+    "_comment": "local:false builds in the cloud, so android-submit resolves the artifact with --latest instead of a path. The Android SDK on this machine lives on an exFAT volume whose AppleDouble sidecars break CMake globs, which is a second reason to prefer cloud."
+  },
+
   "web": {
     "enabled": true,
     "deployCommand": "npm run deploy:web",

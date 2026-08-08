@@ -24,7 +24,8 @@ release/
 ./release/ship.sh -m "custom commit message"
 ```
 
-Stages: `cleanup commit verify push domain seo blog web ios-build ios-verify ios-submit`
+Stages: `cleanup commit verify push domain seo blog web ios-build ios-verify
+ios-submit android-build android-submit`
 
 Each stage group is gated by `"enabled": true` in the config, so a repo with no
 domain or SEO work just leaves those false and the stages never run.
@@ -48,7 +49,8 @@ Nothing secret is ever read from the config file.
 | `domain` | `NAMECHEAP_API_USER` `NAMECHEAP_API_KEY` `NAMECHEAP_USERNAME` `NAMECHEAP_CLIENT_IP` `NAMECHEAP_ENV` |
 | `domain` | `NC_REGISTRANT_FIRST_NAME` `_LAST_NAME` `_ADDRESS1` `_CITY` `_STATE_PROVINCE` `_POSTAL_CODE` `_COUNTRY` `_PHONE` `_EMAIL_ADDRESS` |
 | `seo` | `AI_PROVIDER` `AI_API_KEY` `AI_MODEL` (optionally `AI_BASE_URL`) |
-| `ios-submit` | EAS credentials (`eas login`) |
+| `ios-submit` | EAS credentials (`eas login`), `ASC_API_KEY_PATH` `ASC_API_KEY_ISSUER_ID` |
+| `android-submit` | EAS credentials (`eas login`), `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` |
 
 `NC_REGISTRANT_PHONE` must be formatted `+NNN.NNNNNNNNNN` — Namecheap rejects
 anything else with error 2015182.
@@ -70,6 +72,18 @@ registrant's home address. `buy-domain.mjs` forces it on unless you set
 
 **iOS stages need macOS.** `ship.sh` refuses to run them elsewhere rather than
 failing halfway through a build.
+
+**Google Play will not accept an API upload until the package already exists in
+the console with one release uploaded by hand.** This is a one-time gate per
+app, it is not documented at the point of failure, and `android-submit` will
+fail against a package that has never been through it. Do the first upload
+through the Play Console UI; every later one can go through this pipeline.
+
+**iOS builds need a distribution certificate before they can run at all.**
+A cloud build fails with *"Distribution Certificate is not validated for
+non-interactive builds"* and never reaches the queue. Run `eas credentials
+--platform ios` interactively once — it needs an Apple Developer login, so it
+cannot be part of an automated pipeline.
 
 ## The blog stage, and why it writes to `public/`
 

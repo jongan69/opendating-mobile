@@ -52,7 +52,16 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "jonny2298@live.com"
+        "appleId": "jonny2298@live.com",
+        "ascApiKeyPath": "$ASC_API_KEY_PATH",
+        "ascApiKeyId": "563GUURUSD",
+        "ascApiKeyIssuerId": "$ASC_API_KEY_ISSUER_ID"
+      },
+      "android": {
+        "serviceAccountKeyPath": "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+        "track": "internal",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": false
       }
     }
   }
