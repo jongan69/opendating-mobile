@@ -178,11 +178,12 @@ Uses the `screenshot` EAS profile which sets `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
 | TypeScript | ✅ 0 errors |
 | ESLint | ✅ 0 errors, 9 warnings |
 | Tests | ✅ 81 tests, 6 suites |
-| Android builds (EAS) | ✅ v0.1.0 build 2 **finished**, store AAB, commit `3cfbd08` |
-| Android submissions | ❌ Blocked — no service account, no console app record |
+| Android builds (EAS) | ✅ v0.1.0 build 3 **finished**, store AAB, commit `2c9a9e4` |
+| Android submissions | ❌ Blocked — `serviceAccountKeyPath` is empty; no Play service account/app record available locally |
 | Android keystore | ✅ Managed by Expo (Build Credentials 7eb19zjEJ1) |
-| iOS builds (EAS) | ❌ **Blocked** — distribution cert not set up, zero builds ever |
-| iOS submissions | ❌ Never submitted |
+| iOS builds (EAS) | ✅ v0.1.0 build 2 **finished**, App Store IPA, commit `2c9a9e4` |
+| iOS IPA verification | ✅ App Store signed locally (`builds/opendating-ios-0.1.0-2.ipa`) |
+| iOS submissions | ❌ Blocked — `ascApiKeyIssuerId` is empty |
 | iOS App Store listing | ❌ Not set up |
 | `ship.sh` Android stages | ✅ `android-build`, `android-submit` |
 | `eas.json` submit config | ✅ Both platforms, env-var driven |
@@ -192,46 +193,40 @@ Uses the `screenshot` EAS profile which sets `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
 | `ios/exportOptions.plist` | ❌ Missing — only needed for the local-build path |
 | `ios/` directory | ❌ Doesn't exist locally (EAS generates in cloud) |
 
-The AAB at build 2 is built from commit `3cfbd08`, which contains every code
-fix on `main` — the only later commits are documentation. It is a submittable
-artifact today; nothing is waiting on a rebuild.
+Current finished binaries:
+
+- iOS: build `c51e102b-4592-448e-8f42-3127ceead80f`, IPA
+  `https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/c51e102b-4592-448e-8f42-3127ceead80f`
+- Android: build `f5b79c72-91ee-4dd3-96e7-0343911e2ca2`, AAB
+  `https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/f5b79c72-91ee-4dd3-96e7-0343911e2ca2`
+
+Both are built from commit `2c9a9e4`. Commit `3f506ce` only adds `builds/` to
+`.gitignore`, so the binaries still match the release code.
 
 ---
 
-## Two hard blockers, both requiring a human login
+## Two hard blockers, both requiring store-console access
 
 Neither can be automated, and neither is a code problem. Everything else in
 this repo is ready; these two gates are what stand between the current state
 and a build sitting in each store's console.
 
-### 1. iOS — no distribution certificate
+### 1. iOS — App Store Connect issuer ID and app record
 
-There has never been an iOS build. The cloud build fails before it is even
-queued:
+The App Store signed IPA is built and locally verified. `eas submit` stops
+before upload because `ascApiKeyIssuerId` is empty. The key itself already
+exists at `~/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8`.
 
-```
-Distribution Certificate is not validated for non-interactive builds.
-Credentials are not set up. Run this command again in interactive mode.
-```
-
-Run once, interactively, and answer the Apple Developer sign-in:
-
-```bash
-eas credentials --platform ios
-```
-
-Expo then generates and stores the distribution certificate and provisioning
-profile on their servers, and every later build is non-interactive.
-
-**Also needed for `ios-submit`:** the App Store Connect API key issuer ID.
-The key itself already exists at
-`~/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8`. Find the issuer ID at
-App Store Connect → Users and Access → Integrations → App Store Connect API —
-it is the UUID shown above the key table, and it is per-team, not per-key.
+Find the issuer ID at App Store Connect → Users and Access → Integrations →
+App Store Connect API. It is the UUID shown above the key table and is per-team,
+not per-key.
 
 ```bash
 export ASC_API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8"
 export ASC_API_KEY_ISSUER_ID="<the UUID>"
+
+eas submit --platform ios --id c51e102b-4592-448e-8f42-3127ceead80f \
+  --profile production --non-interactive --wait
 ```
 
 An app record must also exist in App Store Connect for
@@ -239,14 +234,14 @@ An app record must also exist in App Store Connect for
 
 ### 2. Android — no Google Play service account, and no app in the console
 
-The AAB is built and waiting (v0.1.0 build 2, commit `3cfbd08`, store
+The AAB is built and waiting (v0.1.0 build 3, commit `2c9a9e4`, store
 distribution). Two things block the upload:
 
 **Google Play refuses an API upload until the package already exists in the
 console with one release uploaded by hand.** This is a one-time gate per app
 and it is the single most common surprise in an otherwise automated pipeline.
 Upload the AAB through the Play Console UI once — download it from
-[the build page](https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/547697cc-b966-4633-80c9-65cec35eb6c3)
+[the build page](https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/f5b79c72-91ee-4dd3-96e7-0343911e2ca2)
 — and every subsequent release can go through `android-submit`.
 
 **A service account key is needed for automated uploads.** Play Console → Setup
@@ -255,6 +250,9 @@ manager", download the JSON:
 
 ```bash
 export GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$HOME/.google-play/service-account.json"
+
+eas submit --platform android --id f5b79c72-91ee-4dd3-96e7-0343911e2ca2 \
+  --profile production --non-interactive --wait
 ```
 
 `eas.json` submits to the **internal** track with `releaseStatus: draft`, so
@@ -266,10 +264,10 @@ nothing reaches the public until it is promoted in the console.
 
 ### Blocked on your login (cannot be scripted)
 
-1. `eas credentials --platform ios` — answer the Apple Developer prompts
+1. Export `ASC_API_KEY_ISSUER_ID`
 2. Create the App Store Connect app record for `com.jongan69.opendating`
-3. Upload the existing AAB to Play Console once, by hand
-4. Create the Play service account JSON and export the two env vars above
+3. Upload the Android AAB to Play Console once, by hand
+4. Create the Play service account JSON and export `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
 
 ### Then, fully automated
 
@@ -281,15 +279,16 @@ nothing reaches the public until it is promoted in the console.
 ### Before First App Store Review
 
 - [ ] Create `build.config.env` using the template above
-- [ ] Generate App Store Connect API key and place at `~/.appstoreconnect/AuthKey_<ID>.p8`
+- [ ] Export the App Store Connect API issuer ID for key `563GUURUSD`
 - [ ] Set up iOS app listing in App Store Connect (screenshots, description, privacy policy URL, age rating)
 - [ ] Generate Google Play service account JSON for automated uploads
 - [ ] Set up Google Play listing (screenshots, description, content rating)
 - [ ] Create `ios/exportOptions.plist` for local builds
 - [ ] Fix Android SDK location (move from exFAT to APFS) for local Android builds
 - [ ] Capture App Store screenshots using `scripts/capture-screenshots.sh`
-- [ ] Set up privacy policy URL (currently needed for both stores)
-- [ ] Add Android stages to `ship.sh` if full pipeline coverage is desired
+- [x] Set up privacy/support URL:
+      `https://jongan69.github.io/opendating-mobile/privacy/`
+- [x] Add Android stages to `ship.sh`
 
 ### App Store Assets Checklist
 
