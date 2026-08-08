@@ -166,18 +166,32 @@ Uses the `screenshot` EAS profile which sets `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
 | TypeScript | ✅ 0 errors |
 | ESLint | ✅ 0 errors, 9 warnings |
 | Tests | ✅ 81 tests, 6 suites |
-| iOS builds (EAS) | ❌ Never built |
-| Android builds (EAS) | ✅ 2 previous (v0.1.0 build 1) |
-| iOS submissions | ❌ Never submitted |
+| Android builds (EAS) | ✅ v0.1.0 build 2 in progress |
 | Android submissions | ❌ Never submitted |
+| Android keystore | ✅ Managed by Expo (Build Credentials 7eb19zjEJ1) |
+| iOS builds (EAS) | ❌ **Blocked** — distribution cert not set up |
+| iOS submissions | ❌ Never submitted |
+| iOS App Store listing | ❌ Not set up |
 | `build.config.env` | ❌ Missing — needs creation |
 | `ios/exportOptions.plist` | ❌ Missing — needed by local build script |
-| iOS App Store listing | ❌ Not set up |
 | Google Play listing | ❌ Not set up |
 | App Store Connect API key | ❓ Unknown — check `~/.appstoreconnect/` |
 | Google Play service account | ❓ Unknown |
-| Android keystore | ❓ Check `android/gradle.properties` |
 | `ios/` directory | ❌ Doesn't exist locally (EAS generates in cloud) |
+
+### iOS Credential Blocker
+
+iOS builds fail with:
+```
+Distribution Certificate is not validated for non-interactive builds.
+Credentials are not set up. Run this command again in interactive mode.
+```
+
+**Fix (run interactively):**
+```bash
+eas credentials --platform ios
+```
+This launches the interactive credential wizard. You'll need your Apple Developer account credentials. Expo will generate and store the distribution certificate and provisioning profile on their servers.
 
 ---
 
