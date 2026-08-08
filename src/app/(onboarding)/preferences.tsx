@@ -121,7 +121,7 @@ export default function PreferencesScreen() {
               the composition boundary and it renders nothing at all.
               matchContents lets Host take its height from the slider instead
               of collapsing to zero. */}
-          <Host matchContents={{ vertical: true }}>
+          <Host matchContents={{ vertical: true }} seedColor={colors.accent}>
             <Slider
               value={minAge}
               min={MIN_AGE}
@@ -137,7 +137,7 @@ export default function PreferencesScreen() {
           <Text style={[typography.labelMedium, { color: colors.textSecondary }]}>
             Maximum: {maxAge}
           </Text>
-          <Host matchContents={{ vertical: true }}>
+          <Host matchContents={{ vertical: true }} seedColor={colors.accent}>
             <Slider
               value={maxAge}
               min={MIN_AGE}
