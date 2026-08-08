@@ -17,7 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Button, Host, Picker } from '@expo/ui';
+import { Button, Host } from '@expo/ui';
+import { OptionSelector } from '@/components/ui/option-selector';
 import { BackHeader } from '@/components/back-header';
 import { isServiceUnavailable } from '@/lib/opendating/errors';
 import {
@@ -319,18 +320,24 @@ export default function EditProfileScreen() {
                 </View>
               </FieldRow>
               <FieldRow label="Gender">
-                <Picker selectedValue={gender} onValueChange={setGender}>
-                  {GENDER_OPTIONS.map((option) => (
-                    <Picker.Item key={option.value || 'unspecified'} label={option.label} value={option.value} />
-                  ))}
-                </Picker>
+                <View style={styles.selectorWrap}>
+                  <OptionSelector
+                    label="Gender"
+                    options={GENDER_OPTIONS}
+                    value={gender}
+                    onChange={setGender}
+                  />
+                </View>
               </FieldRow>
               <FieldRow label="Looking for" last>
-                <Picker selectedValue={intent} onValueChange={setIntent}>
-                  {INTENT_OPTIONS.map((option) => (
-                    <Picker.Item key={option.value || 'unspecified'} label={option.label} value={option.value} />
-                  ))}
-                </Picker>
+                <View style={styles.selectorWrap}>
+                  <OptionSelector
+                    label="Looking for"
+                    options={INTENT_OPTIONS}
+                    value={intent}
+                    onChange={setIntent}
+                  />
+                </View>
               </FieldRow>
             </FormSection>
 
@@ -532,6 +539,10 @@ const styles = StyleSheet.create({
   },
   inputWrap: {
     flex: 1,
+  },
+  selectorWrap: {
+    flex: 1,
+    paddingVertical: spacing.sm,
   },
   inputFill: {
     width: '100%',

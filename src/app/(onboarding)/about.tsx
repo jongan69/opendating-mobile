@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Picker } from '@expo/ui';
+import { OptionSelector } from '@/components/ui/option-selector';
 import { useRouter } from 'expo-router';
 import {
   FieldLabel,
@@ -167,14 +167,13 @@ export default function AboutScreen() {
       <View style={styles.section}>
         <FieldLabel>Prompt (optional)</FieldLabel>
         <View style={styles.promptQuestion}>
-          <Picker
-            selectedValue={promptQuestion}
-            onValueChange={(value) => setPromptQuestion(value as string)}
-          >
-            {PROMPT_QUESTIONS.map((question) => (
-              <Picker.Item key={question} label={question} value={question} />
-            ))}
-          </Picker>
+          <OptionSelector
+            label="Prompt"
+            layout="list"
+            options={PROMPT_QUESTIONS.map((q) => ({ value: q, label: q }))}
+            value={promptQuestion}
+            onChange={setPromptQuestion}
+          />
         </View>
         <TextInput
           value={promptAnswer}
