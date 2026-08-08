@@ -14,7 +14,23 @@
         "promoText": "Meet people nearby with a dating app built around coarse location, encrypted messages, and no advertising profile.",
         "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
         "supportUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
-        "marketingUrl": "https://jongan69.github.io/opendating-mobile/"
+        "marketingUrl": "https://jongan69.github.io/opendating-mobile/",
+        "screenshots": {
+          "APP_IPHONE_67": [
+            "./screenshots/app-store/6.7-01-welcome.png",
+            "./screenshots/app-store/6.7-02-create-account.png",
+            "./screenshots/app-store/6.7-12-discover.png",
+            "./screenshots/app-store/6.7-13-matches.png",
+            "./screenshots/app-store/6.7-14-profile.png"
+          ],
+          "APP_IPHONE_61": [
+            "./screenshots/app-store/6.1-01-welcome.png",
+            "./screenshots/app-store/6.1-02-create-account.png",
+            "./screenshots/app-store/6.1-12-discover.png",
+            "./screenshots/app-store/6.1-13-matches.png",
+            "./screenshots/app-store/6.1-14-profile.png"
+          ]
+        }
       }
     },
     "advisory": {

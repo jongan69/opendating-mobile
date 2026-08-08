@@ -88,8 +88,9 @@ Safety. Confirm the final console answers before submitting for review.
 | Reports and block actions | Safety and moderation | Yes | No |
 
 The app does not use third-party advertising SDKs and does not sell personal
-data. iOS export compliance is set to non-exempt encryption because private
-messages are end-to-end encrypted.
+data. iOS export compliance is configured as standard encryption with no France
+availability for this release, so App Store Connect does not require an export
+compliance document or compliance code.
 
 ## Age And Content Rating
 
@@ -114,7 +115,7 @@ The selected flow is welcome, account creation, discovery, matches, and profile.
 
 | Platform | Build | Artifact |
 |---|---|---|
-| iOS | `c51e102b-4592-448e-8f42-3127ceead80f` | App Store IPA, v0.1.0 build 2 |
+| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | App Store IPA, v0.1.0 build 4 |
 | Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Play Store AAB, v0.1.0 version code 3 |
 
 ## Submission Commands
