@@ -13,7 +13,7 @@
       "appleTeamId": "97N6GR4YEK",
       "supportsTablet": true,
       "config": {
-        "usesNonExemptEncryption": true
+        "usesNonExemptEncryption": false
       },
       "privacyManifests": {
         "NSPrivacyTracking": false,
@@ -34,7 +34,7 @@
         ]
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": true,
+        "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "OpenDating uses your general area to help you discover people nearby. Your exact location is never shared.",
         "NSPhotoLibraryUsageDescription": "OpenDating needs access to your photos to set up your dating profile.",
         "NSCameraUsageDescription": "OpenDating can use your camera to take new profile photos."
