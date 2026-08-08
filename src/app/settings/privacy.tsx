@@ -6,9 +6,10 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
-import { Collapsible, Host } from '@expo/ui';
+
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { hexToNpub, shortPubkey } from '@/lib/format';
+import { AppCollapsible } from '@/components/ui/app-collapsible';
 import { useTheme } from '@/state/theme-context';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
@@ -74,7 +75,6 @@ export default function PrivacyScreen() {
       edges={['left', 'right', 'bottom']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
@@ -105,11 +105,10 @@ export default function PrivacyScreen() {
             <View
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
-              <Collapsible
+              <AppCollapsible
                 isOpen={technicalOpen}
                 onOpenChange={setTechnicalOpen}
                 label="Your npub (Nostr identity)"
-                labelStyle={{ color: colors.text }}
               >
                 <View style={[styles.technicalBody, { borderTopColor: colors.divider }]}>
                   <Text
@@ -148,11 +147,10 @@ export default function PrivacyScreen() {
                     </Text>
                   </Pressable>
                 </View>
-              </Collapsible>
+              </AppCollapsible>
             </View>
           </View>
         </ScrollView>
-      </Host>
     </SafeAreaView>
   );
 }

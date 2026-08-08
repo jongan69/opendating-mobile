@@ -6,7 +6,7 @@ import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
-import { Host } from '@expo/ui';
+
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { connectionStateLabel, hexToNpub, shortPubkey } from '@/lib/format';
 import type { ConnectionState, OpenDatingCapabilities } from '@/types/opendating';
@@ -163,7 +163,6 @@ export default function AdvancedScreen() {
       edges={['left', 'right', 'bottom']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
@@ -299,7 +298,6 @@ export default function AdvancedScreen() {
             </View>
           </Section>
         </ScrollView>
-      </Host>
     </SafeAreaView>
   );
 }

@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Button, Host } from '@expo/ui';
+import { AppButton } from '@/components/ui/app-button';
 import { OptionSelector } from '@/components/ui/option-selector';
 import { BackHeader } from '@/components/back-header';
 import { isServiceUnavailable } from '@/lib/opendating/errors';
@@ -278,7 +278,6 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <BackHeader title="Edit Profile" />
         {loading ? (
           <View style={styles.center}>
@@ -472,8 +471,7 @@ export default function EditProfileScreen() {
               </View>
             ) : null}
 
-            <Button
-              variant="filled"
+            <AppButton
               disabled={saving}
               style={{ backgroundColor: colors.accent, borderRadius: radius.lg }}
               onPress={save}
@@ -481,10 +479,9 @@ export default function EditProfileScreen() {
               <Text style={[typography.button, { color: colors.textInverse, textAlign: 'center' }]}>
                 {saving ? 'Saving…' : 'Save'}
               </Text>
-            </Button>
+            </AppButton>
           </ScrollView>
         )}
-      </Host>
     </SafeAreaView>
   );
 }

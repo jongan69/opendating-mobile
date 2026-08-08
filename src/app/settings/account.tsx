@@ -5,7 +5,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Button, Host } from '@expo/ui';
+import { AppButton } from '@/components/ui/app-button';
 import {
   getOpenDatingClient,
   resetOpenDatingClient,
@@ -73,7 +73,6 @@ export default function AccountScreen() {
       edges={['left', 'right', 'bottom']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
@@ -104,8 +103,7 @@ export default function AccountScreen() {
             </Text>
           </View>
 
-          <Button
-            variant="filled"
+          <AppButton
             disabled={deleting}
             style={{ backgroundColor: colors.destructive, borderRadius: radius.lg }}
             onPress={confirmDelete}
@@ -118,7 +116,7 @@ export default function AccountScreen() {
             >
               {deleting ? 'Deleting…' : 'Delete Account'}
             </Text>
-          </Button>
+          </AppButton>
 
           <Text
             style={[typography.caption, styles.note, { color: colors.textTertiary }]}
@@ -127,7 +125,6 @@ export default function AccountScreen() {
             make sure you want to go before you confirm.
           </Text>
         </ScrollView>
-      </Host>
     </SafeAreaView>
   );
 }

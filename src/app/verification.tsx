@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
-import { Button, Host } from '@expo/ui';
+import { AppButton } from '@/components/ui/app-button';
 import { BackHeader } from '@/components/back-header';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { formatTimestamp, shortPubkey } from '@/lib/format';
@@ -121,15 +121,14 @@ export default function VerificationScreen() {
           <Text style={[typography.bodyMedium, styles.centerText, { color: colors.destructive }]}>
             {error}
           </Text>
-          <Button
-            variant="filled"
+          <AppButton
             style={{ backgroundColor: colors.accent, borderRadius: radius.lg }}
             onPress={() => void loadClaims()}
           >
             <Text style={[typography.button, { color: colors.textInverse, textAlign: 'center' }]}>
               Retry
             </Text>
-          </Button>
+          </AppButton>
         </View>
       );
     }
@@ -208,10 +207,8 @@ export default function VerificationScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
         <BackHeader title="Verification" />
         {renderContent()}
-      </Host>
     </SafeAreaView>
   );
 }
