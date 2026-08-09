@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/jongan69/opendating-mobile/security/advisories/new
+    about: Report security issues privately; never include keys, private messages, or personal data in a public issue.
+  - name: Release status and known blockers
+    url: https://github.com/jongan69/opendating-mobile/blob/main/docs/RELEASE-STATUS.md
+    about: Check the current production gates before filing a release-readiness issue.

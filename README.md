@@ -121,7 +121,7 @@ cd opendating-mobile
 
 # Install
 cp .env.example .env
-npm install --legacy-peer-deps
+npm ci
 
 # Run
 npm start                # Expo dev server
@@ -147,6 +147,9 @@ npm test                 # Jest test suite
 | [DESIGN](docs/DESIGN.md) | Visual principles, color system, typography, motion |
 | [SECURITY](docs/SECURITY.md) | Key storage, encryption, auth, trust model |
 | [PRIVACY](docs/PRIVACY.md) | What's shared, what's not, limitations, controls |
+| [HANDOFF](docs/HANDOFF.md) | Repository boundary, access inventory, quality gates, and continuation order |
+| [RELEASE-STATUS](docs/RELEASE-STATUS.md) | Verified release behavior and current production blockers |
+| [ROADMAP-1.0](docs/ROADMAP-1.0.md) | Gated path from release containment through GA and federation |
 | [PROTOCOL-INTEGRATION](docs/PROTOCOL-INTEGRATION.md) | All 20+ protocol operations, request lifecycle, error handling |
 | [MOBILE-V0.1-COMPLETE](docs/MOBILE-V0.1-COMPLETE.md) | Release report with full feature inventory |
 | [CONTRIBUTING](CONTRIBUTING.md) | Development workflow, code style, privacy rules |

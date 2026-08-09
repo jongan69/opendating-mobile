@@ -33,7 +33,7 @@ This is the implementation ledger for the marketplace-competitive 1.0 program. I
 - Merge the mobile release-containment PR and backend protocol 0.1.1 PR through CI.
 - Publish and pin `opendating-protocol@0.1.1`; remove the temporary mobile routing mirror.
 - Verify account deletion against the advertised deletion service and prove that immediate hiding and cascade receipts work.
-- Turn on protected branches and production-environment approvals after the CI workflow exists on `main`.
+- Keep the configured protected branches, protected staging environments, and reviewer-gated production environments aligned with the deployment workflows.
 - Exit only with release-commit evidence for discovery gestures, profile navigation, deletion, documentation, and store hold state.
 
 ### 1. Secure the identity, transport, and local-data boundary

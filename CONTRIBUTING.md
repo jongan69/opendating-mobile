@@ -6,7 +6,7 @@
 git clone https://github.com/jongan69/opendating-mobile.git
 cd opendating-mobile
 cp .env.example .env
-npm install --legacy-peer-deps
+npm ci
 npm run typecheck
 ```
 
@@ -19,6 +19,8 @@ npm run typecheck
    npm run typecheck   # Must pass with 0 errors
    npm run lint        # Must pass with 0 errors
    npm test            # Must pass
+   npm run security:audit
+   npm run release:validate
    ```
 4. Test on at least one platform (iOS simulator, Android emulator, or physical device)
 5. Open a PR using the PR template
@@ -58,4 +60,4 @@ Follow conventional commits:
 
 ## Questions?
 
-Check `docs/ARCHITECTURE.md` for the system design, or `CLAUDE.md` for the project rules.
+Start with `docs/HANDOFF.md`, then check `docs/ARCHITECTURE.md` for the system design and `CLAUDE.md` for the project rules.
