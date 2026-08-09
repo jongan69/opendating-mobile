@@ -1,58 +1,145 @@
-import { useMemo, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+// Candidate detail — the full profile behind a card in the deck.
+//
+// Reads entirely from the candidate cache. It deliberately does NOT call
+// useDiscovery(): that hook's mount effect fetches a page of candidates and
+// reads GPS, so calling it here fired a redundant round-trip and a location
+// read every single time a profile was opened, into a second copy of the
+// discovery stack whose state nothing else could see.
+//
+// Like and pass are posted to the swipe-decision channel and applied by the
+// Discover screen, which owns the real stack.
+
+import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { useTheme } from '@/state/theme-context';
-import { useDiscovery } from '@/features/discovery/use-discovery';
+import * as Haptics from 'expo-haptics';
+import { SafetyMenu, type SafetyMenuHandle } from '@/components/safety/safety-menu';
 import { useCachedCandidate } from '@/features/discovery/candidate-cache';
+import { postSwipeDecision } from '@/features/discovery/swipe-decisions';
+import { distanceLabel, genderLabel, intentLabel } from '@/lib/profile-labels';
+import { useTheme } from '@/state/theme-context';
+import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
-import type { Candidate } from '@/types/opendating';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 export default function CandidateDetail() {
   const { pubkey } = useLocalSearchParams<{ pubkey: string }>();
   const router = useRouter();
   const { colors } = useTheme();
-  const { candidates } = useDiscovery();
-  const cached = useCachedCandidate(pubkey);
-  // Look up from the deck first, then the cache — so a candidate opened from a
-  // match or after being swiped still renders rather than showing "not available".
-  const candidate: Candidate | undefined = useMemo(() => {
-    const deck = candidates.find((c) => c.pubkey === pubkey);
-    return deck ?? cached ?? undefined;
-  }, [candidates, cached, pubkey]);
-  const [photoIndex, setPhotoIndex] = useState(0);
+  // Read at render, not module load: a module-scope Dimensions.get() is
+  // captured once at import and never updates, which is wrong on a rotating
+  // iPad — and this app ships with supportsTablet.
+  const { width: screenWidth } = useWindowDimensions();
+  const candidate = useCachedCandidate(pubkey);
+  const safetyRef = useRef<SafetyMenuHandle>(null);
 
-  const isVerified = (candidate?.profile.verification_claims ?? []).length > 0;
-  const prompts = (candidate?.profile.prompts ?? []).filter(
-    (p) => p.question.trim().length > 0 && p.answer.trim().length > 0
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [failedUrls, setFailedUrls] = useState<ReadonlySet<string>>(() => new Set());
+
+  const styles = useMemo(() => makeStyles(colors, screenWidth), [colors, screenWidth]);
+
+  const photos = useMemo(
+    () =>
+      [...(candidate?.profile.photos ?? [])]
+        .sort((a, b) => a.order - b.order)
+        .filter((p) => p.url.length > 0 && !failedUrls.has(p.url)),
+    [candidate?.profile.photos, failedUrls]
+  );
+
+  const handleImageError = useCallback((url: string) => {
+    setFailedUrls((prev) => {
+      if (prev.has(url)) return prev;
+      const next = new Set(prev);
+      next.add(url);
+      return next;
+    });
+  }, []);
+
+  const decide = useCallback(
+    (direction: 'like' | 'pass') => {
+      if (!candidate) return;
+      if (direction === 'like') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      } else {
+        Haptics.selectionAsync().catch(() => {});
+      }
+      postSwipeDecision({
+        pubkey: candidate.pubkey,
+        direction,
+        grant: candidate.candidate_grant,
+      });
+      router.back();
+    },
+    [candidate, router]
   );
 
   if (!candidate) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()}>
-            <Text style={[typography.bodyMedium, { color: colors.accent }]}>Back</Text>
-          </Pressable>
-        </View>
+        <DetailHeader onBack={() => router.back()} colors={colors} />
         <View style={styles.center}>
-          <Text style={[typography.bodyLarge, { color: colors.textSecondary }]}>Profile not available</Text>
+          <Text style={[typography.bodyLarge, { color: colors.textSecondary }]}>
+            This profile is no longer available
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.backToDeck,
+              { borderColor: colors.border },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[typography.labelLarge, { color: colors.accent }]}>
+              Back to browsing
+            </Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
   }
 
   const { profile } = candidate;
+  const displayName = profile.display_name?.trim() || 'New Friend';
+  const isVerified = (profile.verification_claims ?? []).length > 0;
+  const intent = intentLabel(profile.relationship_intent);
+  const gender = genderLabel(profile.gender);
+  const distance = distanceLabel(candidate.distance_bucket);
+  const prompts = (profile.prompts ?? []).filter(
+    (p) => p.question.trim().length > 0 && p.answer.trim().length > 0
+  );
+  const interests = (profile.interests ?? []).filter(Boolean);
+  // Distance and gender are facts about the person; intent gets its own chip
+  // below, so repeating it in the subtitle just said the same thing twice.
+  const subtitle = [distance, gender].filter(Boolean).join(' · ');
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {profile.photos && profile.photos.length > 0 ? (
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
+      <DetailHeader
+        onBack={() => router.back()}
+        onSafety={() => safetyRef.current?.present()}
+        colors={colors}
+      />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {photos.length > 0 ? (
           <View style={styles.photoScroller}>
             <ScrollView
               horizontal
@@ -64,20 +151,30 @@ export default function CandidateDetail() {
                 )
               }
             >
-              {profile.photos.map((photo, index) => (
-                <Image key={photo.id ?? index} source={{ uri: photo.url }} style={styles.photo} contentFit="cover" transition={200} />
+              {photos.map((photo, index) => (
+                <Image
+                  key={photo.id}
+                  source={{ uri: photo.url }}
+                  style={styles.photo}
+                  contentFit="cover"
+                  transition={200}
+                  cachePolicy="memory-disk"
+                  recyclingKey={photo.url}
+                  accessibilityLabel={`${displayName} photo ${index + 1} of ${photos.length}`}
+                  onError={() => handleImageError(photo.url)}
+                />
               ))}
             </ScrollView>
-            {profile.photos.length > 1 ? (
+            {photos.length > 1 ? (
               <View style={styles.dots} pointerEvents="none">
-                {profile.photos.map((photo, index) => (
+                {photos.map((photo, index) => (
                   <View
-                    key={photo.id ?? index}
+                    key={photo.id}
                     style={[
                       styles.dot,
                       index === photoIndex
-                        ? { backgroundColor: '#FFFFFF', width: 16 }
-                        : { backgroundColor: 'rgba(255, 255, 255, 0.45)' },
+                        ? styles.dotActive
+                        : styles.dotInactive,
                     ]}
                   />
                 ))}
@@ -85,14 +182,21 @@ export default function CandidateDetail() {
             ) : null}
           </View>
         ) : (
-          <View style={[styles.photoPlaceholder, { backgroundColor: colors.surface }]}>
-            <Text style={[typography.displayLarge, { color: colors.textTertiary }]}>{profile.display_name?.[0] ?? '?'}</Text>
+          <View style={styles.photoPlaceholder}>
+            <Text style={[typography.displayLarge, { color: colors.textTertiary }]}>
+              {displayName.charAt(0).toUpperCase()}
+            </Text>
+            <Text style={[typography.bodySmall, { color: colors.textTertiary }]}>
+              No photos yet
+            </Text>
           </View>
         )}
+
         <View style={styles.content}>
           <View style={styles.nameRow}>
-            <Text style={[typography.headlineLarge, { color: colors.text }]}>
-              {profile.display_name ?? 'Unknown'}{profile.age ? `, ${profile.age}` : ''}
+            <Text style={[typography.headlineLarge, styles.name, { color: colors.text }]}>
+              {displayName}
+              {profile.age ? `, ${profile.age}` : ''}
             </Text>
             {isVerified ? (
               <SymbolView
@@ -103,102 +207,338 @@ export default function CandidateDetail() {
               />
             ) : null}
           </View>
-          <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
-            {candidate.distance_bucket}{profile.relationship_intent ? ` · ${profile.relationship_intent.replace('_', ' ')}` : ''}
-          </Text>
-          {profile.relationship_intent ? (
+
+          {subtitle ? (
+            <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
+              {subtitle}
+            </Text>
+          ) : null}
+
+          {intent ? (
             <View style={[styles.intentChip, { backgroundColor: colors.accentLight }]}>
               <Text style={[typography.labelMedium, { color: colors.accent }]}>
-                Looking for: {profile.relationship_intent.replace('_', ' ')}
+                Looking for: {intent}
               </Text>
             </View>
           ) : null}
+
+          {profile.bio?.trim() ? (
+            <Section title="About" colors={colors}>
+              <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
+                {profile.bio.trim()}
+              </Text>
+            </Section>
+          ) : null}
+
           {prompts.length > 0 ? (
-            <View style={styles.section}>
-              <Text style={[typography.titleSmall, { color: colors.text, marginBottom: spacing.sm }]}>Prompts</Text>
+            <Section title="Prompts" colors={colors}>
               {prompts.map((prompt) => (
-                <View key={prompt.question} style={[styles.promptCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  <Text style={[typography.labelMedium, { color: colors.accent }]}>{prompt.question}</Text>
-                  <Text style={[typography.bodyMedium, { color: colors.text }]}>{prompt.answer}</Text>
+                <View
+                  key={`${prompt.question}-${prompt.answer}`}
+                  style={[
+                    styles.promptCard,
+                    { backgroundColor: colors.surface, borderColor: colors.border },
+                  ]}
+                >
+                  <Text style={[typography.labelMedium, { color: colors.accent }]}>
+                    {prompt.question}
+                  </Text>
+                  <Text style={[typography.bodyMedium, { color: colors.text }]}>
+                    {prompt.answer}
+                  </Text>
                 </View>
               ))}
-            </View>
+            </Section>
           ) : null}
-          {profile.bio ? (
-            <View style={styles.section}>
-              <Text style={[typography.titleSmall, { color: colors.text, marginBottom: spacing.sm }]}>About</Text>
-              <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>{profile.bio}</Text>
-            </View>
-          ) : null}
-          {profile.interests && profile.interests.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[typography.titleSmall, { color: colors.text, marginBottom: spacing.sm }]}>Interests</Text>
+
+          {interests.length > 0 ? (
+            <Section title="Interests" colors={colors}>
               <View style={styles.chips}>
-                {profile.interests.map((interest: string, i: number) => (
-                  <View key={i} style={[styles.chip, { backgroundColor: colors.accentLight }]}>
-                    <Text style={[typography.labelSmall, { color: colors.accent }]}>{interest}</Text>
+                {interests.map((interest) => (
+                  <View
+                    key={interest}
+                    style={[styles.chip, { backgroundColor: colors.accentLight }]}
+                  >
+                    <Text style={[typography.labelSmall, { color: colors.accent }]}>
+                      {interest}
+                    </Text>
                   </View>
                 ))}
               </View>
-            </View>
-          )}
-          <View style={styles.section}>
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: '/report',
-                  params: {
-                    pubkey,
-                    name: profile.display_name?.trim() || pubkey,
-                  },
-                })
-              }
-              style={({ pressed }) => [styles.reportBtn, { backgroundColor: pressed ? colors.destructiveLight : 'transparent', borderColor: colors.destructive }]}
-            >
-              <Text style={[typography.labelMedium, { color: colors.destructive }]}>Report</Text>
-            </Pressable>
-          </View>
+            </Section>
+          ) : null}
         </View>
       </ScrollView>
+
+      {/* Deciding from here rather than backing out and hunting for the card
+          again is the whole point of opening a profile. */}
+      <View style={[styles.actions, { borderTopColor: colors.border }]}>
+        <Pressable
+          onPress={() => decide('pass')}
+          accessibilityRole="button"
+          accessibilityLabel={`Pass on ${displayName}`}
+          hitSlop={spacing.sm}
+          style={({ pressed }) => [
+            styles.actionButton,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <SymbolView
+            name={{ ios: 'xmark', android: 'close', web: 'close' }}
+            size={26}
+            tintColor={colors.text}
+            weight="semibold"
+          />
+        </Pressable>
+        <Pressable
+          onPress={() => decide('like')}
+          accessibilityRole="button"
+          accessibilityLabel={`Like ${displayName}`}
+          hitSlop={spacing.sm}
+          style={({ pressed }) => [
+            styles.actionButton,
+            styles.actionButtonPrimary,
+            { backgroundColor: colors.accent },
+            pressed && styles.pressed,
+          ]}
+        >
+          <SymbolView
+            name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }}
+            size={28}
+            tintColor="#FFFFFF"
+            weight="semibold"
+          />
+        </Pressable>
+      </View>
+
+      <SafetyMenu
+        ref={safetyRef}
+        targetPubkey={candidate.pubkey}
+        targetName={displayName}
+        onBlock={() => router.back()}
+      />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  photoScroller: { height: screenWidth * 1.25 },
-  photo: { width: screenWidth, height: screenWidth * 1.25 },
-  dots: {
-    position: 'absolute',
-    top: spacing.xl,
-    left: 0,
-    right: 0,
+function DetailHeader({
+  onBack,
+  onSafety,
+  colors,
+}: {
+  onBack: () => void;
+  onSafety?: () => void;
+  colors: ThemeColors;
+}) {
+  return (
+    <View style={headerStyles.row}>
+      <Pressable
+        onPress={onBack}
+        accessibilityRole="button"
+        accessibilityLabel="Back"
+        hitSlop={spacing.md}
+        style={({ pressed }) => [
+          headerStyles.button,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+          pressed && headerStyles.pressed,
+        ]}
+      >
+        <SymbolView
+          name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}
+          size={20}
+          tintColor={colors.text}
+          weight="semibold"
+        />
+      </Pressable>
+      {onSafety ? (
+        <Pressable
+          onPress={onSafety}
+          accessibilityRole="button"
+          accessibilityLabel="Safety options"
+          hitSlop={spacing.md}
+          style={({ pressed }) => [
+            headerStyles.button,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && headerStyles.pressed,
+          ]}
+        >
+          <SymbolView
+            name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+            size={20}
+            tintColor={colors.text}
+            weight="semibold"
+          />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+function Section({
+  title,
+  colors,
+  children,
+}: {
+  title: string;
+  colors: ThemeColors;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={sectionStyles.section}>
+      <Text style={[typography.titleSmall, sectionStyles.title, { color: colors.text }]}>
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+const headerStyles = StyleSheet.create({
+  row: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  dot: { width: 7, height: 7, borderRadius: radius.full },
-  intentChip: {
-    alignSelf: 'flex-start',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    marginTop: spacing.sm,
   },
-  promptCard: {
-    borderRadius: radius.md,
-    borderWidth: 1,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    gap: spacing.xs,
+  button: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  photoPlaceholder: { width: screenWidth, height: screenWidth * 1.25, justifyContent: 'center', alignItems: 'center' },
-  content: { padding: spacing.lg, paddingBottom: spacing.huge },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xs },
-  section: { marginTop: spacing.xxl },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.full },
-  reportBtn: { alignItems: 'center', paddingVertical: spacing.md, borderRadius: radius.md, borderWidth: 1 },
+  pressed: {
+    opacity: 0.7,
+  },
 });
+
+const sectionStyles = StyleSheet.create({
+  section: {
+    marginTop: spacing.xxl,
+  },
+  title: {
+    marginBottom: spacing.sm,
+  },
+});
+
+function makeStyles(colors: ThemeColors, screenWidth: number) {
+  const photoHeight = screenWidth * 1.25;
+  return StyleSheet.create({
+    container: { flex: 1 },
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.lg,
+      padding: spacing.xl,
+    },
+    backToDeck: {
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      borderRadius: radius.full,
+      borderWidth: 1,
+    },
+    pressed: {
+      opacity: 0.7,
+      transform: [{ scale: 0.97 }],
+    },
+    scrollContent: {
+      paddingBottom: spacing.xxl,
+    },
+    photoScroller: {
+      height: photoHeight,
+    },
+    photo: {
+      width: screenWidth,
+      height: photoHeight,
+      backgroundColor: colors.surface,
+    },
+    photoPlaceholder: {
+      width: screenWidth,
+      height: photoHeight,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.surface,
+    },
+    dots: {
+      position: 'absolute',
+      top: spacing.lg,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.xs + 2,
+    },
+    dot: {
+      width: 7,
+      height: 7,
+      borderRadius: radius.full,
+    },
+    dotActive: {
+      width: 16,
+      backgroundColor: '#FFFFFF',
+    },
+    dotInactive: {
+      backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    },
+    content: {
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.xl,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    name: {
+      flexShrink: 1,
+    },
+    intentChip: {
+      alignSelf: 'flex-start',
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      marginTop: spacing.md,
+    },
+    promptCard: {
+      borderRadius: radius.md,
+      borderWidth: 1,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      gap: spacing.xs,
+    },
+    chips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    chip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: radius.full,
+    },
+    actions: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.xxxl,
+      paddingVertical: spacing.md,
+      borderTopWidth: StyleSheet.hairlineWidth,
+    },
+    actionButton: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      borderWidth: StyleSheet.hairlineWidth,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionButtonPrimary: {
+      borderWidth: 0,
+    },
+  });
+}

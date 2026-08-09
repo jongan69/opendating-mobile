@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { distanceLabel, intentLabel } from '@/lib/profile-labels';
 import { useTheme } from '@/state/theme-context';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
@@ -15,6 +16,12 @@ interface CandidateCardProps {
   photoIndex?: number;
   /** Called whenever the pager advances (tap left/right) */
   onPhotoTap?: (index: number) => void;
+  /**
+   * Open the full profile. When provided the info block becomes pressable and
+   * a "View profile" affordance is shown; without it the card is display-only,
+   * which is what the non-interactive back cards of the deck want.
+   */
+  onOpenProfile?: () => void;
 }
 
 const GRADIENT_COLORS: readonly [string, string] = [
@@ -26,6 +33,7 @@ export function CandidateCard({
   candidate,
   photoIndex = 0,
   onPhotoTap,
+  onOpenProfile,
 }: CandidateCardProps) {
   const { colors, isDark } = useTheme();
   const [index, setIndex] = useState(photoIndex);
@@ -76,8 +84,8 @@ export function CandidateCard({
   const displayName = profile.display_name?.trim() || 'New Friend';
   const ageLabel = typeof profile.age === 'number' ? `, ${profile.age}` : '';
   const isVerified = (profile.verification_claims ?? []).length > 0;
-  const distanceLabel = prettyDistance(candidate.distance_bucket);
-  const intent = profile.relationship_intent?.trim();
+  const distance = distanceLabel(candidate.distance_bucket);
+  const intent = intentLabel(profile.relationship_intent);
   const interests = (profile.interests ?? []).filter(Boolean).slice(0, 3);
 
   return (
@@ -143,57 +151,79 @@ export function CandidateCard({
         </View>
       ) : null}
 
-      {/* Bottom gradient + info */}
+      {/* Bottom gradient + info.
+          The gradient itself stays pointerEvents="none" so it never eats a
+          swipe; only the info block below opts back into touches. */}
       <LinearGradient
         colors={GRADIENT_COLORS}
         locations={[0, 1]}
         pointerEvents="none"
         style={styles.gradient}
+      />
+
+      <Pressable
+        // Tapping the name/details area is the conventional way into a full
+        // profile, and it is the one part of the card that is never a photo
+        // paging target. Without onOpenProfile this renders as a plain View.
+        onPress={onOpenProfile}
+        disabled={!onOpenProfile}
+        accessibilityRole={onOpenProfile ? 'button' : undefined}
+        accessibilityLabel={
+          onOpenProfile ? `View ${displayName}'s full profile` : undefined
+        }
+        accessibilityHint={onOpenProfile ? 'Opens photos, prompts, and bio' : undefined}
+        style={({ pressed }) => [styles.info, pressed && styles.infoPressed]}
       >
-        <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name} numberOfLines={1}>
-              {displayName}
-              {ageLabel}
-            </Text>
-            {isVerified ? (
-              <View
-                style={styles.verifiedBadge}
-                accessibilityLabel="Verified"
-                accessibilityRole="image"
-              >
-                <Text style={styles.verifiedCheck}>✓</Text>
-              </View>
-            ) : null}
-          </View>
-
-          {distanceLabel ? (
-            <Text style={styles.distance} numberOfLines={1}>
-              {distanceLabel}
-            </Text>
-          ) : null}
-
-          {intent ? (
-            <View style={styles.intentRow}>
-              <Text style={styles.intent} numberOfLines={1}>
-                {intent}
-              </Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.name} numberOfLines={1}>
+            {displayName}
+            {ageLabel}
+          </Text>
+          {isVerified ? (
+            <View
+              style={styles.verifiedBadge}
+              accessibilityLabel="Verified"
+              accessibilityRole="image"
+            >
+              <Text style={styles.verifiedCheck}>✓</Text>
             </View>
           ) : null}
-
-          {interests.length > 0 ? (
-            <View style={styles.interests}>
-              {interests.map((interest) => (
-                <View key={interest} style={styles.interestChip}>
-                  <Text style={styles.interestText} numberOfLines={1}>
-                    {interest}
-                  </Text>
-                </View>
-              ))}
+          {onOpenProfile ? (
+            // A visible target. The previous build opened the profile from an
+            // invisible strip down the middle of the card, which nothing on
+            // screen suggested was there.
+            <View style={styles.viewProfileBadge} pointerEvents="none">
+              <Text style={styles.viewProfileChevron}>›</Text>
             </View>
           ) : null}
         </View>
-      </LinearGradient>
+
+        {distance ? (
+          <Text style={styles.distance} numberOfLines={1}>
+            {distance}
+          </Text>
+        ) : null}
+
+        {intent ? (
+          <View style={styles.intentRow}>
+            <Text style={styles.intent} numberOfLines={1}>
+              {intent}
+            </Text>
+          </View>
+        ) : null}
+
+        {interests.length > 0 ? (
+          <View style={styles.interests}>
+            {interests.map((interest) => (
+              <View key={interest} style={styles.interestChip}>
+                <Text style={styles.interestText} numberOfLines={1}>
+                  {interest}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+      </Pressable>
     </View>
   );
 }
@@ -215,15 +245,6 @@ function PhotoPlaceholder() {
       </Text>
     </View>
   );
-}
-
-function prettyDistance(bucket: string | undefined | null): string {
-  if (!bucket) return '';
-  const normalized = bucket.trim().toLowerCase();
-  if (normalized === 'nearby' || normalized === 'within 5 mi') {
-    return 'Nearby';
-  }
-  return bucket.trim();
 }
 
 const iosContinuous = Platform.OS === 'ios'
@@ -260,7 +281,10 @@ const styles = StyleSheet.create({
   tapZone: {
     position: 'absolute',
     top: 0,
-    bottom: 0,
+    // Stops above the info block so photo paging and "open profile" can never
+    // claim the same pixel. Previously these ran the full height of the card
+    // and sat on top of the name and bio.
+    bottom: '38%',
     width: '33%',
     zIndex: 2,
   },
@@ -297,10 +321,34 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   info: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 3,
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.xl,
-    paddingTop: spacing.huge,
+    paddingTop: spacing.xl,
     gap: spacing.xs,
+  },
+  infoPressed: {
+    opacity: 0.82,
+  },
+  viewProfileBadge: {
+    marginLeft: 'auto',
+    width: 30,
+    height: 30,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewProfileChevron: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    lineHeight: 26,
+    fontWeight: '600',
+    marginTop: -2,
   },
   nameRow: {
     flexDirection: 'row',
