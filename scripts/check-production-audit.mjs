@@ -29,11 +29,45 @@ if (!Number.isFinite(expiry.getTime()) || expiry < new Date()) {
   throw new Error(`Security exception expired on ${exceptions.expires}.`);
 }
 
-const allowed = new Set(exceptions.highSeverityPackages ?? []);
+function advisoryIdsFor(packageName, visited = new Set()) {
+  if (visited.has(packageName)) return [];
+  visited.add(packageName);
+
+  const vulnerability = report.vulnerabilities?.[packageName];
+  if (!vulnerability) return [];
+
+  const ids = [];
+  for (const via of vulnerability.via ?? []) {
+    if (typeof via === 'object' && Number.isInteger(via.source)) {
+      ids.push(via.source);
+    } else if (typeof via === 'string') {
+      ids.push(...advisoryIdsFor(via, visited));
+    }
+  }
+  return [...new Set(ids)].sort((left, right) => left - right);
+}
+
+const allowed = new Map(
+  (exceptions.highSeverityExceptions ?? []).map((exception) => [
+    exception.package,
+    exception,
+  ]),
+);
 const unexpectedHigh = vulnerabilities
   .filter(([, value]) => value.severity === 'high')
-  .map(([name]) => name)
-  .filter((name) => !allowed.has(name));
+  .filter(([name, value]) => {
+    const exception = allowed.get(name);
+    if (!exception || exception.affectedRange !== value.range) return true;
+
+    const actualIds = advisoryIdsFor(name);
+    const expectedIds = [...(exception.advisoryIds ?? [])].sort(
+      (left, right) => left - right,
+    );
+    return JSON.stringify(actualIds) !== JSON.stringify(expectedIds);
+  })
+  .map(([name, value]) =>
+    `${name} (${value.range}; advisories ${advisoryIdsFor(name).join(', ') || 'unknown'})`,
+  );
 if (unexpectedHigh.length > 0) {
   throw new Error(`Unexpected high production advisories: ${unexpectedHigh.join(', ')}`);
 }
@@ -43,7 +77,7 @@ const currentHigh = new Set(
     .filter(([, value]) => value.severity === 'high')
     .map(([name]) => name),
 );
-const resolved = [...allowed].filter((name) => !currentHigh.has(name));
+const resolved = [...allowed.keys()].filter((name) => !currentHigh.has(name));
 if (resolved.length > 0) {
   console.warn(`Remove resolved audit exceptions: ${resolved.join(', ')}`);
 }

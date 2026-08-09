@@ -75,14 +75,19 @@ Before promoting a release, also verify:
 
 ## Building after approval
 
-EAS is the primary store-build path. Only after the manifest and external gates are approved:
+EAS is the primary store-build path. Only after the source candidate has a
+manifest-only approval commit and a trusted signed release-candidate tag:
 
 ```bash
 npm run build:ios
 npm run build:android
 ```
 
-The exact EAS artifact IDs and checksums then belong in `release/manifest.json`. Verify the signed binaries and store metadata before submission.
+The build commands run the source-only gate. Record the resulting EAS artifact
+IDs, store build numbers/version codes, and SHA-256 checksums in
+`release/manifest.json`; commit only that manifest change and create the final
+trusted signed tag. The full gate then verifies both artifacts before submission
+or metadata publication.
 
 Submit only the recorded artifacts:
 
@@ -109,12 +114,18 @@ Screenshot mode may use fixture data only. It must not connect a store asset gen
 
 1. Merge reviewed changes through protected `main` branches in both repositories.
 2. Publish and pin the canonical protocol package.
-3. Create a signed release candidate tag.
-4. Populate the release manifest with the exact SHA, protocol/schema/migration state, artifacts, and checksums.
-5. Run CI, release-build E2E, security, deletion, backup/restore, and rollback evidence from that tag.
-6. Obtain engineering, security, legal, trust-and-safety, operations, and country go/no-go approvals.
-7. Change the manifest to approved in its own reviewed PR.
-8. Build, verify, submit, and roll out through the staged percentages in the roadmap.
+3. Record the reviewed source-candidate SHA, protocol/schema/migration state,
+   approver, and approval time in a manifest-only commit; no application source
+   may change in that commit.
+4. Create and verify a trusted signed annotated release-candidate tag on that
+   approval commit, then run the source-only gate and create the EAS store
+   builds from that exact tag.
+5. Add the exact EAS artifact IDs, store build numbers/version codes, and
+   SHA-256 checksums in another manifest-only reviewed commit. Create the final
+   trusted signed tag; do not move an existing signed tag.
+6. Run CI, release-build E2E, security, deletion, backup/restore, and rollback evidence for those exact artifacts.
+7. Obtain engineering, security, legal, trust-and-safety, operations, and country go/no-go approvals.
+8. Run the full release gate, submit only the recorded artifacts, and roll out through the staged percentages in the roadmap.
 9. Monitor each stage for 48–72 hours and roll back or disable affected services through signed flags if a gate regresses.
 
 ## Live store containment

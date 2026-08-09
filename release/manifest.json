@@ -1,14 +1,23 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "status": "blocked",
   "appVersion": "0.1.1",
   "gitSha": null,
   "protocolVersion": "0.1",
-  "databaseSchema": null,
+  "databaseSchema": "legacy-unversioned",
   "artifacts": {
-    "iosBuildId": null,
-    "androidBuildId": null,
-    "checksums": {}
+    "ios": {
+      "appVersion": "0.1.1",
+      "buildNumber": null,
+      "buildId": null,
+      "sha256": null
+    },
+    "android": {
+      "appVersion": "0.1.1",
+      "versionCode": null,
+      "buildId": null,
+      "sha256": null
+    }
   },
   "migrationState": "not-started",
   "approvedAt": null,

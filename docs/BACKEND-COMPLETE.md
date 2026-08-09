@@ -1,17 +1,18 @@
-# Backend Complete — OpenDating Relay v0.1 Handoff
+# Historical Backend v0.1 Handoff
 
 **Date:** 2026-08-07
 **Relay:** `wss://opendating-relay.jonathang132298.workers.dev`
 **Protocol:** `opendating-protocol@0.1.0`
 
-The backend is complete. Every flow the mobile app depends on has been implemented,
-verified live against production, and exercised through a scriptable harness
-(`scripts/od-client.ts` in the backend repo). No further backend changes are
-required for the app to function end-to-end.
+> **Archived snapshot, not a current readiness claim.** This document records
+> the August 7 v0.1 handoff. The exact deployed state has not been reverified
+> from the current release candidate, and substantial protocol, security,
+> moderation, reliability, and operational work remains. See
+> [Release Status](RELEASE-STATUS.md) and the [1.0 Roadmap](ROADMAP-1.0.md).
 
 ---
 
-## Deployed Services (all live)
+## Services reported in the historical handoff
 
 | Service | Role | Verified |
 |---|---|---|
@@ -212,8 +213,8 @@ The APKs in `android/app/build/outputs/` are stale and must not be used.
 - [x] 20-candidate page: 2 D1 queries
 - [x] Two pages fetchable with cursor; null = end of deck
 - [x] 31st like → `rate_limited`
-- [x] Service SQL has test coverage (15 integration tests, 239 total)
+- [x] Current protocol branch verification: 17 files / 248 tests, including 18 D1 service integration tests
 - [x] Photo upload verified end-to-end against production R2
-- [x] Test members removed, storage keys rotated
-- [x] `npm run ci` green (typecheck + build + 239 tests)
-- [x] Deployed and verified live
+- [ ] Test-member removal and storage-key rotation require current operational evidence
+- [x] Current protocol branch typecheck, lint, build, and 248 tests pass
+- [ ] Reverify the deployed relay and deletion flow from the exact release commit

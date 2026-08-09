@@ -10,7 +10,7 @@ This is the implementation ledger for the marketplace-competitive 1.0 program. I
 - `0.2.x` is the security-foundation and closed-beta line.
 - `1.0.0` is reserved for GA after every technical and marketplace gate passes.
 - `main` must stay releasable, protected, and CI-green. Work lands through reviewed pull requests.
-- A production artifact must be traceable to a signed tag and manifest containing the app/build version, git SHA, protocol version, database schema, artifact IDs, checksums, and migration state.
+- A production artifact must be traceable to a signed annotated tag and manifest containing the app/build version, source-candidate git SHA, protocol version, database schema, artifact IDs, checksums, and migration state. The tagged approval commit may differ from the source candidate only in `release/manifest.json`; the release guard verifies that boundary and the tag signature.
 - Mobile and relay development, staging, and production resources must be isolated. A production app must never fall back to staging implicitly.
 
 ## Phase ledger

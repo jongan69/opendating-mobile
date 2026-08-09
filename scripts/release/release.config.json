@@ -28,7 +28,7 @@
   },
 
   "verify": {
-    "commands": ["npm run typecheck", "npm test -- --runInBand", "npm run security:audit", "npm run release:verify"],
+    "commands": ["npm run typecheck", "npm test -- --runInBand", "npm run security:audit", "npm run release:validate"],
     "lint": "npm run lint"
   },
 

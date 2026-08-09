@@ -6,7 +6,7 @@ OpenDating Mobile is the first reference client for the [OpenDating](https://git
 
 ## Critical Rules
 
-1. **Never import backend implementation code.** The mobile app is an independently developed client. All integration goes through `opendating-protocol@0.1.0` and the public relay at `wss://opendating-relay.jonathang132298.workers.dev`.
+1. **Never import backend implementation code.** The mobile app is an independently developed client. All integration goes through the published `opendating-protocol@0.1.0` registry artifact and the public relay at `wss://opendating-relay.jonathang132298.workers.dev`. Package `0.1.1` is not the baseline until its registry artifact is published and verified.
 
 2. **Nostr is invisible to users.** Never use terms like "npub", "nsec", "relay", "NIP-42", "gift wrap", "event kind" in user-facing UI. Normal language: "Create Account", not "Generate Nostr Keypair".
 

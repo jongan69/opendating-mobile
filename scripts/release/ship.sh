@@ -195,9 +195,10 @@ fi
 if should_run ios-build && enabled ios; then
   step "iOS production build"
   [[ "$(uname)" == "Darwin" ]] || die "iOS builds require macOS"
+  run npm run release:verify -- --source-only
   run mkdir -p "$(cfg ios.outputDir builds)"
   EXTRA=""; [[ "$(cfg ios.local true)" == "true" ]] && EXTRA="--local"
-  run env EAS_NO_VCS=1 npx eas-cli@latest build \
+  run npx --yes eas-cli@21.7.0 build \
     --platform ios --profile "$(cfg ios.easProfile production)" \
     $EXTRA --non-interactive --output "$IPA_PATH"
 fi
@@ -214,7 +215,8 @@ fi
 # ── ios submit ────────────────────────────────────────────────────────────────
 if should_run ios-submit && enabled ios; then
   step "Upload to App Store Connect"
-  run npx eas-cli@latest submit --platform ios \
+  run npm run release:verify
+  run npx --yes eas-cli@21.7.0 submit --platform ios \
     --profile "$(cfg ios.easProfile production)" \
     --path "$IPA_PATH" --non-interactive --wait
 fi
@@ -229,12 +231,13 @@ fi
 
 if should_run android-build && enabled android; then
   step "Android production build"
+  run npm run release:verify -- --source-only
   EXTRA=""
   if [[ "$(cfg android.local false)" == "true" ]]; then
     run mkdir -p "$(cfg android.outputDir builds)"
     EXTRA="--local --output $AAB_PATH"
   fi
-  run env EAS_NO_VCS=1 npx eas-cli@latest build \
+  run npx --yes eas-cli@21.7.0 build \
     --platform android --profile "$(cfg android.easProfile production)" \
     $EXTRA --non-interactive
 fi
@@ -246,15 +249,16 @@ fi
 # it is called out here rather than discovered.
 if should_run android-submit && enabled android; then
   step "Upload to Google Play"
+  run npm run release:verify
   if [[ "$(cfg android.local false)" == "true" ]]; then
     $DRY_RUN || [[ -f "$AAB_PATH" ]] || die "AAB not found at $AAB_PATH"
-    run npx eas-cli@latest submit --platform android \
+    run npx --yes eas-cli@21.7.0 submit --platform android \
       --profile "$(cfg android.easProfile production)" \
       --path "$AAB_PATH" --non-interactive --wait
   else
     # The cloud build's artifact never lands on this machine; --latest resolves
     # the most recent finished build for the profile.
-    run npx eas-cli@latest submit --platform android \
+    run npx --yes eas-cli@21.7.0 submit --platform android \
       --profile "$(cfg android.easProfile production)" \
       --latest --non-interactive --wait
   fi

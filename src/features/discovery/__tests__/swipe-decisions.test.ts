@@ -46,6 +46,21 @@ describe('swipe decisions', () => {
     unsubscribe();
   });
 
+  // Discover consumes from inside its subscriber, so the decision must be
+  // available before listeners run.
+  it('queues the decision before it notifies subscribers', () => {
+    let queuedDuringNotify: string | null = null;
+    const unsubscribe = subscribeSwipeDecisions(() => {
+      queuedDuringNotify = consumeSwipeDecision()?.pubkey ?? null;
+    });
+
+    postSwipeDecision({ pubkey: 'abc', direction: 'pass' });
+
+    expect(queuedDuringNotify).toBe('abc');
+    expect(consumeSwipeDecision()).toBeNull();
+    unsubscribe();
+  });
+
   it('stops notifying after unsubscribe', () => {
     const seen: string[] = [];
     subscribeSwipeDecisions((d) => seen.push(d.pubkey))();
@@ -65,7 +80,7 @@ describe('swipe decisions', () => {
 
   // Discovery issues a grant per viewer/candidate pair; a like without one is
   // rejected server-side, so the consumer downgrades it to a pass.
-  it('carries the grant so a like can be validated', () => {
+  it('preserves a like posted without a grant', () => {
     postSwipeDecision({ pubkey: 'abc', direction: 'like' });
 
     const decision = consumeSwipeDecision();
