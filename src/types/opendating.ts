@@ -173,7 +173,8 @@ export type OpenDatingServiceRole =
   | 'dm_policy'
   | 'moderation'
   | 'verification'
-  | 'media';
+  | 'media'
+  | 'deletion';
 
 /**
  * Service pubkeys advertised by the relay.

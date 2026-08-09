@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpenDating — Privacy-first decentralized dating</title>
-<meta name="description" content="A dating app with Tinder-quality UX built on decentralized infrastructure. Your identity belongs to you. Your location is private. Your messages are encrypted. No surveillance, no data harvesting.">
+<meta name="description" content="A pre-release privacy-focused dating client with coarse location and end-to-end encrypted messages, built on the open OpenDating protocol.">
 <meta name="keywords" content="opendating, dating app, privacy, decentralized, nostr, encrypted dating, private dating, self-sovereign, no surveillance">
 <meta property="og:title" content="OpenDating — Privacy-first decentralized dating">
-<meta property="og:description" content="A dating app where you own your identity, your location stays private, and your messages are encrypted. No surveillance. No data harvesting.">
+<meta property="og:description" content="A pre-release dating client designed around data minimization, coarse location, and encrypted messages.">
 <meta property="og:url" content="https://jongan69.github.io/opendating-mobile">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://jongan69.github.io/opendating-mobile/images/lockup-coral.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="OpenDating — Privacy-first decentralized dating">
-<meta name="twitter:description" content="Tinder-quality UX with decentralized privacy. Own your identity. Encrypted messages. No surveillance.">
+<meta name="twitter:description" content="Pre-release dating software designed around coarse location and encrypted messages.">
 <link rel="canonical" href="https://jongan69.github.io/opendating-mobile">
 <link rel="icon" type="image/png" href="images/favicon-32.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon-180.png">
@@ -264,10 +264,10 @@
     <img src="images/lockup-coral.png" alt="OpenDating" class="logo" width="480" height="99">
   </picture>
   <p class="sub">
-    A dating app you can trust. Your identity belongs to <strong>you</strong>.
-    Your exact location <strong>never</strong> leaves your phone. Your messages are
-    <strong>end-to-end encrypted</strong>. No surveillance, no data harvesting, no
-    company that owns your profile.
+    A pre-release dating client built around data minimization. Exact GPS is
+    converted to a coarse area on-device, and direct messages are
+    <strong>end-to-end encrypted</strong>. The first services are operated by
+    OpenDating while federation is developed after reliable general availability.
   </p>
   <div class="actions">
     <a href="https://github.com/jongan69/opendating-mobile" class="btn btn-primary">
@@ -287,7 +287,7 @@
       <div class="feature-card">
         <div class="icon">🔑</div>
         <h3>Own Your Identity</h3>
-        <p>Your account is a cryptographic keypair stored only on your device. Move it to any OpenDating client. No company can lock you out or delete your profile.</p>
+        <p>Your account is based on a cryptographic keypair stored in device secure storage. The current advanced recovery flow can export it; passkey recovery is required before launch.</p>
       </div>
       <div class="feature-card">
         <div class="icon">📍</div>
@@ -307,12 +307,12 @@
       <div class="feature-card">
         <div class="icon">📱</div>
         <h3>Native Experience</h3>
-        <p>Tinder-quality swipe gestures, photo-first cards, and smooth animations. iOS feels like SwiftUI. Android feels like Material 3.</p>
+        <p>Photo-first cards, gesture-driven discovery, native navigation, dark mode, and accessibility foundations for iOS and Android.</p>
       </div>
       <div class="feature-card">
         <div class="icon">🌐</div>
-        <h3>Built on Nostr</h3>
-        <p>Runs on a decentralized protocol with no central server. Your data isn't in a corporate database — it's encrypted events on a censorship-resistant relay network.</p>
+        <h3>Open protocol, first-party operation</h3>
+        <p>Built on Nostr and the open OpenDating protocol. The current profile, discovery, matching, moderation, and deletion services are operated by OpenDating on Cloudflare.</p>
       </div>
     </div>
   </div>
@@ -320,23 +320,21 @@
 
 <section class="alt">
   <div class="container">
-    <h2>OpenDating vs Traditional Dating Apps</h2>
-    <p class="section-sub">Most dating apps are surveillance businesses. OpenDating isn't.</p>
+    <h2>Product commitments</h2>
+    <p class="section-sub">The launch standard is defined by verifiable commitments, not unsourced competitor scoring.</p>
 
     <div style="overflow-x:auto">
     <table class="compare">
       <thead>
-        <tr><th>Feature</th><th>Tinder</th><th>Bumble</th><th>Hinge</th><th>OpenDating</th></tr>
+        <tr><th>Commitment</th><th>Current state</th><th>GA gate</th></tr>
       </thead>
       <tbody>
-        <tr><td>You own your identity</td>            <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>Exact location never shared</td>       <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>End-to-end encrypted messages</td>     <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>Likes are private</td>                 <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>Portable profile</td>                  <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>No ads or data harvesting</td>         <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>Open source</td>                       <td class="cross">✕</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-        <tr><td>Blocks are private</td>                <td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>No paid ranking or boosts</td><td class="check">Product policy</td><td>Entitlement and ranking tests</td></tr>
+        <tr><td>Safety features remain free</td><td class="check">Product policy</td><td>Store and server enforcement</td></tr>
+        <tr><td>Exact GPS stays on-device</td><td class="check">Implemented</td><td>Independent privacy test</td></tr>
+        <tr><td>Direct-message content is end-to-end encrypted</td><td class="check">Implemented</td><td>Independent security review</td></tr>
+        <tr><td>Transparent daily recommendations</td><td>Planned</td><td>Fairness and liquidity gates</td></tr>
+        <tr><td>Passkey recovery and native signer</td><td>Blocked</td><td>Physical-device recovery tests</td></tr>
       </tbody>
     </table>
     </div>
@@ -349,11 +347,11 @@
     <p class="section-sub">Every architectural decision was made to protect you — not to monetize you.</p>
 
     <div class="privacy-callout">
-      <h3>🔐 What OpenDating <em>never</em> sees</h3>
+      <h3>🔐 Data-minimizing design</h3>
       <div class="privacy-list">
         <div class="item"><span class="check-icon">✓</span><span><strong>Your exact location</strong> — only a ~5 km geohash prefix is sent</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Your messages</strong> — end-to-end encrypted, not stored in plaintext</span></div>
-        <div class="item"><span class="check-icon">✓</span><span><strong>Your private key</strong> — lives only in your device's secure storage</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Your private key</strong> — stored in device secure storage; it leaves only if you explicitly use the legacy export flow</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Who you like</strong> — one-way likes are encrypted gift wraps</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Who you block</strong> — blocks are private and enforced locally first</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Your report details</strong> — encrypted to the moderation service</span></div>
@@ -395,17 +393,17 @@
 <section id="get">
   <div class="container-narrow">
     <h2>Get OpenDating</h2>
-    <p class="section-sub">Free. Open source. No ads. No data harvesting. No subscriptions.</p>
+    <p class="section-sub">Source available for development and security review. Store distribution is held.</p>
 
     <div class="download-grid">
       <div class="download-card">
         <h3>📱 iOS</h3>
-        <p>Coming to the App Store. For now, build from source or join the TestFlight beta.</p>
+        <p>The stale submission is not approved to ship. Invited testing resumes only after the documented release gates pass.</p>
         <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">Build from Source</a>
       </div>
       <div class="download-card">
         <h3>🤖 Android</h3>
-        <p>Coming to Google Play. Build from source or use the development build.</p>
+        <p>The Android artifact remains draft. Developers can build from source for isolated testing.</p>
         <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">Build from Source</a>
       </div>
     </div>
@@ -422,20 +420,20 @@
     <p class="section-sub">Thoughts on privacy, decentralized dating, and building ethical technology.</p>
 
     <div class="blog-grid">
-      <a href="blog/why-privacy-matters-in-dating" class="blog-card">
-        <div class="date">2026</div>
-        <h3>Why Privacy Matters in Dating Apps</h3>
-        <p>Traditional dating apps know more about you than your therapist. Here's why that matters and what decentralized alternatives offer.</p>
+      <a href="safety/" class="blog-card">
+        <div class="date">GUIDE</div>
+        <h3>Safety Center</h3>
+        <p>Practical guidance for spotting scams, planning safer meetings, protecting private information, and reporting concerns.</p>
       </a>
       <a href="blog/how-decentralized-dating-works" class="blog-card">
         <div class="date">2026</div>
         <h3>How Decentralized Dating Works</h3>
-        <p>Nostr isn't just for social media. Here's how OpenDating uses encrypted gift wraps, service roles, and relay enforcement to build a dating app without a central server.</p>
+        <p>How encrypted gift wraps and role-separated first-party services work today, and what federation still needs before providers are interchangeable.</p>
       </a>
-      <a href="blog/tinder-vs-bumble-vs-opendating" class="blog-card">
-        <div class="date">2026</div>
-        <h3>Comparing Dating Apps Through a Privacy Lens</h3>
-        <p>A side-by-side look at what the major dating apps collect, store, and share — and how OpenDating does things differently.</p>
+      <a href="status/" class="blog-card">
+        <div class="date">LIVE</div>
+        <h3>Release and Service Status</h3>
+        <p>See why production distribution is blocked and which reliability, safety, legal, and security gates remain.</p>
       </a>
     </div>
 
@@ -451,7 +449,10 @@
     <span>
       <a href="https://github.com/jongan69/opendating-mobile">GitHub</a> ·
       <a href="https://github.com/jongan69/OpenDating">Protocol</a> ·
-      <a href="blog">Blog</a>
+      <a href="privacy/">Privacy</a> ·
+      <a href="terms/">Terms</a> ·
+      <a href="safety/">Safety</a> ·
+      <a href="status/">Status</a>
     </span>
   </div>
 </footer>

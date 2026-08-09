@@ -16,7 +16,8 @@
 // so its own `pubkey` field proves nothing on its own; we accept a rumor
 // only when it agrees with the seal that carried it.
 
-import { nip44Decrypt } from 'opendating-protocol';
+import { getEventHash, nip44Decrypt } from 'opendating-protocol';
+import { schnorr } from '@noble/curves/secp256k1';
 
 /** NIP-59 seal kind. */
 const SEAL_KIND = 13;
@@ -49,7 +50,75 @@ interface InnerEvent {
   pubkey?: unknown;
   created_at?: unknown;
   kind?: unknown;
+  tags?: unknown;
   content?: unknown;
+  sig?: unknown;
+}
+
+const HEX_64 = /^[0-9a-f]{64}$/i;
+const HEX_128 = /^[0-9a-f]{128}$/i;
+
+interface SignedInnerEvent {
+  id: string;
+  pubkey: string;
+  created_at: number;
+  kind: number;
+  tags: string[][];
+  content: string;
+  sig: string;
+}
+
+function asSignedEvent(value: InnerEvent): SignedInnerEvent | null {
+  if (
+    typeof value.id !== 'string' ||
+    !HEX_64.test(value.id) ||
+    typeof value.pubkey !== 'string' ||
+    !HEX_64.test(value.pubkey) ||
+    typeof value.created_at !== 'number' ||
+    !Number.isInteger(value.created_at) ||
+    typeof value.kind !== 'number' ||
+    !Number.isInteger(value.kind) ||
+    !Array.isArray(value.tags) ||
+    !value.tags.every(
+      (tag) => Array.isArray(tag) && tag.every((item) => typeof item === 'string')
+    ) ||
+    typeof value.content !== 'string' ||
+    typeof value.sig !== 'string' ||
+    !HEX_128.test(value.sig)
+  ) {
+    return null;
+  }
+
+  return value as SignedInnerEvent;
+}
+
+function hasValidRumorId(value: InnerEvent): boolean {
+  if (
+    typeof value.id !== 'string' ||
+    !HEX_64.test(value.id) ||
+    typeof value.pubkey !== 'string' ||
+    !HEX_64.test(value.pubkey) ||
+    typeof value.created_at !== 'number' ||
+    !Number.isInteger(value.created_at) ||
+    typeof value.kind !== 'number' ||
+    !Number.isInteger(value.kind) ||
+    !Array.isArray(value.tags) ||
+    !value.tags.every(
+      (tag) => Array.isArray(tag) && tag.every((item) => typeof item === 'string')
+    ) ||
+    typeof value.content !== 'string'
+  ) {
+    return false;
+  }
+
+  const unsigned = {
+    pubkey: value.pubkey,
+    created_at: value.created_at,
+    kind: value.kind,
+    tags: value.tags as string[][],
+    content: value.content,
+  };
+  return getEventHash(unsigned) === value.id;
 }
 
 function parseEvent(json: string): InnerEvent | null {
@@ -85,22 +154,30 @@ export function unwrapGiftWrap(
 
   const seal = parseEvent(sealJson);
   if (!seal) return null;
-  if (seal.kind !== SEAL_KIND) return null;
+  const signedSeal = asSignedEvent(seal);
+  if (
+    !signedSeal ||
+    signedSeal.kind !== SEAL_KIND ||
+    getEventHash(signedSeal) !== signedSeal.id ||
+    !schnorr.verify(signedSeal.sig, signedSeal.id, signedSeal.pubkey)
+  ) {
+    return null;
+  }
 
-  const senderPubkey = seal.pubkey;
-  if (typeof senderPubkey !== 'string' || senderPubkey.length === 0) return null;
-  if (typeof seal.content !== 'string' || seal.content.length === 0) return null;
+  const senderPubkey = signedSeal.pubkey;
+  if (signedSeal.content.length === 0) return null;
 
   // Layer 2: seal → rumor, keyed by the real sender from the seal.
   let rumorJson: string;
   try {
-    rumorJson = nip44Decrypt(seal.content, recipientPrivkey, senderPubkey);
+    rumorJson = nip44Decrypt(signedSeal.content, recipientPrivkey, senderPubkey);
   } catch {
     return null;
   }
 
   const rumor = parseEvent(rumorJson);
   if (!rumor) return null;
+  if (!hasValidRumorId(rumor)) return null;
 
   // The rumor is unsigned. Only the seal is signed by the sender, so a rumor
   // claiming a different author than the seal that delivered it is a forgery

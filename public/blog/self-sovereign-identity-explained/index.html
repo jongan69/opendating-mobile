@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Self-Sovereign Identity: What It Means for Dating — OpenDating Blog</title>
-<meta name="description" content="When you own your dating identity as a cryptographic keypair, it's portable across apps. No company lock-in, no lost profiles, no one who can delete your account.">
+<meta name="description" content="How OpenDating's cryptographic identity works today, including current portability and recovery limits.">
+<meta name="robots" content="noindex">
 <meta name="keywords" content="self-sovereign identity, decentralized identity, dating app portability, nostr identity, opendating">
 <meta property="og:title" content="Self-Sovereign Identity: What It Means for Dating">
 <meta property="og:description" content="Your dating profile shouldn't be owned by a company. Here's how self-sovereign identity gives you control over your dating life.">
@@ -35,9 +36,9 @@
     <h1>Self-Sovereign Identity: What It Means for Dating</h1>
     <div class="date">August 2026</div>
 
-    <p>Every dating app you've ever used owns your profile. Tinder owns your Tinder profile. Bumble owns your Bumble profile. If those companies shut down, ban you, or change their terms, your dating presence disappears. You don't own anything — you're renting space on their servers.</p>
+    <p>OpenDating identifies an account with a cryptographic keypair rather than an email-and-password login. This gives the member control of the signing identity, but it does not make the first-party service unable to moderate an account or remove hosted profile data.</p>
 
-    <p><strong>Self-sovereign identity</strong> flips this. You own your identity as a cryptographic keypair. Your profile is signed by your key. You can take it to any compatible app, at any time.</p>
+    <p>The keypair can work in a compatible client. Full profile, match, message-history, and private-list portability across providers is post-GA work and should not be inferred from key portability alone.</p>
 
     <h2>How It Works</h2>
 
@@ -45,23 +46,23 @@
 
     <p>This means:</p>
     <ul>
-      <li><strong>Portability</strong> — take your profile, matches, and conversation history to any OpenDating client</li>
-      <li><strong>No lock-in</strong> — no company can delete your account or hold your data hostage</li>
+      <li><strong>Client portability</strong> — a compatible client can use the same signing identity</li>
+      <li><strong>Service limits</strong> — hosted profile and relationship data still depend on the current operator</li>
       <li><strong>Prove it's you</strong> — your public key is your identity; anyone can verify messages come from you</li>
-      <li><strong>Privacy-preserving</strong> — your private key never leaves your device</li>
+      <li><strong>Privacy-focused</strong> — your private key is stored with device secure storage and leaves only when you explicitly use the legacy recovery export</li>
     </ul>
 
     <h2>Why This Matters for Dating</h2>
 
     <p>Dating is personal. The idea that a corporation owns your dating profile — your photos, your bio, your preferences, your conversation history — is strange when you think about it. Your dating life shouldn't be an asset on a company's balance sheet.</p>
 
-    <p>Self-sovereign identity means your dating presence is truly yours. If OpenDating disappears, your identity doesn't. If you want to switch to a different OpenDating-compatible client, you can. Your keypair is all you need.</p>
+    <p>If OpenDating disappears, the keypair still exists, but the current service data may not. Signed export, recovery, and provider-migration formats must be implemented and tested before broader portability claims are made.</p>
 
     <h2>What About Lost Keys?</h2>
 
     <p>This is the trade-off. With a centralized app, you can reset your password. With self-sovereign identity, losing your private key means losing access to your account — permanently. There's no "forgot password" button. This is why OpenDating provides backup and export features, and why you should store your key somewhere safe.</p>
 
-    <p>The upside is that <em>only you</em> can lose your key. No company can accidentally leak it. No hacker can steal it from a database. No employee can misuse it. The responsibility is yours — and so is the security.</p>
+    <p>The current v0.1 app stores the key with device secure storage and loads it into a JavaScript signer. A native device-bound signer and passkey-encrypted recovery are required before production; the beta does not claim that compromise is impossible.</p>
 
     <h2>The Bigger Picture</h2>
 

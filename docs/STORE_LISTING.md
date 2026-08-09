@@ -1,6 +1,8 @@
 # OpenDating Store Listing
 
-**Last updated:** 2026-08-08
+**Last updated:** 2026-08-09
+
+> **Submission status: held.** This metadata is not approved for upload. The iOS build 4 submission must be withdrawn and Android build 3 must remain draft. Production scripts are blocked by `release/manifest.json`.
 
 This is the canonical copy deck for the first App Store Connect and Google Play
 Console records.
@@ -11,7 +13,7 @@ Console records.
 |---|---|
 | App Store name | OpenDating Mobile |
 | Google Play name | OpenDating |
-| Subtitle / short description | Private dating, no ads |
+| Subtitle / short description | Private dating, pre-release |
 | iOS bundle ID | `com.jongan69.opendating` |
 | Android package | `com.jongan69.opendating` |
 | SKU | `com.jongan69.opendating` |
@@ -20,31 +22,18 @@ Console records.
 | Primary category | Social Networking |
 | Secondary category | Lifestyle |
 | Privacy policy URL | `https://jongan69.github.io/opendating-mobile/privacy/` |
-| Support URL | `https://jongan69.github.io/opendating-mobile/privacy/` |
+| Support URL | `https://jongan69.github.io/opendating-mobile/safety/` |
 | Marketing URL | `https://jongan69.github.io/opendating-mobile/` |
 
 ## Store Description
 
-OpenDating is a privacy-first dating app for meeting people nearby without
-turning your love life into an advertising profile.
+OpenDating is pre-release dating software built around coarse location and
+end-to-end encrypted direct messages. Current services are operated by
+OpenDating while the project completes native key protection, durable
+messaging, verification, moderation, legal, and reliability gates.
 
-Create an account in the app, build a profile, discover nearby people, match
-when the interest is mutual, and message with end-to-end encryption. Your exact
-location never leaves your device. OpenDating uses only a coarse area so
-discovery can work without exposing your precise location.
-
-What makes OpenDating different:
-
-- Self-owned account with a recovery key
-- Coarse location instead of exact location sharing
-- End-to-end encrypted private messages
-- Private likes until there is a match
-- Local blocks, reports, and unmatch controls
-- No ads and no tracking-based business model
-- Built on open, portable dating infrastructure
-
-OpenDating is an early production release for people who want a calmer, more
-private way to meet. Bring the human part. The app handles the privacy plumbing.
+No current binary is approved for public distribution. This copy must be
+rewritten and legally reviewed before a future store submission.
 
 ## Keywords
 
@@ -52,9 +41,9 @@ private way to meet. Bring the human part. The app handles the privacy plumbing.
 
 ## Release Notes
 
-Initial 0.1 release: account creation with a recovery key, privacy-first
-onboarding, nearby discovery using coarse location, mutual matches, end-to-end
-encrypted messages, blocks, reports, and profile controls.
+Release held. Version 0.1.1 repairs discovery gestures and request routing,
+adds authenticated inbound-envelope checks, and keeps production distribution
+blocked pending the documented release gates.
 
 ## Reviewer Notes
 
@@ -118,32 +107,28 @@ Google Play phone screenshots are in `screenshots/play-store/phone-*.png` at
 
 | Platform | Build | Artifact |
 |---|---|---|
-| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | App Store IPA, v0.1.0 build 4 |
-| Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Play Store AAB, v0.1.0 version code 3 |
+| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | Stale App Store IPA, v0.1.0 build 4 — withdraw |
+| Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Stale Play Store AAB, v0.1.0 version code 3 — keep draft |
 
 ## Submission Commands
 
-After the App Store Connect app record exists:
+Only after `release/manifest.json` is approved from the exact release commit:
 
 ```bash
-export ASC_API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_563GUURUSD.p8"
-export ASC_API_KEY_ISSUER_ID="<issuer UUID>"
+export ASC_API_KEY_PATH="<approved secret path>"
+export ASC_API_KEY_ISSUER_ID="<approved issuer ID>"
 
 npm run store:ios:lookup-asc-app-id
 npm run store:ios:lookup-asc-app-id -- --write-eas-json
 
-npx eas-cli@latest submit --platform ios \
-  --id c51e102b-4592-448e-8f42-3127ceead80f \
-  --profile production --non-interactive --wait
+npm run submit:ios
 npm run store:metadata:push -- --non-interactive
 ```
 
 After the Play Console app exists and the first AAB has been uploaded manually:
 
 ```bash
-export GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$HOME/.google-play/service-account.json"
+export GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="<approved secret path>"
 
-npx eas-cli@latest submit --platform android \
-  --id f5b79c72-91ee-4dd3-96e7-0343911e2ca2 \
-  --profile production --non-interactive --wait
+npm run submit:android
 ```

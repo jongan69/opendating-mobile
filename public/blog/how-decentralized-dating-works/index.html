@@ -37,9 +37,9 @@
 
     <p>OpenDating is built on <strong>Nostr</strong> — a decentralized protocol for censorship-resistant communication. But here's the key insight: <strong>you never need to know that.</strong> The app looks and feels like any modern dating app. The decentralization is infrastructure, not UX.</p>
 
-    <h2>The Problem With Centralized Dating</h2>
-    <p>Every major dating app runs on a central server owned by a company. That company stores your profile, your messages, your location, your swipes, and your matches in a database they control. They can read your messages. They can sell your data. They can change the rules or shut down your account. You don't own anything.</p>
-    <p>Decentralized dating replaces the central server with a <strong>relay network</strong> — computers that pass encrypted messages between users without being able to read them.</p>
+    <h2>What is open today</h2>
+    <p>OpenDating uses an open wire protocol over Nostr, but the current profile, discovery, matching, policy, moderation, media, and deletion services are operated by OpenDating on Cloudflare. Profiles and relationship state are stored in first-party databases. Calling the current deployment “no central server” would be inaccurate.</p>
+    <p>The post-GA goal is provider interchangeability: signed manifests, portable exports, conformance tests, and multiple independent operators. Those capabilities do not exist in the current beta.</p>
 
     <h2>How OpenDating Protects Your Privacy</h2>
 
@@ -50,15 +50,15 @@
     <p>When you message a match, the content is encrypted on your device using NIP-44 — the same encryption standard used by secure messaging apps. Only your match's device can decrypt it. The relay enforces that only matched users can message each other, but it never sees the content.</p>
 
     <h3>3. Service Roles</h3>
-    <p>Instead of one monolithic server doing everything, OpenDating splits functionality across independent services — profile, discovery, matcher, DM policy, and moderation. Each service only sees the data it needs to function. The discovery service knows your general area but not your messages. The matcher knows about likes but not your location.</p>
+    <p>OpenDating separates functionality by role — profile, discovery, matcher, DM policy, moderation, and deletion. Today those roles share one first-party operator, but the boundaries reduce accidental coupling and define the interfaces needed for future independent providers.</p>
 
     <h3>4. Relay Enforcement</h3>
     <p>The relay enforces rules at the protocol level: unmatched users can't message each other, blocked users can't discover the blocker, and reports are routed privately to moderation. These aren't app-level features — they're enforced by the infrastructure.</p>
 
     <h2>What This Means for Users</h2>
-    <p>You create an account (a cryptographic keypair), build a profile, and start discovering people — exactly like any dating app. The difference is invisible: your data isn't in a corporate database. It's encrypted events on a decentralized network that you control.</p>
+    <p>You create an account (a cryptographic keypair), build a profile, and start discovering people. Direct messages and service commands use encrypted gift wraps, while authorized services necessarily process profile, preference, match, block, report, and deletion state.</p>
 
-    <p>If OpenDating disappears tomorrow, your identity — your keypair — still works with any other OpenDating-compatible client. You own your dating life.</p>
+    <p>The keypair can be used by another compatible client, but portable profile, private-list, and cross-provider service migration are not complete. The public site will not promise full portability before conformance tests prove it.</p>
 
     <p><a href="../../">Learn more about OpenDating →</a></p>
   </article>

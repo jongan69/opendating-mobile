@@ -29,6 +29,7 @@ const KNOWN_ROLES: OpenDatingServiceRole[] = [
   'moderation',
   'verification',
   'media',
+  'deletion',
 ];
 
 /** Nostr pubkeys are 32-byte hex. Anything else is not usable as a peer. */
@@ -115,6 +116,8 @@ export function serviceLabel(role: OpenDatingServiceRole): string {
       return 'Verification';
     case 'media':
       return 'Photos';
+    case 'deletion':
+      return 'Account deletion';
     case 'system':
       return 'Connection';
   }

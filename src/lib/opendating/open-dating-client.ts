@@ -20,7 +20,9 @@ import NDK, {
 import {
   createEnvelope,
   buildGiftWrap,
+  checkRequestFreshness,
   generateKeypair,
+  validateEnvelope,
   type OpenDatingEnvelope,
 } from 'opendating-protocol';
 import * as SecureStore from 'expo-secure-store';
@@ -47,6 +49,10 @@ import { mapServiceError, ServiceUnavailableError } from './errors';
 import { parseCapabilities, serviceLabel } from './capabilities';
 import { unwrapGiftWrap } from './gift-wrap';
 import { uploadPendingPhotos } from './media';
+import {
+  getRequestRoute,
+  type ClientRequestType,
+} from './request-routing';
 
 // ---- Constants ----
 
@@ -89,6 +95,8 @@ interface PendingRequest {
   resolve: (value: OpenDatingEnvelope) => void;
   reject: (error: Error) => void;
   timer: ReturnType<typeof setTimeout>;
+  expectedSenderPubkey: string;
+  expectedResultType: string;
 }
 
 interface OpenDatingClientConfig {
@@ -112,6 +120,8 @@ class OpenDatingClientImpl {
   private messageListeners = new Set<(msg: ODMessage) => void>();
   /** Rumor ids already delivered — relays re-send, and we must not double-fire. */
   private seenRumorIds = new Set<string>();
+  /** DMs that arrive during bootstrap, before the conversation hook mounts. */
+  private bufferedMessages: ODMessage[] = [];
   /** From the relay's NIP-11 `limitation.auth_required`. */
   private relayRequiresAuth = true;
 
@@ -177,6 +187,7 @@ class OpenDatingClientImpl {
     await SecureStore.deleteItemAsync(SECURE_STORE_PUBKEY_KEY);
     this.userPubkey = '';
     this.userPrivkey = '';
+    this.bufferedMessages = [];
   }
 
   // ---- Connection ----
@@ -308,6 +319,7 @@ class OpenDatingClientImpl {
     }
     this.pendingRequests.clear();
     this.seenRumorIds.clear();
+    this.bufferedMessages = [];
 
     // NDK manages relay connections via its pool; no explicit disconnect() method.
     // Just drop the reference and let GC handle cleanup.
@@ -410,15 +422,14 @@ class OpenDatingClientImpl {
   // ---- System ----
 
   async ping(): Promise<{ server_time: number; protocol_version: string }> {
-    const result = await this.sendRequest('system', 'system.ping', {});
+    const result = await this.sendRequest('system.ping', {});
     return result.payload as { server_time: number; protocol_version: string };
   }
 
   // ---- Core Request / Response ----
 
   private async sendRequest(
-    service: OpenDatingServiceRole,
-    type: string,
+    type: ClientRequestType,
     payload: Record<string, unknown>
   ): Promise<OpenDatingEnvelope> {
     if (!this.services) {
@@ -428,11 +439,12 @@ class OpenDatingClientImpl {
       throw new Error('Not connected. Call connect() first.');
     }
 
-    const servicePubkey = this.services[service]?.pubkey;
+    const route = getRequestRoute(type);
+    const servicePubkey = this.services[route.role]?.pubkey;
     if (!servicePubkey) {
       // The relay simply doesn't run this service. Callers turn this into a
       // "not available yet" state rather than a generic error.
-      throw new ServiceUnavailableError(service, serviceLabel(service));
+      throw new ServiceUnavailableError(route.role, serviceLabel(route.role));
     }
 
     const requestId = randomUUID();
@@ -455,7 +467,13 @@ class OpenDatingClientImpl {
         reject(new Error(`Request timed out: ${type}`));
       }, REQUEST_TIMEOUT_MS);
 
-      this.pendingRequests.set(requestId, { resolve, reject, timer });
+      this.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        timer,
+        expectedSenderPubkey: servicePubkey,
+        expectedResultType: route.resultType,
+      });
     });
 
     try {
@@ -507,52 +525,76 @@ class OpenDatingClientImpl {
 
     // Relays re-deliver; the rumor id is deterministic, so it dedupes across
     // reconnects as well as within a session.
-    if (unwrapped.rumorId) {
-      if (this.seenRumorIds.has(unwrapped.rumorId)) return;
-      this.seenRumorIds.add(unwrapped.rumorId);
-    }
+    if (unwrapped.rumorId && this.seenRumorIds.has(unwrapped.rumorId)) return;
+
+    let accepted = false;
 
     if (unwrapped.kind === KIND_OD_COMMAND) {
-      this.handleCommandEnvelope(unwrapped.content);
-      return;
+      accepted = this.handleCommandEnvelope(
+        unwrapped.content,
+        unwrapped.senderPubkey
+      );
     }
 
     if (unwrapped.kind === KIND_DM) {
-      this.handleDirectMessage(unwrapped);
+      accepted = this.handleDirectMessage(unwrapped);
+    }
+
+    if (accepted && unwrapped.rumorId) {
+      this.rememberRumorId(unwrapped.rumorId);
     }
   }
 
-  private handleCommandEnvelope(content: string): void {
+  private rememberRumorId(rumorId: string): void {
+    this.seenRumorIds.add(rumorId);
+    // A relay replay must not create an unbounded process-lifetime set.
+    if (this.seenRumorIds.size > 4_096) {
+      const oldest = this.seenRumorIds.values().next().value;
+      if (oldest) this.seenRumorIds.delete(oldest);
+    }
+  }
+
+  private handleCommandEnvelope(content: string, senderPubkey: string): boolean {
     let envelope: OpenDatingEnvelope;
     try {
       envelope = JSON.parse(content) as OpenDatingEnvelope;
     } catch {
-      return;
+      return false;
     }
-    if (!envelope || typeof envelope.type !== 'string') return;
+    if (!validateEnvelope(envelope).valid) return false;
+    if (checkRequestFreshness(envelope.created_at) !== null) return false;
 
     const pending = this.pendingRequests.get(envelope.request_id);
     if (pending) {
+      if (senderPubkey !== pending.expectedSenderPubkey) return false;
+
+      const isError =
+        envelope.type === 'system.error' || envelope.type === 'service.error';
+      if (!isError && envelope.type !== pending.expectedResultType) return false;
+
       clearTimeout(pending.timer);
       this.pendingRequests.delete(envelope.request_id);
 
       // The protocol emits `system.error`; older builds emitted
       // `service.error`. Accept both so an error is never mistaken for a
       // successful result.
-      if (envelope.type === 'system.error' || envelope.type === 'service.error') {
+      if (isError) {
         const errPayload = envelope.payload as { code?: string; message?: string };
         const mapped = mapServiceError(errPayload?.code ?? 'unknown');
         pending.reject(new Error(mapped.userMessage));
       } else {
         pending.resolve(envelope);
       }
-      return;
+      return true;
     }
 
     // Server push (no request waiting on it).
     if (envelope.type === 'match.created') {
+      if (senderPubkey !== this.services?.matcher?.pubkey) return false;
       this.handleMatchCreatedPush(envelope);
+      return true;
     }
+    return false;
   }
 
   private handleDirectMessage(unwrapped: {
@@ -560,7 +602,7 @@ class OpenDatingClientImpl {
     content: string;
     createdAt: number;
     rumorId: string;
-  }): void {
+  }): boolean {
     let text: string | undefined;
     let to: string | undefined;
     try {
@@ -574,13 +616,13 @@ class OpenDatingClientImpl {
       // Tolerate a rumor carrying bare text rather than a JSON body.
       text = unwrapped.content;
     }
-    if (!text) return;
+    if (!text) return false;
 
     // Our own sent messages come back as self-addressed copies, so the peer
     // is the `to` field for those and the sender for everything else.
     const outgoing = unwrapped.senderPubkey === this.userPubkey;
     const conversationPubkey = outgoing ? to : unwrapped.senderPubkey;
-    if (!conversationPubkey) return; // Unroutable — drop rather than misfile.
+    if (!conversationPubkey) return false; // Unroutable — drop rather than misfile.
 
     const msg: ODMessage = {
       // The rumor id is stable across re-delivery; the wrap id is not, since
@@ -594,9 +636,15 @@ class OpenDatingClientImpl {
       outgoing,
     };
 
-    for (const listener of this.messageListeners) {
-      listener(msg);
+    if (this.messageListeners.size === 0) {
+      this.bufferedMessages.push(msg);
+      if (this.bufferedMessages.length > 100) this.bufferedMessages.shift();
+    } else {
+      for (const listener of this.messageListeners) {
+        listener(msg);
+      }
     }
+    return true;
   }
 
   // ---- Match push handling ----
@@ -618,12 +666,12 @@ class OpenDatingClientImpl {
   // ---- Profile Operations ----
 
   async createProfile(): Promise<OpenDatingProfile> {
-    const result = await this.sendRequest('profile', 'profile.create', {});
+    const result = await this.sendRequest('profile.create', {});
     return result.payload as unknown as OpenDatingProfile;
   }
 
   async getProfile(): Promise<OpenDatingProfile> {
-    const result = await this.sendRequest('profile', 'profile.get', {});
+    const result = await this.sendRequest('profile.get', {});
     return result.payload as unknown as OpenDatingProfile;
   }
 
@@ -637,7 +685,7 @@ class OpenDatingClientImpl {
    * profile is never queryable by anyone the service has not granted access.
    */
   async updateProfile(content: ProfileContent): Promise<void> {
-    await this.sendRequest('profile', 'profile.update', { profile: content });
+    await this.sendRequest('profile.update', { profile: content });
   }
 
   /**
@@ -653,19 +701,19 @@ class OpenDatingClientImpl {
   }
 
   async pauseProfile(): Promise<void> {
-    await this.sendRequest('profile', 'profile.pause', {});
+    await this.sendRequest('profile.pause', {});
   }
 
   async resumeProfile(): Promise<void> {
-    await this.sendRequest('profile', 'profile.resume', {});
+    await this.sendRequest('profile.resume', {});
   }
 
   async deleteProfile(): Promise<void> {
-    await this.sendRequest('profile', 'profile.delete', {});
+    await this.sendRequest('profile.delete', {});
   }
 
   async updateVisibility(visibility: string): Promise<void> {
-    await this.sendRequest('profile', 'visibility.update', { visibility });
+    await this.sendRequest('visibility.update', { visibility });
   }
 
   // ---- Discovery Operations ----
@@ -674,7 +722,7 @@ class OpenDatingClientImpl {
     geohashPrefix: string,
     countryCode?: string
   ): Promise<void> {
-    await this.sendRequest('discovery', 'discovery.update_location', {
+    await this.sendRequest('discovery.update_location', {
       geohash_prefix: geohashPrefix,
       country_code: countryCode,
     });
@@ -683,7 +731,7 @@ class OpenDatingClientImpl {
   async updateDiscoveryPreferences(
     preferences: DiscoveryPreferences
   ): Promise<void> {
-    await this.sendRequest('discovery', 'discovery.update_preferences', {
+    await this.sendRequest('discovery.update_preferences', {
       max_distance_km: preferences.max_distance_km,
       min_age: preferences.min_age,
       max_age: preferences.max_age,
@@ -693,7 +741,7 @@ class OpenDatingClientImpl {
   }
 
   async getCandidates(query: CandidateQuery): Promise<CandidatePage> {
-    const result = await this.sendRequest('discovery', 'discovery.get_candidates', {
+    const result = await this.sendRequest('discovery.get_candidates', {
       radius_miles: query.radius_miles,
       age_min: query.age_min,
       age_max: query.age_max,
@@ -708,7 +756,7 @@ class OpenDatingClientImpl {
   // ---- Matching Operations ----
 
   async like(targetPubkey: string, candidateGrant: string): Promise<LikeResult> {
-    const result = await this.sendRequest('matcher', 'intent.like', {
+    const result = await this.sendRequest('intent.like', {
       target_pubkey: targetPubkey,
       candidate_grant: candidateGrant,
     });
@@ -716,13 +764,13 @@ class OpenDatingClientImpl {
   }
 
   async revokeLike(targetPubkey: string): Promise<void> {
-    await this.sendRequest('matcher', 'intent.revoke', {
+    await this.sendRequest('intent.revoke', {
       target_pubkey: targetPubkey,
     });
   }
 
   async getMatches(): Promise<Match[]> {
-    const result = await this.sendRequest('matcher', 'match.list', {});
+    const result = await this.sendRequest('match.list', {});
     const payload = result.payload as { matches?: Match[] };
     return payload.matches ?? [];
   }
@@ -730,31 +778,31 @@ class OpenDatingClientImpl {
   // ---- Safety Operations ----
 
   async createBlock(targetPubkey: string): Promise<void> {
-    await this.sendRequest('dm_policy', 'block.create', {
+    await this.sendRequest('block.create', {
       target_pubkey: targetPubkey,
     });
   }
 
   async removeBlock(targetPubkey: string): Promise<void> {
-    await this.sendRequest('dm_policy', 'block.remove', {
+    await this.sendRequest('block.remove', {
       target_pubkey: targetPubkey,
     });
   }
 
   async getBlocks(): Promise<Block[]> {
-    const result = await this.sendRequest('dm_policy', 'block.list', {});
+    const result = await this.sendRequest('block.list', {});
     const payload = result.payload as { blocks?: Block[] };
     return payload.blocks ?? [];
   }
 
   async unmatch(targetPubkey: string): Promise<void> {
-    await this.sendRequest('matcher', 'unmatch.create', {
+    await this.sendRequest('unmatch.create', {
       target_pubkey: targetPubkey,
     });
   }
 
   async report(report: ReportInput): Promise<void> {
-    await this.sendRequest('moderation', 'report.create', {
+    await this.sendRequest('report.create', {
       subject_pubkey: report.subject_pubkey,
       report_type: report.report_type,
       description_encrypted: report.description_encrypted,
@@ -765,7 +813,7 @@ class OpenDatingClientImpl {
   // ---- Verification ----
 
   async getVerificationClaims(): Promise<VerificationClaim[]> {
-    const result = await this.sendRequest('profile', 'verification.list', {});
+    const result = await this.sendRequest('verification.list', {});
     const payload = result.payload as { claims?: VerificationClaim[] };
     return payload.claims ?? [];
   }
@@ -773,7 +821,7 @@ class OpenDatingClientImpl {
   // ---- Account ----
 
   async deleteAccount(): Promise<void> {
-    await this.sendRequest('profile', 'account.delete', {});
+    await this.sendRequest('account.delete', {});
   }
 
   // ---- Messaging (NIP-17) ----
@@ -816,6 +864,9 @@ class OpenDatingClientImpl {
 
   subscribeToMessages(callback: (msg: ODMessage) => void): () => void {
     this.messageListeners.add(callback);
+    const buffered = this.bufferedMessages;
+    this.bufferedMessages = [];
+    for (const message of buffered) callback(message);
     // The inbox subscription is opened on connect and shared by every
     // listener, so attaching here never opens a second relay subscription.
     this.startInboxSubscription();

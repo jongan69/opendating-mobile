@@ -14,7 +14,7 @@ OpenDating Mobile is built as a layered application where each layer has strict 
                    OpenDatingClient (src/lib/opendating/)
                    /                           \
                   /                             \
-    opendating-protocol                   NDK Mobile
+    opendating-protocol                   NDK core
     (crypto, envelopes,               (relay, subscriptions,
      gift wraps, types)                events, signer)
                   \                             /
@@ -29,7 +29,7 @@ OpenDating Mobile is built as a layered application where each layer has strict 
 
 1. **Screens** may import from Features, Components, Theme, and OpenDatingClient
 2. **Features** may import from OpenDatingClient, Location, Storage, Theme, Types
-3. **OpenDatingClient** may import from opendating-protocol, NDK Mobile, Storage
+3. **OpenDatingClient** may import from opendating-protocol, NDK core, Storage
 4. **Screens must NOT** construct Nostr events, gift wraps, or envelopes directly
 5. **No layer** may import from backend implementation code
 
@@ -63,9 +63,9 @@ The facade that screens talk to. Domain-oriented API:
 - `createBlock()`, `unmatch()`, `report()`
 - `getCapabilities()`, `ping()`
 
-### NDK Mobile
+### NDK core
 
-Handles all Nostr infrastructure:
+Handles the current transport integration:
 - Relay connection and reconnection
 - NIP-42 AUTH
 - Event publication and subscription
