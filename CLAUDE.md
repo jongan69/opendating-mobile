@@ -2,7 +2,7 @@
 
 ## Project Identity
 
-OpenDating Mobile is the first reference client for the [OpenDating](https://github.com/jongan69/OpenDating) protocol — a privacy-first, decentralized dating application built on Nostr. It is a production-quality Expo React Native app, not a prototype or demo.
+OpenDating Mobile is the first reference client for the [OpenDating](https://github.com/jongan69/OpenDating) protocol. It is a pre-release Expo React Native app under active security and reliability work. Production builds and submissions are blocked until `release/manifest.json` is explicitly approved.
 
 ## Critical Rules
 
@@ -10,7 +10,7 @@ OpenDating Mobile is the first reference client for the [OpenDating](https://git
 
 2. **Nostr is invisible to users.** Never use terms like "npub", "nsec", "relay", "NIP-42", "gift wrap", "event kind" in user-facing UI. Normal language: "Create Account", not "Generate Nostr Keypair".
 
-3. **Privacy is non-negotiable.** Raw GPS never leaves the device (only 5-char geohash). nsec lives only in SecureStore. DMs are end-to-end encrypted. Blocks take effect locally before network confirmation.
+3. **Privacy is non-negotiable.** Raw GPS never leaves the device (only a 5-character geohash). Never log or transmit a private key. The v0.1 JavaScript/SecureStore signer and advanced clipboard recovery are known pre-GA limitations tracked in `docs/RELEASE-STATUS.md`. DMs are end-to-end encrypted. Blocks must take effect locally before network confirmation.
 
 4. **Use @expo/ui for conventional UI.** Escape to React Native + Reanimated only for the swipe deck and complex gestures. No alternative UI frameworks (NativeWind, Tamagui, etc.).
 

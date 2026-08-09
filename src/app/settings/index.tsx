@@ -233,7 +233,8 @@ export default function SettingsScreen() {
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />
             <MenuRow
               label="Terms of Service"
-              onPress={() => router.push('/settings/privacy')}
+              supportingText="Draft beta terms — legal review pending"
+              onPress={() => router.push('/settings/terms')}
             />
           </View>
 

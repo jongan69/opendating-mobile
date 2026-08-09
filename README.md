@@ -7,7 +7,7 @@
 
 <p align="center">
   <strong>The privacy-first, decentralized dating app.</strong><br>
-  A production-grade Expo React Native reference client for the OpenDating protocol.
+  A pre-release Expo React Native reference client for the OpenDating protocol.
 </p>
 
 <p align="center">
@@ -21,9 +21,11 @@
 
 <br>
 
+> **Release status:** blocked for production and store submission. This repository is not yet production-grade. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities and open gates, and the [1.0 Execution Roadmap](docs/ROADMAP-1.0.md) for the gated path through GA.
+
 ## What is OpenDating?
 
-**OpenDating** is a dating application that feels as polished as Tinder, Bumble, or Hinge — but built on a decentralized, privacy-first architecture. Your identity belongs to you. Your exact location never leaves your device. Your likes, blocks, and reports are private. Your messages are end-to-end encrypted.
+**OpenDating** is an early dating client built around data minimization, coarse location, private service requests, and end-to-end encrypted direct messages. It currently connects to services operated by OpenDating on Cloudflare; federation and independent providers are post-GA work.
 
 Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for censorship-resistant communication. But normal users never need to know that. They just create an account, build a profile, and start discovering people nearby.
 
@@ -38,9 +40,9 @@ Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for ce
 | Your data lives on their servers | Your identity is a key you own |
 | They track your exact location | Only ~5 km coarse area shared |
 | They can read your messages | End-to-end encrypted (NIP-44) |
-| They own your profile | Portable across any OpenDating client |
-| They monetize your data | No ads, no surveillance business model |
-| You can't leave | Export your key, move to any client |
+| Profile portability varies by provider | Open profile formats are available; complete cross-provider portability is post-GA work |
+| Advertising and data monetization may be part of the model | No advertising or tracking-based monetization in the current build |
+| Account portability varies | The protocol is designed for portable identity; cross-provider portability is not yet GA-ready |
 
 <br>
 
@@ -88,13 +90,13 @@ Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for ce
 ┌──────────────────────────────────────────────┐
 │                  Expo UI                     │  ← Native components
 ├──────────────────────────────────────────────┤
-│               30 App Screens                 │  ← Expo Router
+│               App Screens                    │  ← Expo Router
 ├──────────────────────────────────────────────┤
-│             11 Feature Hooks                 │  ← Domain logic
+│              Feature Hooks                   │  ← Domain logic
 ├──────────────────────────────────────────────┤
 │           OpenDatingClient                   │  ← Protocol facade
 ├──────────────────┬───────────────────────────┤
-│ opendating-proto │   NDK Mobile              │  ← Infrastructure
+│ opendating-proto │   NDK core                │  ← Infrastructure
 │ (crypto, types)  │   (relay, events, auth)   │
 ├──────────────────┴───────────────────────────┤
 │                  Nostr                       │
@@ -103,7 +105,7 @@ Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for ce
 └──────────────────────────────────────────────┘
 ```
 
-**The mobile app does not depend on backend implementation code.** Everything required for client integration is defined by the `opendating-protocol@0.1.0` package, the public relay API, and the OpenDating protocol specification.
+**The mobile app does not depend on backend implementation code.** Integration uses the `opendating-protocol` package, the advertised service capabilities, and the OpenDating protocol specification. Protocol `0.1` is experimental; package `0.1.1` is pending registry publication.
 
 <br>
 
@@ -158,8 +160,8 @@ npm test                 # Jest test suite
 | **Language** | TypeScript (strict) | 6.0 |
 | **Navigation** | Expo Router | ~57 |
 | **UI Components** | @expo/ui | ~57 |
-| **Nostr Client** | @nostr-dev-kit/ndk-mobile | ^0.8 |
-| **Protocol** | opendating-protocol | 0.1.0 |
+| **Nostr Client** | @nostr-dev-kit/ndk | ^2.15 |
+| **Protocol** | opendating-protocol | 0.1 (experimental) |
 | **Gestures** | react-native-gesture-handler | ~2.32 |
 | **Animation** | react-native-reanimated | ^4.5 |
 | **Images** | expo-image | ~57 |

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "status": "blocked",
+  "appVersion": "0.1.1",
+  "gitSha": null,
+  "protocolVersion": "0.1",
+  "databaseSchema": null,
+  "artifacts": {
+    "iosBuildId": null,
+    "androidBuildId": null,
+    "checksums": {}
+  },
+  "migrationState": "not-started",
+  "approvedAt": null,
+  "approvedBy": null,
+  "blockers": [
+    "native-signer-and-passkey-recovery",
+    "durable-encrypted-message-store",
+    "global-persistent-block-enforcement",
+    "verification-and-moderation-operations",
+    "production-legal-and-store-review",
+    "independent-security-review"
+  ]
+}

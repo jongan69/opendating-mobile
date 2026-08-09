@@ -16,33 +16,15 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jongan69.github.io/opendating-mobile/blog/why-privacy-matters-in-dating</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://jongan69.github.io/opendating-mobile/blog/how-decentralized-dating-works</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://jongan69.github.io/opendating-mobile/blog/tinder-vs-bumble-vs-opendating</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://jongan69.github.io/opendating-mobile/blog/self-sovereign-identity-explained</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://jongan69.github.io/opendating-mobile/blog/end-to-end-encryption-dating</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://jongan69.github.io/opendating-mobile/blog/location-privacy-dating-apps</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/terms/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/community/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/safety/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/deletion/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/subprocessors/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/retention/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://jongan69.github.io/opendating-mobile/status/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

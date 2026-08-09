@@ -7,16 +7,16 @@
 - Uses `@noble/curves` secp256k1 underneath
 - Keys generated on-device, never transmitted
 
-### Key Storage
-- Private key (nsec) stored ONLY in OS secure storage via `expo-secure-store`
-- iOS: Keychain with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`
-- Android: EncryptedSharedPreferences backed by Android Keystore
-- Private key NEVER enters: AsyncStorage, SQLite, logs, analytics, navigation params, clipboard
+### Key Storage (current v0.1 limitation)
+- The private key is persisted with `expo-secure-store` and loaded into the JavaScript `OpenDatingClient` for signing and encryption.
+- The advanced recovery screen can copy the raw recovery key to the clipboard after an explicit warning.
+- The key must never enter AsyncStorage, SQLite, logs, analytics, navigation params, or network payloads.
+- A device-bound native signer and passkey-encrypted recovery are required before production approval; see `RELEASE-STATUS.md`.
 
 ### Signer
-- NDK Mobile manages signing operations
-- Private key material never leaves the secure signer context
-- NIP-42 AUTH events signed by the signer
+- NDK core signs NIP-42 authentication through `NDKPrivateKeySigner`.
+- Protocol commands and encryption are performed inside the client facade.
+- This keeps protocol operations out of screens, but it is not the final native cryptographic boundary.
 
 ## Network Security
 
@@ -53,7 +53,7 @@
 ### Profile Data
 - Profile information sent only through authorized discovery
 - Arbitrary profile enumeration prevented by relay
-- Photos accessed through authorized media tokens (not permanent public URLs)
+- Current profile photos use hosted URLs. Revocable media references and short-lived authorized URLs are required before GA.
 
 ## Safety
 

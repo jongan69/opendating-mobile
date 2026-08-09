@@ -149,6 +149,77 @@ describe('unwrapGiftWrap', () => {
     expect(unwrapGiftWrap(wrap, bob.privateKey)).toBeNull();
   });
 
+  it('rejects a seal with a tampered signature', () => {
+    const rumor = {
+      id: '',
+      pubkey: alice.publicKey,
+      created_at: 1700000000,
+      kind: 14,
+      tags: [] as string[][],
+      content: JSON.stringify({ text: 'forged' }),
+      sig: '',
+    };
+    const rumorHash = signEvent(rumor, alice.privateKey).id;
+    rumor.id = rumorHash;
+
+    const sealUnsigned = {
+      pubkey: alice.publicKey,
+      created_at: 1700000000,
+      kind: 13,
+      tags: [] as string[][],
+      content: nip44Encrypt(JSON.stringify(rumor), alice.privateKey, bob.publicKey),
+    };
+    const validSignature = signEvent(sealUnsigned, alice.privateKey);
+    const seal = {
+      ...sealUnsigned,
+      ...validSignature,
+      sig: `${validSignature.sig.slice(0, -1)}${validSignature.sig.endsWith('0') ? '1' : '0'}`,
+    };
+
+    const ephemeral = generateKeypair();
+    const wrap = {
+      pubkey: ephemeral.publicKey,
+      content: nip44Encrypt(
+        JSON.stringify(seal),
+        ephemeral.privateKey,
+        bob.publicKey
+      ),
+    };
+
+    expect(unwrapGiftWrap(wrap, bob.privateKey)).toBeNull();
+  });
+
+  it('rejects a rumor whose id does not match its content', () => {
+    const rumor = {
+      id: 'f'.repeat(64),
+      pubkey: alice.publicKey,
+      created_at: 1700000000,
+      kind: 14,
+      tags: [] as string[][],
+      content: JSON.stringify({ text: 'tampered' }),
+      sig: '',
+    };
+    const sealUnsigned = {
+      pubkey: alice.publicKey,
+      created_at: 1700000000,
+      kind: 13,
+      tags: [] as string[][],
+      content: nip44Encrypt(JSON.stringify(rumor), alice.privateKey, bob.publicKey),
+    };
+    const seal = { ...sealUnsigned, ...signEvent(sealUnsigned, alice.privateKey) };
+    const ephemeral = generateKeypair();
+    const wrap = {
+      pubkey: ephemeral.publicKey,
+      content: nip44Encrypt(
+        JSON.stringify(seal),
+        ephemeral.privateKey,
+        bob.publicKey
+      ),
+    };
+
+    expect(unwrapGiftWrap(wrap, bob.privateKey)).toBeNull();
+  });
+
   it('rejects an inner event that is not a seal', async () => {
     const notASeal = {
       pubkey: alice.publicKey,

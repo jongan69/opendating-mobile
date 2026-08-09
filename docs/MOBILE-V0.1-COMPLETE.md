@@ -31,7 +31,7 @@ The OpenDating Mobile reference application is fully implemented, type-safe, and
                          │
                  OpenDatingClient
                  /             \
-    opendating-protocol      NDK Mobile
+    opendating-protocol      NDK core
                  \             /
                       Nostr
                        │

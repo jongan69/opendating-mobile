@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -47,10 +50,60 @@ jobs:
       - run: npm ci
       - run: npm test -- --passWithNoTests
 
-  # Full check passes only when all three pass
+  security:
+    name: Security and release policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run security:audit
+      - run: npm run release:validate
+      - name: Reject backend implementation imports
+        run: |
+          if rg "(?:from|require\() ['\"](?:\.\./)+OpenDating/(?:src|worker)|/LocalCode/OpenDating/(?:src|worker)" src; then
+            exit 1
+          fi
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+      - if: github.event_name != 'pull_request'
+        run: echo "Dependency review applies to pull requests."
+
+  sbom:
+    name: SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm sbom --omit=dev --sbom-format cyclonedx > sbom.cdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json
+          if-no-files-found: error
+          retention-days: 30
+
+  # Full check passes only when all release checks pass.
   ci:
     name: CI
-    needs: [typecheck, lint, test]
+    needs: [typecheck, lint, test, security, dependency-review, sbom]
     runs-on: ubuntu-latest
     steps:
       - run: echo "All checks passed"

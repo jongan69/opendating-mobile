@@ -1,341 +1,126 @@
-# OpenDating Mobile — Deployment Guide
+# OpenDating Mobile Deployment Guide
 
-**Last updated:** 2026-08-08
-**App:** OpenDating v0.1.0
-**Bundle IDs:** `com.jongan69.opendating` (iOS + Android)
+**Last updated:** 2026-08-09
 
----
+**App:** OpenDating Mobile 0.1.1 pre-release
 
-## Quick Deploy (EAS Cloud Build)
+**Bundle IDs:** `com.jongan69.opendating` (iOS and Android)
 
-EAS is the primary deployment path. It builds in the cloud — no local Xcode or Android SDK needed.
+## Release hold
 
-### Prerequisites
+Production builds and submissions are blocked. The existing iOS 0.1.0 build 4 and Android 0.1.0 build 3 predate required fixes and must not be released. See [Release Status](RELEASE-STATUS.md), [1.0 Execution Roadmap](ROADMAP-1.0.md), and `release/manifest.json`.
 
-- [x] EAS CLI logged in (`jongan69` / `jonny2298@live.com`)
-- [x] `eas.json` configured with `production` profile
-- [x] TypeScript passes (0 errors)
-- [x] ESLint passes (0 errors, 9 warnings)
-- [x] 81 tests pass across 6 suites
+The production build and submit scripts call `scripts/release/assert-release-ready.mjs`. They refuse to run unless:
 
-### iOS — Build + Submit to TestFlight
+1. the release manifest status is `approved`;
+2. the manifest's git SHA equals the exact checked-out commit; and
+3. an authorized release manager explicitly sets the production approval variable.
 
-```bash
-# Build in the cloud (15-30 min)
-eas build --platform ios --profile production --auto-submit
+Do not bypass this guard. A successful EAS build is an artifact, not approval to ship.
 
-# Or build then submit separately:
-eas build --platform ios --profile production
-eas submit --platform ios --profile production
-```
+## Known remote artifacts
 
-The `submit.production.ios` config in `eas.json` already has `appleId: "jonny2298@live.com"`. After upload, go to [App Store Connect](https://appstoreconnect.apple.com) → TestFlight, select the build, and submit for review.
+| Platform | Artifact | Required action |
+|---|---|---|
+| iOS | EAS build `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67`, app version 0.1.0 build 4 | Withdraw/reject the stale App Store Connect submission and do not promote the binary |
+| Android | EAS build `f5b79c72-91ee-4dd3-96e7-0343911e2ca2`, app version 0.1.0 build 3 | Keep out of production and leave any Play release in draft |
 
-### Android — Build + Submit to Play Store
+EAS confirms that both store artifacts finished. App Store Connect submission state must be verified in App Store Connect itself; repository documentation is not authoritative for live review state.
 
-```bash
-# Build AAB in the cloud (10-20 min)
-eas build --platform android --profile production
+## Environments
 
-# Submit to Play Console
-eas submit --platform android --profile production
-```
+Before a production release is approved, create distinct development, staging, and production resources for:
 
-After upload, go to [Google Play Console](https://play.google.com/console) → OpenDating → Release, start rollout.
+- relay Workers, routes, domains, secrets, and signed bootstrap manifests;
+- D1, R2, KV, Queues, backups, and observability;
+- EAS build/update profiles and store credentials;
+- verification, moderation, push, billing, analytics, and crash-reporting vendors.
 
----
+Production builds must receive production endpoints explicitly and must never silently fall back to staging. Required production bindings fail closed.
 
-## Alternative: Local Build Scripts
+## Required local configuration
 
-The `scripts/` directory has repo-agnostic shell scripts for local builds. Zero dependencies beyond the platform SDKs.
+The checked-in `.env.example` documents non-secret local values. Copy it to the ignored `.env` for development. Never commit App Store, Play, EAS, relay, vendor, signing, recovery, or database secrets.
 
-### What You Need (Not Yet Configured)
+Store automation expects credential paths through environment variables:
 
-These scripts need a `build.config.env` file at the repo root. **This file does not exist yet.**
+- `ASC_API_KEY_PATH` and `ASC_API_KEY_ISSUER_ID` for App Store Connect;
+- `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` for Play Console.
 
-Create `build.config.env`:
+Their presence is not evidence of release approval. Keys must be least-privilege, rotated, and stored in the approved secret manager. Do not record credential locations or availability in this guide.
+
+## Pre-release verification
+
+Run from the exact candidate commit:
 
 ```bash
-# ── App identity ──────────────────────────────────────────────────────
-APP_NAME="OpenDating"
-APP_BUNDLE_ID="com.jongan69.opendating"
-
-# ── iOS ───────────────────────────────────────────────────────────────
-IOS_DEVELOPMENT_TEAM="<your Apple Team ID from developer.apple.com/account>"
-IOS_EXPORT_OPTIONS="ios/exportOptions.plist"
-
-# App Store Connect API key (get from App Store Connect → Integrations → App Store Connect API)
-ASC_API_KEY_ID="<key ID, e.g. AB12CD34EF>"
-ASC_API_KEY_ISSUER_ID="<issuer ID from App Store Connect → Users and Access → Keys>"
-# Default key path: ~/.appstoreconnect/AuthKey_<KEY_ID>.p8
-ASC_API_KEY_PATH="$HOME/.appstoreconnect/AuthKey_<KEY_ID>.p8"
-
-# ── Android ───────────────────────────────────────────────────────────
-ANDROID_PROJECT_DIR="android"
-ANDROID_KEYSTORE_PATH="<path to .keystore or .jks>"
-ANDROID_KEYSTORE_PASSWORD="<keystore password>"
-ANDROID_KEY_ALIAS="<key alias>"
-ANDROID_KEY_PASSWORD="<key password>"
-
-# Google Play service account JSON (get from play.google.com/console → API access)
-GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$HOME/.google-play/service-account.json"
+npm ci
+npm run typecheck
+npm run lint
+npm test -- --runInBand
+npm run security:audit
+npm run release:validate
 ```
 
-### iOS Local Build
+CI also checks for backend source imports, creates an SBOM, reviews dependency changes, and uploads test evidence. Warnings permitted by the project policy must be reviewed; errors are not permitted.
+
+Before promoting a release, also verify:
+
+- protocol package/version and relay capabilities match the manifest;
+- account deletion, discovery gestures, candidate profiles, blocks, reports, unmatch, and recovery on physical devices;
+- no raw GPS, secret keys, message plaintext, sensitive profile content, or stable identity keys appear in logs, analytics, crash reports, push payloads, URLs, or navigation state;
+- merged iOS/Android permission manifests contain only exercised permissions;
+- store privacy/data-safety disclosures, policies, deletion URL, moderation coverage, and country approvals match runtime behavior;
+- restore/failover, rollback, load, security, and operational evidence is attached to the release ticket.
+
+## Building after approval
+
+EAS is the primary store-build path. Only after the manifest and external gates are approved:
 
 ```bash
-./scripts/build-ios.sh              # Build + upload to TestFlight
-./scripts/build-ios.sh --no-submit  # Build IPA only, skip upload
+npm run build:ios
+npm run build:android
 ```
 
-**Additional requirements:**
-- macOS with Xcode 16+
-- `ios/exportOptions.plist` (not yet created — use `xcodebuild -exportOptionsPlist` or generate from Xcode)
-- App Store Connect API key (`.p8` file)
+The exact EAS artifact IDs and checksums then belong in `release/manifest.json`. Verify the signed binaries and store metadata before submission.
 
-### Android Local Build
+Submit only the recorded artifacts:
 
 ```bash
-./scripts/build-android.sh              # Build AAB + upload to Play Store
-./scripts/build-android.sh --no-submit  # Build only
-./scripts/build-android.sh --apk        # Build APK instead of AAB
+npm run submit:ios
+npm run submit:android
 ```
 
-**Additional requirements:**
-- Android SDK (`ANDROID_HOME` set)
-- JDK 17+
-- **⚠️ Known issue on this machine:** `~/Library/Android/sdk` is a symlink to an exFAT volume. macOS AppleDouble `._*` sidecars break CMake globs in `react-native-worklets` and `react-native-screens`. Fix:
-  ```bash
-  dot_clean -m /Volumes/T9/DevTools/AndroidSDK
-  ```
-  Durable fix: move the SDK to the internal APFS disk.
+Android submission targets an internal draft. Promotion is a separate, evidence-backed release decision. iOS review submission is also separate from artifact upload.
 
----
+## Screenshots and listing assets
 
-## Release Pipeline (`scripts/release/ship.sh`)
-
-A full-featured orchestration script that chains: cleanup → commit → verify → push → domain → SEO → blog → web → iOS build → iOS verify → iOS submit.
+Generate store screenshots with the isolated screenshot profile:
 
 ```bash
-./scripts/release/ship.sh --dry-run          # Print the plan, touch nothing
-./scripts/release/ship.sh --only ios-build   # Single stage
-./scripts/release/ship.sh --only ios-submit  # Upload to App Store Connect
-./scripts/release/ship.sh --skip seo,domain  # All but these
+./scripts/capture-screenshots.sh
+./scripts/capture-screenshots-ios.sh
+./scripts/resize-screenshots.sh
 ```
 
-### Stages enabled for OpenDating
+Screenshot mode may use fixture data only. It must not connect a store asset generator to real user accounts or production private content. Listing copy comes from [Store Listing](STORE_LISTING.md) and must receive legal/product review before submission.
 
-| Stage | Enabled | Status |
-|-------|---------|--------|
-| `cleanup` | always | ✅ |
-| `commit` | always | ✅ |
-| `verify` | always | ✅ (typecheck) |
-| `push` | always | ✅ |
-| `domain` | `false` | ⏳ Pending domain registration |
-| `seo` | `true` | ⚠️ Needs `AI_API_KEY` set (already in `.env`) |
-| `blog` | `true` | ⚠️ Renders to `public/blog/` for web deploy |
-| `web` | `true` | ⚠️ Needs `npm run deploy:web:prod` configured |
-| `ios-build` | `true` | ✅ Uses EAS cloud build |
-| `ios-verify` | `true` | ✅ Checks IPA is App Store signed |
-| `ios-submit` | `true` | ✅ Uploads to App Store Connect |
+## Release sequence
 
-| `android-build` | `true` | ✅ EAS cloud build (AAB) |
-| `android-submit` | `true` | ⛔ Blocked — see "Two hard blockers" below |
+1. Merge reviewed changes through protected `main` branches in both repositories.
+2. Publish and pin the canonical protocol package.
+3. Create a signed release candidate tag.
+4. Populate the release manifest with the exact SHA, protocol/schema/migration state, artifacts, and checksums.
+5. Run CI, release-build E2E, security, deletion, backup/restore, and rollback evidence from that tag.
+6. Obtain engineering, security, legal, trust-and-safety, operations, and country go/no-go approvals.
+7. Change the manifest to approved in its own reviewed PR.
+8. Build, verify, submit, and roll out through the staged percentages in the roadmap.
+9. Monitor each stage for 48–72 hours and roll back or disable affected services through signed flags if a gate regresses.
 
-Both stores are reachable from the pipeline:
+## Live store containment
 
-```bash
-./scripts/release/ship.sh --only android-build,android-submit
-./scripts/release/ship.sh --only ios-build,ios-verify,ios-submit
-```
+- In App Store Connect, select OpenDating 0.1.0 build 4 and remove it from review if its current status permits. Record the resulting state and timestamp in the release ticket.
+- In Play Console, keep 0.1.0 build 3 out of production. Do not upload it merely to complete console setup.
+- Do not replace either stale artifact until the exact new candidate commit passes the approved release gates.
 
-`android.local` defaults to `false`, so the build runs in the cloud and
-`android-submit` resolves the artifact with `--latest` rather than a local path.
-Set it to `true` only if the local Android SDK problem below is fixed.
-
----
-
-## Screenshot Capture
-
-Scripts for generating App Store screenshots:
-
-```bash
-./scripts/capture-screenshots.sh         # Capture all device sizes
-./scripts/capture-screenshots-ios.sh     # iOS-specific captures
-./scripts/resize-screenshots.sh          # Resize to required dimensions
-```
-
-Uses the `screenshot` EAS profile which sets `EXPO_PUBLIC_SCREENSHOT_MODE=true`.
-
----
-
-## Current State (2026-08-08)
-
-| Item | Status |
-|------|--------|
-| EAS login | ✅ `jongan69` |
-| `eas.json` production profile | ✅ Configured |
-| TypeScript | ✅ 0 errors |
-| ESLint | ✅ 0 errors, 11 known warnings |
-| Tests | ✅ 81 tests, 6 suites |
-| Android builds (EAS) | ✅ v0.1.0 build 3 **finished**, store AAB, commit `2c9a9e4` |
-| Android submissions | ⚠️ Play Console UI handoff — AAB and screenshots are ready; no service account available for API submit |
-| Android keystore | ✅ Managed by Expo (Build Credentials 7eb19zjEJ1) |
-| iOS builds (EAS) | ✅ v0.1.0 build 4 **finished**, App Store IPA |
-| iOS submissions | ✅ Resubmitted; App Store Connect state `WAITING_FOR_REVIEW` |
-| iOS App Store listing | ✅ Metadata and screenshots synced, including `APP_IPAD_PRO_3GEN_129` |
-| `ship.sh` Android stages | ✅ `android-build`, `android-submit` |
-| `eas.json` submit config | ✅ Both platforms, env-var driven |
-| App Store Connect API key | ✅ `AuthKey_563GUURUSD.p8` present; matching issuer ID verified locally |
-| Google Play service account | ❌ Not configured locally |
-| `build.config.env` | ❌ Missing — only needed for the local-build path |
-| `ios/exportOptions.plist` | ❌ Missing — only needed for the local-build path |
-| `ios/` directory | ❌ Doesn't exist locally (EAS generates in cloud) |
-
-Current finished/submitted binaries:
-
-- iOS: App Store Connect app `6799451889`, version `0.1.0`, build `4`,
-  state `WAITING_FOR_REVIEW`
-- Android: build `f5b79c72-91ee-4dd3-96e7-0343911e2ca2`, AAB
-  `https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/f5b79c72-91ee-4dd3-96e7-0343911e2ca2`
-
-Android was built from commit `2c9a9e4`. The screenshot metadata fix is in the
-current working tree and has already been synced to App Store Connect.
-
----
-
-## Remaining Android Handoff
-
-The AAB is built and waiting (v0.1.0 build 3, commit `2c9a9e4`, store
-distribution). Two things block the upload:
-
-**Google Play refuses an API upload until the package already exists in the
-console with one release uploaded by hand.** This is a one-time gate per app
-and it is the single most common surprise in an otherwise automated pipeline.
-Upload the AAB through the Play Console UI once — download it from
-[the build page](https://expo.dev/accounts/jongan69/projects/opendating-mobile/builds/f5b79c72-91ee-4dd3-96e7-0343911e2ca2)
-— and every subsequent release can go through `android-submit`.
-
-**A service account key is needed for automated uploads.** Play Console → Setup
-→ API access → create a service account in Google Cloud, grant it "Release
-manager", download the JSON:
-
-```bash
-export GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$HOME/.google-play/service-account.json"
-
-eas submit --platform android --id f5b79c72-91ee-4dd3-96e7-0343911e2ca2 \
-  --profile production --non-interactive --wait
-```
-
-`eas.json` submits to the **internal** track with `releaseStatus: draft`, so
-nothing reaches the public until it is promoted in the console.
-
----
-
-## What To Do Next
-
-### Remaining Manual/Console Work
-
-1. Finish the Google Play release in the already-open Play Console tab.
-2. Upload the five `screenshots/play-store/phone-*.png` assets if Play Console
-   does not already show them.
-3. Create the Play service account JSON and export
-   `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` for future automated submits.
-
-### Then, fully automated
-
-```bash
-./scripts/release/ship.sh --only android-build,android-submit
-```
-
-### Before First App Store Review
-
-- [ ] Create `build.config.env` using the template above
-- [x] Create App Store Connect app record and write `ascAppId` to `eas.json`
-- [x] Prepare iOS App Store listing copy and metadata (`docs/STORE_LISTING.md`, `store.config.json`)
-- [x] Push iOS metadata after the app record/binary exists
-- [x] Submit iOS version `0.1.0` build `4` for review
-- [ ] Generate Google Play service account JSON for automated uploads
-- [ ] Set up Google Play listing (description, content rating, and final console review)
-- [ ] Create `ios/exportOptions.plist` for local builds
-- [ ] Fix Android SDK location (move from exFAT to APFS) for local Android builds
-- [x] Capture and verify Android screenshots using `scripts/capture-screenshots.sh`
-- [x] Generate App Store screenshots in `screenshots/app-store/`, including 13-inch iPad
-- [x] Generate Google Play phone screenshots in `screenshots/play-store/`
-- [x] Set up privacy/support URL:
-      `https://jongan69.github.io/opendating-mobile/privacy/`
-- [x] Add Android stages to `ship.sh`
-
-### App Store Assets Checklist
-
-Both stores require:
-
-- **App icon** (1024×1024 PNG, no alpha for iOS) — `scripts/generate-brand-assets.py` can generate
-- **Screenshots** — 6.7" iPhone (1290×2796) and 6.9" iPhone (1320×2868) required for iOS; various phone + tablet sizes for Android
-- **App description** — See `scripts/release/release.config.json` for tagline and differentiators
-- **Privacy Policy URL** — Must be publicly accessible
-- **Support URL** — Must be publicly accessible
-- **Age rating** — Dating app = 17+
-- **Content declarations** — User-generated content, chat/messaging
-
----
-
-## CI/CD
-
-GitHub Actions (`.github/workflows/ci.yml`) runs on push/PR to `main`:
-- TypeScript typecheck
-- ESLint
-- Jest tests
-
-All three must pass. The workflow does **not** deploy — deployment is manual via EAS CLI or the local build scripts.
-
----
-
-## Verification Checklist (Pre-Submit)
-
-Run before every App Store submission:
-
-- [ ] `npm run typecheck` — 0 errors
-- [ ] `npm run lint` — 0 errors (warnings OK)
-- [ ] `npm test` — all 81 tests pass
-- [ ] Relay is live: `curl -H "Accept: application/nostr+json" https://opendating-relay.jonathang132298.workers.dev`
-- [ ] No hardcoded service pubkeys (all from NIP-11)
-- [ ] No "npub", "nsec", "relay", "NIP-42" in user-facing strings
-- [ ] `.env` values are correct (relay URL, protocol version)
-- [ ] Version in `app.json` matches the release version
-- [ ] No permission is declared that no code path exercises — check the merged
-      manifest, not `app.json`, because plugins inject permissions the static
-      config never mentions:
-      ```bash
-      npx expo prebuild --platform android --no-install \
-        && grep uses-permission android/app/src/main/AndroidManifest.xml
-      ```
-
-## Android permissions, and why `blockedPermissions` is the mechanism
-
-`android.permissions` in `app.json` is **additive** — config plugins append to
-it. Removing an entry there does not remove it from the built app.
-`expo-location` contributes `ACCESS_FINE_LOCATION` and `expo-image-picker`
-contributes `RECORD_AUDIO` whatever the static config says.
-
-`android.blockedPermissions` is the only thing that strips them: it emits
-`tools:node="remove"` so no installed library or plugin can reintroduce the
-permission at manifest merge.
-
-Currently blocked, both verified absent from the merged manifest:
-
-| Permission | Why |
-|---|---|
-| `ACCESS_FINE_LOCATION` | The app only ever derives a 5-character geohash (~±2.4 km) at `Accuracy.Balanced`. Coarse alone matches the behaviour and the privacy positioning, and drops "Precise" from the OS prompt. |
-| `RECORD_AUDIO` | There is no audio code anywhere in the app. A dating app asking to record audio is both a Play policy problem and an obvious trust problem. |
-
-Two remain declared and are worth a decision before submission:
-
-- `SYSTEM_ALERT_WINDOW` ("draw over other apps") comes from React Native's own
-  manifest for the dev overlay. Blocking it is the right call for a store
-  build, but it may affect the dev-client overlay, so it is left alone rather
-  than traded for a broken development loop.
-- `READ_EXTERNAL_STORAGE` / `WRITE_EXTERNAL_STORAGE` are scoped to
-  `maxSdkVersion="32"`. Modern Android uses the system photo picker and needs
-  neither, but blocking them risks photo selection on Android 12 and below,
-  which is untested here — the verification device runs Android 16.
+Store consoles and EAS are the authorities for live artifact state; this file describes policy and the last verified artifact identities only.

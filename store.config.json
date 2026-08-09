@@ -1,19 +1,19 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "copyright": "2026 OpenDating",
     "categories": ["SOCIAL_NETWORKING", "LIFESTYLE"],
     "info": {
       "en-US": {
         "title": "OpenDating Mobile",
-        "subtitle": "Private dating, no ads",
-        "description": "OpenDating is a privacy-first dating app for meeting people nearby without turning your love life into an advertising profile.\n\nCreate an account in the app, build a profile, discover nearby people, match when the interest is mutual, and message with end-to-end encryption. Your exact location never leaves your device. OpenDating uses only a coarse area so discovery can work without exposing your precise location.\n\nWhat makes OpenDating different:\n\n- Self-owned account with a recovery key\n- Coarse location instead of exact location sharing\n- End-to-end encrypted private messages\n- Private likes until there is a match\n- Local blocks, reports, and unmatch controls\n- No ads and no tracking-based business model\n- Built on open, portable dating infrastructure\n\nOpenDating is an early production release for people who want a calmer, more private way to meet. Bring the human part. The app handles the privacy plumbing.",
+        "subtitle": "Private dating, pre-release",
+        "description": "OpenDating is pre-release dating software built around coarse location and end-to-end encrypted direct messages. Current services are operated by OpenDating while the project completes native key protection, durable messaging, verification, moderation, legal, and reliability gates.\n\nNo current binary is approved for public distribution. This metadata is retained for future review only.",
         "keywords": ["singles,match,chat,nearby,secure,photos,profile,ethical,local,relationships,privacy"],
-        "releaseNotes": "Initial 0.1 release: account creation with a recovery key, privacy-first onboarding, nearby discovery using coarse location, mutual matches, end-to-end encrypted messages, blocks, reports, and profile controls.",
+        "releaseNotes": "Release held. Version 0.1.1 repairs discovery gestures and routing, adds authenticated inbound-envelope checks, and keeps production distribution blocked pending the documented release gates.",
         "promoText": "Meet people nearby with a dating app built around coarse location, encrypted messages, and no advertising profile.",
         "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
-        "supportUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
+        "supportUrl": "https://jongan69.github.io/opendating-mobile/safety/",
         "marketingUrl": "https://jongan69.github.io/opendating-mobile/",
         "screenshots": {
           "APP_IPHONE_67": [

@@ -5,19 +5,19 @@
     "name": "OpenDating",
     "slug": "opendating",
     "tagline": "Privacy-first decentralized dating",
-    "description": "A dating app with Tinder-quality UX built on decentralized infrastructure. Your identity belongs to you, your exact location never leaves your device, and your messages are end-to-end encrypted. No surveillance, no data harvesting, no central server that owns your profile.",
+    "description": "Pre-release dating software built around coarse location and end-to-end encrypted direct messages. Current services are operated by OpenDating; production distribution is blocked.",
     "category": "dating app",
     "audience": "people who want genuine dating without surveillance capitalism",
     "platforms": ["iOS", "Android"],
     "price": "Free",
     "differentiators": [
-      "Self-sovereign identity — you own your account, not a company",
+      "Cryptographic identity with a legacy recovery-key flow",
       "Coarse location only — your exact GPS never reaches the server",
-      "End-to-end encrypted messages — nobody can read your conversations",
+      "End-to-end encrypted direct-message content",
       "Private likes — one-way likes are never public",
       "Private blocks and reports — enforced server-side, never notified",
       "No ads, no data harvesting, no surveillance business model",
-      "Portable profile — export your key and move to any OpenDating client"
+      "Open protocol with cross-provider portability planned after GA"
     ]
   },
 
@@ -28,14 +28,14 @@
   },
 
   "verify": {
-    "commands": ["npm run typecheck"],
+    "commands": ["npm run typecheck", "npm test -- --runInBand", "npm run security:audit", "npm run release:verify"],
     "lint": "npm run lint"
   },
 
   "ios": {
-    "enabled": true,
+    "enabled": false,
     "bundleId": "com.jongan69.opendating",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "buildNumber": "1",
     "easProfile": "production",
     "outputDir": "builds",
@@ -43,9 +43,9 @@
   },
 
   "android": {
-    "enabled": true,
+    "enabled": false,
     "packageName": "com.jongan69.opendating",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "easProfile": "production",
     "outputDir": "builds",
     "local": false,
@@ -79,7 +79,7 @@
     "articleCount": 20,
     "year": 2026,
     "model": "deepseek-chat",
-    "autoPublish": true,
+    "autoPublish": false,
     "competitors": [
       "Tinder",
       "Bumble",

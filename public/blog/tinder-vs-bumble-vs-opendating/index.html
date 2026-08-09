@@ -7,6 +7,7 @@
 <meta name="description" content="A side-by-side comparison of what Tinder, Bumble, Hinge, and OpenDating collect, store, and share about you. The privacy differences are stark.">
 <meta name="keywords" content="tinder privacy, bumble privacy, hinge privacy, dating app comparison, private dating app, opendating vs tinder">
 <meta property="og:title" content="Tinder vs Bumble vs Hinge: A Privacy Comparison">
+<meta name="robots" content="noindex">
 <meta property="og:description" content="What do the major dating apps know about you? A side-by-side comparison of data collection, message privacy, and location tracking.">
 <link rel="canonical" href="https://jongan69.github.io/opendating-mobile/blog/tinder-vs-bumble-vs-opendating">
 <style>
@@ -36,37 +37,21 @@
 <div class="container">
   <nav><a href="../../blog">← Blog</a></nav>
   <article>
-    <h1>Tinder vs Bumble vs Hinge: How They Handle Your Privacy</h1>
+    <h1>Correction: Dating App Ownership and Privacy Comparisons</h1>
     <div class="date">August 2026</div>
 
-    <p>Most people choose a dating app based on design, user base, or success stories. Almost nobody compares them on <strong>privacy</strong> — which is strange, given how much personal data dating apps collect. Here's an honest comparison.</p>
+    <p>An earlier version of this article incorrectly said Tinder, Bumble, and Hinge were all owned by Match Group and presented unsupported feature comparisons as settled facts. The article has been withdrawn rather than leaving marketing claims online without current sourcing and legal review.</p>
 
-    <p><strong>Note:</strong> This comparison is based on publicly available privacy policies and app permissions as of 2026. For the most current information, visit each app's privacy page directly.</p>
+    <h2>Correct ownership</h2>
+    <p>Match Group's official materials list Tinder and Hinge in its brand portfolio. Bumble Inc.'s investor site identifies Bumble Inc. as the parent company of Bumble, Badoo, and BFF. Bumble is not owned by Match Group.</p>
 
-    <h2>Data Collection at a Glance</h2>
+    <ul>
+      <li><a href="https://ir.matchgroup.com/">Match Group investor relations</a></li>
+      <li><a href="https://ir.bumble.com/">Bumble Inc. investor relations</a></li>
+    </ul>
 
-    <table>
-      <tr><th>What They Collect</th><th>Tinder</th><th>Bumble</th><th>Hinge</th><th>OpenDating</th></tr>
-      <tr><td>Precise GPS location</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No (5 km geohash only)</td></tr>
-      <tr><td>Message content readable by company</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No (E2E encrypted)</td></tr>
-      <tr><td>Email or phone required</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">No</td></tr>
-      <tr><td>Profile export/portability</td><td class="no">Partial</td><td class="no">Partial</td><td class="no">Partial</td><td class="yes">Full (portable keypair)</td></tr>
-      <tr><td>Swipe/like data stored</td><td class="no">Yes</td><td class="no">Yes</td><td class="no">Yes</td><td class="yes">Likes encrypted</td></tr>
-      <tr><td>Third-party data sharing</td><td class="no">Yes</td><td class="no">Limited</td><td class="no">Yes</td><td class="yes">None</td></tr>
-      <tr><td>Open source</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes (MIT)</td></tr>
-    </table>
-
-    <h2>Location: The Biggest Difference</h2>
-    <p>All three major apps request precise GPS access and update your location frequently — often every time you open the app. This data can reveal where you live, where you work, and your daily routines. OpenDating converts your GPS to a coarse geohash (~5 km precision) entirely on-device and only sends that prefix. The raw coordinates are discarded.</p>
-
-    <h2>Messages: Who Can Read Them</h2>
-    <p>On Tinder, Bumble, and Hinge, messages are stored on company servers and are accessible to employees (subject to internal access controls). Reports of inappropriate behavior include the full conversation history being reviewed by human moderators at the company. OpenDating uses NIP-44 end-to-end encryption — messages are encrypted on your device and can only be decrypted by the recipient. Not even the relay operator can read them.</p>
-
-    <h2>Business Model Implications</h2>
-    <p>Tinder, Bumble, and Hinge are all owned by Match Group, a publicly traded company. Their business model depends on collecting user data for ad targeting, algorithmic recommendations, and upsells (Super Likes, Boosts, premium subscriptions). OpenDating has no advertising, no data monetization, and no premium tiers. It's free and open source.</p>
-
-    <h2>Which App Should You Use?</h2>
-    <p>If you value a large user base and don't mind trading privacy for convenience, the major apps serve that purpose. If you want a dating experience where you control your data, your location stays private, and your messages are genuinely encrypted, OpenDating offers a fundamentally different architecture.</p>
+    <h2>What replaces the comparison</h2>
+    <p>OpenDating will publish only dated, directly sourced comparisons that distinguish app behavior, company policy, and inference. Until counsel reviews that work, the site describes OpenDating's own current implementation and measurable release gates without scoring competitors.</p>
 
     <p><a href="../../">Learn more about OpenDating →</a></p>
   </article>

@@ -2,7 +2,7 @@
 
 > Privacy-first decentralized dating
 
-A dating app with Tinder-quality UX built on decentralized infrastructure (Nostr). Your identity belongs to you, your exact location never leaves your device, and your messages are end-to-end encrypted. No surveillance, no data harvesting, no central server that owns your profile.
+A pre-release dating client built on Nostr and the OpenDating protocol. Exact GPS is converted to a coarse area on-device and direct messages are end-to-end encrypted. Current services are operated by OpenDating on Cloudflare; federation is post-GA work.
 
 ## What it is
 - Category: dating app
@@ -17,10 +17,11 @@ A dating app with Tinder-quality UX built on decentralized infrastructure (Nostr
 - Private likes — one-way likes are never public
 - Private blocks and reports — enforced server-side, never notified
 - No ads, no data harvesting, no surveillance business model
-- Portable profile — export your key and move to any OpenDating client
+- Experimental account portability through a recovery key; passkey recovery and cross-provider portability are not GA-ready
 
 ## Links
 - Site: https://jongan69.github.io/opendating-mobile
 - Blog: https://jongan69.github.io/opendating-mobile/blog
 - GitHub: https://github.com/jongan69/opendating-mobile
 - Protocol: https://github.com/jongan69/OpenDating
+- Release status: https://jongan69.github.io/opendating-mobile/status/
