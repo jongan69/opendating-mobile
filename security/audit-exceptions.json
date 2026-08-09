@@ -1,6 +1,6 @@
 {
   "expires": "2026-09-30",
-  "rationale": "Expo SDK 57 and React Native 0.86 currently resolve framework, build-tool, and test-tool advisories whose automated fixes propose incompatible downgrades. Production release remains blocked while upstream-compatible fixes are evaluated; test-only findings do not enter the shipped bundle.",
+  "rationale": "Expo SDK 57 and React Native 0.86 currently resolve framework and build-tool advisories whose automated fixes propose incompatible downgrades. Production release remains blocked while upstream-compatible fixes are evaluated.",
   "highSeverityPackages": [
     "@expo/cli",
     "@expo/metro",
@@ -8,7 +8,6 @@
     "@react-native/community-cli-plugin",
     "@react-native/metro-config",
     "@react-native/virtualized-lists",
-    "@testing-library/react-native",
     "expo",
     "image-size",
     "metro",
