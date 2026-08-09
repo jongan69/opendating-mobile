@@ -10,6 +10,7 @@
 - Inbound service responses require a valid signed seal, a valid rumor hash, the expected advertised sender, request ID, response type, and freshness window.
 - Early direct messages are buffered during bootstrap and in-memory replay tracking is bounded.
 - Typecheck, lint, unit tests, protocol conformance tests, dependency review, production audit exceptions, and release-manifest validation are CI gates.
+- Both repositories protect `main`; GitHub staging environments are protected-branch-only and production environments require `jongan69` approval.
 
 ## Production blockers
 
@@ -25,7 +26,6 @@
 
 - Withdraw or reject the stale iOS submission in App Store Connect and keep the Android artifact in draft.
 - Authenticate npm, publish `opendating-protocol@0.1.1`, then update the mobile lockfile to that exact release.
-- Configure protected GitHub release environments and required reviewer policies; `main` branch protection and required CI checks are already enabled in both repositories.
 - Obtain legal, security, verification, moderation, and store approvals. Repository changes cannot satisfy these operational gates by themselves.
 
 The machine-readable state is in `release/manifest.json`. Production build and submit scripts refuse to run while it is blocked.
