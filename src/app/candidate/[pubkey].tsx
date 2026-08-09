@@ -127,7 +127,10 @@ export default function CandidateDetail() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
-      edges={['top']}
+      // 'bottom' matters here: the like/pass bar is pinned to the bottom of the
+      // screen, and without the inset it sits underneath the Android
+      // navigation bar and the iOS home indicator.
+      edges={['top', 'bottom']}
     >
       <DetailHeader
         onBack={() => router.back()}

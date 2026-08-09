@@ -72,16 +72,28 @@ describe('unwrapGiftWrap', () => {
   it('returns a stable rumor id across re-wrapping of the same message', async () => {
     // Same logical message wrapped twice yields two different outer events,
     // but one rumor id — which is what dedupes relay re-delivery.
-    const content = JSON.stringify({ text: 'same', created_at: 1700000000 });
-    const first = await buildGiftWrap(14, content, alice.privateKey, alice.publicKey, bob.publicKey);
-    const second = await buildGiftWrap(14, content, alice.privateKey, alice.publicKey, bob.publicKey);
+    //
+    // The clock is frozen because the rumor's id covers its created_at, which
+    // buildGiftWrap stamps from the current second. Unfrozen, this passes only
+    // when both wraps happen to land in the same second, and fails whenever
+    // the run is slow enough to straddle a boundary — which is exactly when
+    // CI is loaded.
+    jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    try {
+      const content = JSON.stringify({ text: 'same', created_at: 1700000000 });
+      const first = await buildGiftWrap(14, content, alice.privateKey, alice.publicKey, bob.publicKey);
+      const second = await buildGiftWrap(14, content, alice.privateKey, alice.publicKey, bob.publicKey);
 
-    const a = unwrapGiftWrap(first.giftWrap, bob.privateKey);
-    const b = unwrapGiftWrap(second.giftWrap, bob.privateKey);
+      const a = unwrapGiftWrap(first.giftWrap, bob.privateKey);
+      const b = unwrapGiftWrap(second.giftWrap, bob.privateKey);
 
-    expect(first.giftWrap.id).not.toBe(second.giftWrap.id);
-    expect(a!.rumorId).toBe(b!.rumorId);
-    expect(a!.rumorId).toHaveLength(64);
+      // Different ephemeral wrap keys, so the outer ids must differ.
+      expect(first.giftWrap.id).not.toBe(second.giftWrap.id);
+      expect(a!.rumorId).toBe(b!.rumorId);
+      expect(a!.rumorId).toHaveLength(64);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('returns null for a wrap addressed to someone else', async () => {

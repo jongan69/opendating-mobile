@@ -144,6 +144,14 @@ export function useDiscovery(): UseDiscoveryResult {
 
       try {
         const result = await getOpenDatingClient().like(pubkey, grant);
+        // The quota is only refreshed when a page of candidates is fetched,
+        // and the like response carries no count, so without this the footer
+        // sat at its initial number however many people you liked — and the
+        // "that's all your likes for today" state could never be reached from
+        // swiping alone. Decremented locally and reconciled on the next page.
+        if (mountedRef.current) {
+          setRemainingToday((n) => Math.max(0, n - 1));
+        }
         return result.match_created;
       } catch (err) {
         if (saved && mountedRef.current) {
