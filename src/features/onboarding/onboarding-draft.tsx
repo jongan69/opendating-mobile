@@ -20,26 +20,16 @@ import React, {
 import { isScreenshotMode } from '@/constants/env';
 import { storage } from '@/lib/storage';
 
-// ---- Canonical option lists (shared by the onboarding pickers) ----
+// ---- Option lists ----
+// Re-exported from the canonical source so the onboarding pickers, the profile
+// editor, and every read-only render site cannot disagree about what a value
+// is called. See src/lib/profile-labels.ts.
 
-export interface OnboardingOption {
-  value: string;
-  label: string;
-}
-
-export const GENDER_OPTIONS: OnboardingOption[] = [
-  { value: 'woman', label: 'Woman' },
-  { value: 'man', label: 'Man' },
-  { value: 'nonbinary', label: 'Non-binary' },
-  { value: 'other', label: 'Other' },
-];
-
-export const INTENT_OPTIONS: OnboardingOption[] = [
-  { value: 'long_term', label: 'Long-term relationship' },
-  { value: 'short_term', label: 'Something casual' },
-  { value: 'friendship', label: 'Friendship' },
-  { value: 'figuring_out', label: 'Still figuring it out' },
-];
+export {
+  GENDER_OPTIONS,
+  INTENT_OPTIONS,
+  type LabeledOption as OnboardingOption,
+} from '@/lib/profile-labels';
 
 export const PROMPT_QUESTIONS: string[] = [
   'Two truths and a lie',

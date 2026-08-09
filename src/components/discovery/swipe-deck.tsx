@@ -1,8 +1,15 @@
 // Tinder-style swipe deck — pan gesture with spring-back, off-screen commit,
 // stacked back cards, and UI-thread-only animation via Reanimated.
 /* eslint-disable react-hooks/immutability */ // Reanimated shared value .value = is the library API, not React state
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from 'react';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -35,7 +42,7 @@ interface SwipeDeckProps {
   loading?: boolean;
   /** Forced empty state (e.g. no more candidates today) */
   empty?: boolean;
-  /** Tap the middle of the top card to open the full profile */
+  /** Open the full profile for the top card. */
   onPressCard?: (candidate: Candidate) => void;
 }
 
@@ -95,6 +102,15 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
   // every second profile was skipped without ever being seen.
   const visible = useMemo(() => candidates.slice(0, 3), [candidates]);
   const topCandidate = visible[0];
+
+  // Deepest card first, so the interactive top card is the last child painted.
+  const ordered = useMemo(
+    () =>
+      visible
+        .map((candidate, offset) => ({ candidate, offset }))
+        .reverse(),
+    [visible]
+  );
 
   const dispatchSwipe = useCallback(
     (dir: 'left' | 'right', pubkey: string | undefined, grant: string | undefined) => {
@@ -169,16 +185,28 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
     );
   };
 
+  // `commit` closes over the current top candidate, so it is a new function
+  // every render. Reading it through a ref keeps the imperative handle itself
+  // stable while still calling the latest version — listing `commit` as a
+  // dependency instead would rebuild the handle on every render.
+  const commitRef = useRef(commit);
+  // Updated in an effect rather than during render: writing a ref while
+  // rendering is not safe under concurrent rendering, and the lint rule is
+  // right to reject it.
+  useEffect(() => {
+    commitRef.current = commit;
+  });
+
   // Imperative swipe for the pass/like action buttons — same commit path as
   // a gesture fling, so state (busy guard, advancement) stays consistent.
   useImperativeHandle(
     ref,
     () => ({
       swipe: (direction: 'left' | 'right') => {
-        commit(direction);
+        commitRef.current(direction);
       },
     }),
-    [commit]
+    []
   );
 
   const pan = Gesture.Pan()
@@ -279,55 +307,67 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(function Sw
 
   return (
     <View style={styles.container}>
-      {visible.map((candidate, offset) => {
-        if (offset === 0) {
+      {/* Rendered back-to-front. These cards are absolutely positioned siblings,
+          so both painting and hit-testing follow document order and the LAST
+          child wins. Mapping the array as-is put the deepest back card on top:
+          it covered candidate 1 with candidate 3's photo, and — because it also
+          won hit-testing — swallowed the drag before it could reach the top
+          card's GestureDetector. That is why the deck did not swipe.
+
+          zIndex reinforces the order; elevation is deliberately not used, since
+          on Android it would cast a shadow from these transparent full-bleed
+          wrappers rather than from the card. */}
+      {ordered.map(({ candidate, offset }) => {
+        const layer = { zIndex: visible.length - offset };
+
+        if (offset > 0) {
           return (
-            <GestureDetector key={candidate.pubkey} gesture={pan}>
-              <Animated.View style={[styles.card, topCardStyle]}>
-                <CandidateCard candidate={candidate} />
-                {onPressCard ? (
-                  <Pressable
-                    style={styles.detailTapZone}
-                    onPress={() => onPressCard(candidate)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Open ${candidate.profile.display_name ?? 'candidate'} profile`}
-                  />
-                ) : null}
-                <Animated.View
-                  pointerEvents="none"
-                  style={[styles.stamp, styles.stampLike, likeStampStyle]}
-                >
-                  <Text
-                    style={[styles.stampText, { color: colors.like, borderColor: colors.like }]}
-                  >
-                    LIKE
-                  </Text>
-                </Animated.View>
-                <Animated.View
-                  pointerEvents="none"
-                  style={[styles.stamp, styles.stampPass, passStampStyle]}
-                >
-                  <Text
-                    style={[styles.stampText, { color: colors.pass, borderColor: colors.pass }]}
-                  >
-                    PASS
-                  </Text>
-                </Animated.View>
-              </Animated.View>
-            </GestureDetector>
-          );
-        }
-        if (offset === 1) {
-          return (
-            <Animated.View key={candidate.pubkey} style={[styles.card, backCardStyle]}>
+            <Animated.View
+              key={candidate.pubkey}
+              // Back cards are a preview of what is coming, never a target.
+              pointerEvents="none"
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={[
+                styles.card,
+                layer,
+                offset === 1 ? backCardStyle : backCard2Style,
+              ]}
+            >
               <CandidateCard candidate={candidate} />
             </Animated.View>
           );
         }
+
         return (
-          <Animated.View key={candidate.pubkey} style={[styles.card, backCard2Style]}>
-            <CandidateCard candidate={candidate} />
-          </Animated.View>
+          <GestureDetector key={candidate.pubkey} gesture={pan}>
+            <Animated.View style={[styles.card, layer, topCardStyle]}>
+              <CandidateCard
+                candidate={candidate}
+                onOpenProfile={onPressCard ? () => onPressCard(candidate) : undefined}
+              />
+              <Animated.View
+                pointerEvents="none"
+                style={[styles.stamp, styles.stampLike, likeStampStyle]}
+              >
+                <Text
+                  style={[styles.stampText, { color: colors.like, borderColor: colors.like }]}
+                >
+                  LIKE
+                </Text>
+              </Animated.View>
+              <Animated.View
+                pointerEvents="none"
+                style={[styles.stamp, styles.stampPass, passStampStyle]}
+              >
+                <Text
+                  style={[styles.stampText, { color: colors.pass, borderColor: colors.pass }]}
+                >
+                  PASS
+                </Text>
+              </Animated.View>
+            </Animated.View>
+          </GestureDetector>
         );
       })}
     </View>
@@ -410,14 +450,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     backgroundColor: 'rgba(0, 0, 0, 0.25)',
-  },
-  detailTapZone: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: '33%',
-    right: '33%',
-    zIndex: 4,
   },
   skeletonCard: {
     borderRadius: radius.xxl,

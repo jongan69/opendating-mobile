@@ -12,6 +12,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { BrandMark } from '@/components/brand/brand-mark';
 import { useDiscovery } from '@/features/discovery/use-discovery';
 import { cacheCandidates, getCachedCandidate } from '@/features/discovery/candidate-cache';
+import {
+  consumeSwipeDecision,
+  subscribeSwipeDecisions,
+  type SwipeDecision,
+} from '@/features/discovery/swipe-decisions';
 import { useTheme } from '@/state/theme-context';
 import { isScreenshotMode } from '@/constants/env';
 import { getScreenshotCandidates } from '@/constants/screenshot-demo';
@@ -93,6 +98,30 @@ export default function DiscoverScreen() {
     },
     [router]
   );
+
+  // A like or pass made on the detail screen. That screen cannot act on the
+  // stack itself — discovery state lives in this component's useDiscovery()
+  // instance — so it posts the decision and this applies it.
+  useEffect(() => {
+    const apply = (decision: SwipeDecision) => {
+      if (decision.direction === 'like' && decision.grant) {
+        void handleLike(decision.pubkey, decision.grant);
+      } else {
+        // A like with no grant would be rejected by the server and surface as
+        // "no longer available", so it is treated as a pass — same rule the
+        // deck applies.
+        handlePass(decision.pubkey);
+      }
+    };
+    // Drain anything posted while this screen was unmounted or backgrounded,
+    // then listen for decisions made while it stays mounted underneath.
+    const queued = consumeSwipeDecision();
+    if (queued) apply(queued);
+    return subscribeSwipeDecisions((decision) => {
+      consumeSwipeDecision();
+      apply(decision);
+    });
+  }, [handleLike, handlePass]);
 
   const swipe = useCallback((direction: 'left' | 'right') => {
     if (direction === 'left') {

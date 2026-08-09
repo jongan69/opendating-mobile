@@ -25,7 +25,7 @@ export interface SelectableOption {
 }
 
 interface OptionSelectorProps {
-  options: SelectableOption[];
+  options: readonly SelectableOption[];
   value: string | null;
   onChange: (value: string) => void;
   /**

@@ -22,6 +22,10 @@ import { OptionSelector } from '@/components/ui/option-selector';
 import { BackHeader } from '@/components/back-header';
 import { isServiceUnavailable } from '@/lib/opendating/errors';
 import {
+  GENDER_OPTIONS as CANONICAL_GENDER_OPTIONS,
+  INTENT_OPTIONS as CANONICAL_INTENT_OPTIONS,
+} from '@/lib/profile-labels';
+import {
   PROFILE_CONTENT_VERSION,
   PhotoUploadError,
   loadProfileContent,
@@ -38,21 +42,14 @@ const MAX_PHOTOS = 6;
 const MAX_INTERESTS = 20;
 const MAX_BIO_LENGTH = 500;
 
-const GENDER_OPTIONS: { label: string; value: string }[] = [
-  { label: 'Prefer not to say', value: '' },
-  { label: 'Woman', value: 'woman' },
-  { label: 'Man', value: 'man' },
-  { label: 'Non-binary', value: 'nonbinary' },
-  { label: 'Other', value: 'other' },
-];
-
-const INTENT_OPTIONS: { label: string; value: string }[] = [
-  { label: 'Prefer not to say', value: '' },
-  { label: 'Long-term relationship', value: 'long_term' },
-  { label: 'Something casual', value: 'short_term' },
-  { label: 'New friends', value: 'friendship' },
-  { label: 'Figuring it out', value: 'figuring_out' },
-];
+// Built from the canonical lists rather than restated. The local copies had
+// already drifted — `friendship` read "New friends" here and "Friendship" in
+// onboarding — so the same saved value described itself differently depending
+// on which screen you were looking at. Only the editor's "clear this field"
+// entry is local, because it is an editing affordance, not a profile value.
+const CLEAR_OPTION = { label: 'Prefer not to say', value: '' };
+const GENDER_OPTIONS = [CLEAR_OPTION, ...CANONICAL_GENDER_OPTIONS];
+const INTENT_OPTIONS = [CLEAR_OPTION, ...CANONICAL_INTENT_OPTIONS];
 
 interface SelectedPhoto {
   id: string;

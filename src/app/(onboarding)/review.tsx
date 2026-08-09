@@ -25,13 +25,10 @@ import { storage } from '@/lib/storage';
 import { isScreenshotMode } from '@/constants/env';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
+import { labelFor } from '@/lib/profile-labels';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
-
-function labelFor(options: { value: string; label: string }[], value: string): string {
-  return options.find((o) => o.value === value)?.label ?? value;
-}
 
 export default function ReviewScreen() {
   const router = useRouter();
