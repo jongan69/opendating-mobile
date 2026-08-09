@@ -92,7 +92,7 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "clean": "expo start --clear",
-    "deploy:web": "echo 'Deploy via GitHub Pages — push to main and the deploy-web workflow handles the rest.'",
+    "deploy:web": "echo 'Deploy via GitHub Pages \u2014 push to main and the deploy-web workflow handles the rest.'",
     "release:verify": "node scripts/release/assert-release-ready.mjs",
     "release:validate": "node scripts/release/assert-release-ready.mjs --validate-only",
     "security:audit": "node scripts/check-production-audit.mjs",
@@ -116,5 +116,9 @@
     "postinstall": "node scripts/check-duplicate-runtimes.mjs"
   },
   "private": true,
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "overrides": {
+    "image-size": ">=2.0.2",
+    "uuid": ">=14.0.1"
+  }
 }
