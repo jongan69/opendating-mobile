@@ -1,4 +1,4 @@
-:root { --coral:#E8735A; --bg:#FAF9F7; --surface:#fff; --text:#1A1A19; --muted:#6B6B68; --border:#E8E7E4; --font:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; }
+:root { --coral:#E8735A; --bg:#FAF9F7; --surface:#fff; --text:#1A1A19; --muted:#6B6B68; --border:#E8E7E4; --font:-apple-system,blinkmacsystemfont,'SF Pro Display',system-ui,sans-serif; }
 @media (prefers-color-scheme:dark) { :root { --bg:#141413; --surface:#1D1D1B; --text:#F5F4F2; --muted:#A8A8A3; --border:#30302D; } }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font); font-size:17px; line-height:1.7; }

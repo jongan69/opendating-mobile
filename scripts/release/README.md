@@ -35,10 +35,12 @@ lists the exact 30 article titles it would generate.
 
 ## Stage order, and why
 
-`verify` runs before `push`, and `ios-verify` runs before `ios-submit`. Both
-placements are deliberate: nothing leaves the machine until the tests pass, and
-no archive is uploaded until it has been proven App Store signed. A dev-signed
-IPA fails at Apple's end *after* a long upload, so checking locally is cheap.
+`verify` runs before `push`, and `ios-verify` runs before `ios-submit`. Store
+build stages additionally require the signed source-candidate gate; submit
+stages require the full manifest with artifact IDs, store build numbers, and
+checksums. Nothing leaves the machine until tests pass, and no archive is
+uploaded until it has been proven App Store signed. A dev-signed IPA fails at
+Apple's end *after* a long upload, so checking locally is cheap.
 
 ## Environment
 

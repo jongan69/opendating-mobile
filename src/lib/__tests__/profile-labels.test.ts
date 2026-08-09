@@ -77,8 +77,10 @@ describe('canonical option lists', () => {
   });
 
   it('agrees with the label lookup', () => {
-    for (const option of INTENT_OPTIONS) {
-      expect(labelFor(INTENT_OPTIONS, option.value)).toBe(option.label);
+    for (const options of [GENDER_OPTIONS, INTENT_OPTIONS]) {
+      for (const option of options) {
+        expect(labelFor(options, option.value)).toBe(option.label);
+      }
     }
   });
 });

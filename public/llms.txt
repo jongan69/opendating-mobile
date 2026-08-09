@@ -1,6 +1,6 @@
 # OpenDating
 
-> Privacy-first decentralized dating
+> Privacy-focused dating on an open protocol
 
 A pre-release dating client built on Nostr and the OpenDating protocol. Exact GPS is converted to a coarse area on-device and direct messages are end-to-end encrypted. Current services are operated by OpenDating on Cloudflare; federation is post-GA work.
 
@@ -11,9 +11,9 @@ A pre-release dating client built on Nostr and the OpenDating protocol. Exact GP
 - Built for: people who want genuine dating without surveillance capitalism
 
 ## Key properties
-- Self-sovereign identity — you own your account, not a company
+- Cryptographic account identity — a native signer and safe recovery are still production blockers
 - Coarse location only — your exact GPS never reaches the server
-- End-to-end encrypted messages — nobody can read your conversations
+- End-to-end encrypted message content — the current relay does not receive plaintext
 - Private likes — one-way likes are never public
 - Private blocks and reports — enforced server-side, never notified
 - No ads, no data harvesting, no surveillance business model

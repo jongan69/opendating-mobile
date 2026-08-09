@@ -1,11 +1,9 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Column, Host, ScrollView, Text } from '@expo/ui';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/state/theme-context';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
 
 const TERMS = [
   {
@@ -22,7 +20,7 @@ const TERMS = [
   },
   {
     title: 'Your content',
-    body: 'You keep ownership of content you submit and give OpenDating a limited license to host, process, and show it only as needed to operate, secure, and improve the service. Only upload content you have the right to use.',
+    body: 'You keep ownership of profile content you submit and give OpenDating a limited license to host, process, and display that profile content only as needed to operate, secure, and improve the service. Direct-message content is excluded: messages may be processed only for encrypted transmission, delivery, and security operations. Only upload content you have the right to use.',
   },
   {
     title: 'Safety and availability',
@@ -42,34 +40,65 @@ export default function TermsScreen() {
   const { colors, isDark } = useTheme();
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={['left', 'right', 'bottom']}
-    >
+    <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[typography.caption, { color: colors.textTertiary }]}>DRAFT — AUGUST 9, 2026</Text>
-        <Text style={[typography.bodyMedium, styles.intro, { color: colors.textSecondary }]}>These draft Beta Terms describe the intended rules for invited testing. They are not approved for public launch and require legal review and a versioned acceptance flow before they become the production agreement.</Text>
-        {TERMS.map((term) => (
-          <View
-            key={term.title}
-            style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      <Host
+        colorScheme={isDark ? 'dark' : 'light'}
+        style={{ flex: 1, backgroundColor: colors.background }}
+      >
+        <ScrollView>
+          <Column
+            spacing={spacing.md}
+            style={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
           >
-            <Text style={[typography.titleSmall, { color: colors.text }]}>{term.title}</Text>
-            <Text style={[typography.bodyMedium, styles.body, { color: colors.textSecondary }]}>{term.body}</Text>
-          </View>
-        ))}
-        <Text style={[typography.caption, styles.contact, { color: colors.textTertiary }]}>Questions or abuse reports: jonny2298@live.com</Text>
-      </ScrollView>
-    </SafeAreaView>
+            <Text
+              textStyle={{ ...textStyles.caption, color: colors.textTertiary }}
+            >
+              DRAFT — AUGUST 9, 2026
+            </Text>
+            <Text
+              textStyle={{ ...textStyles.body, color: colors.textSecondary }}
+            >
+              These draft Beta Terms describe the intended rules for invited testing. They are not approved for public launch and require legal review and a versioned acceptance flow before they become the production agreement.
+            </Text>
+            {TERMS.map((term) => (
+              <Column
+                key={term.title}
+                spacing={spacing.sm}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                  borderRadius: radius.lg,
+                  borderWidth: 1,
+                  padding: spacing.lg,
+                }}
+              >
+                <Text textStyle={{ ...textStyles.title, color: colors.text }}>
+                  {term.title}
+                </Text>
+                <Text textStyle={{ ...textStyles.body, color: colors.textSecondary }}>
+                  {term.body}
+                </Text>
+              </Column>
+            ))}
+            <Text
+              textStyle={{
+                ...textStyles.caption,
+                color: colors.textTertiary,
+                textAlign: 'center',
+              }}
+            >
+              Questions or abuse reports: jonny2298@live.com
+            </Text>
+          </Column>
+        </ScrollView>
+      </Host>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: spacing.lg, paddingBottom: spacing.xxxl, gap: spacing.md },
-  intro: { lineHeight: 22, marginBottom: spacing.sm },
-  card: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, padding: spacing.lg, gap: spacing.sm },
-  body: { lineHeight: 22 },
-  contact: { textAlign: 'center', marginTop: spacing.md },
-});
+const textStyles = {
+  body: { fontSize: 15, fontWeight: '400', lineHeight: 22, letterSpacing: 0.25 },
+  caption: { fontSize: 12, fontWeight: '400', lineHeight: 16, letterSpacing: 0.4 },
+  title: { fontSize: 15, fontWeight: '500', lineHeight: 20, letterSpacing: 0.1 },
+} as const;

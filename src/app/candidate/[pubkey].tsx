@@ -43,6 +43,7 @@ export default function CandidateDetail() {
   const { width: screenWidth } = useWindowDimensions();
   const candidate = useCachedCandidate(pubkey);
   const safetyRef = useRef<SafetyMenuHandle>(null);
+  const decidedRef = useRef(false);
 
   const [photoIndex, setPhotoIndex] = useState(0);
   const [failedUrls, setFailedUrls] = useState<ReadonlySet<string>>(() => new Set());
@@ -69,6 +70,10 @@ export default function CandidateDetail() {
   const decide = useCallback(
     (direction: 'like' | 'pass') => {
       if (!candidate) return;
+      // Navigation unmounts asynchronously; latch before notifying the
+      // discovery screen so a double tap cannot reuse the same grant.
+      if (decidedRef.current) return;
+      decidedRef.current = true;
       if (direction === 'like') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
       } else {

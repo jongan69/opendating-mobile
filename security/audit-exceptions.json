@@ -1,20 +1,76 @@
 {
   "expires": "2026-09-30",
   "rationale": "Expo SDK 57 and React Native 0.86 currently resolve framework and build-tool advisories whose automated fixes propose incompatible downgrades. Production release remains blocked while upstream-compatible fixes are evaluated.",
-  "highSeverityPackages": [
-    "@expo/cli",
-    "@expo/metro",
-    "@expo/metro-config",
-    "@react-native/community-cli-plugin",
-    "@react-native/metro-config",
-    "@react-native/virtualized-lists",
-    "expo",
-    "image-size",
-    "metro",
-    "metro-config",
-    "metro-transform-worker",
-    "react-native",
-    "react-native-reanimated",
-    "react-native-worklets"
+  "highSeverityExceptions": [
+    {
+      "package": "@expo/cli",
+      "advisoryIds": [1119441, 1138808, 1138809],
+      "affectedRange": "<=0.0.0-canary-20231123-1b19f96-4 || >=0.0.1-canary-20231125-d600e44"
+    },
+    {
+      "package": "@expo/metro",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "*"
+    },
+    {
+      "package": "@expo/metro-config",
+      "advisoryIds": [1119441, 1138808, 1138809],
+      "affectedRange": "<=0.0.1-canary-20240418-8d74597 || >=0.1.49-alpha.0"
+    },
+    {
+      "package": "@react-native/community-cli-plugin",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "*"
+    },
+    {
+      "package": "@react-native/metro-config",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "*"
+    },
+    {
+      "package": "@react-native/virtualized-lists",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.85.0-nightly-20260108-1236b6be4"
+    },
+    {
+      "package": "expo",
+      "advisoryIds": [1119441, 1138808, 1138809],
+      "affectedRange": "46.0.5 || >=47.0.0-alpha.1"
+    },
+    {
+      "package": "image-size",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "*"
+    },
+    {
+      "package": "metro",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.22.1"
+    },
+    {
+      "package": "metro-config",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "*"
+    },
+    {
+      "package": "metro-transform-worker",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.60.0"
+    },
+    {
+      "package": "react-native",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.73.0-nightly-20230506-1af868c52"
+    },
+    {
+      "package": "react-native-reanimated",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "3.20.0-nightly-20250722-b6c8b9a3c - 4.0.0-nightly-20250309-9ce9085cb || 4.1.7 - 4.2.0-nightly-20251017-235c127fd || >=4.2.3"
+    },
+    {
+      "package": "react-native-worklets",
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.8.0-bundle-mode-preview-1"
+    }
   ]
 }

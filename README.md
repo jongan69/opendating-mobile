@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <strong>The privacy-first, decentralized dating app.</strong><br>
+  <strong>Privacy-focused dating on an open protocol.</strong><br>
   A pre-release Expo React Native reference client for the OpenDating protocol.
 </p>
 
@@ -27,7 +27,10 @@
 
 **OpenDating** is an early dating client built around data minimization, coarse location, private service requests, and end-to-end encrypted direct messages. It currently connects to services operated by OpenDating on Cloudflare; federation and independent providers are post-GA work.
 
-Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for censorship-resistant communication. But normal users never need to know that. They just create an account, build a profile, and start discovering people nearby.
+Under the hood, OpenDating uses **Nostr** as a protocol building block. The
+current discovery, matching, moderation, media, and delivery services are
+first-party OpenDating services; interchangeable independent providers are
+post-GA work.
 
 > **OpenDating Mobile** is the first reference client for the [OpenDating protocol](https://github.com/jongan69/OpenDating) (v0.1).
 
@@ -40,9 +43,9 @@ Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for ce
 | Your data lives on their servers | Your identity is a key you own |
 | They track your exact location | Only ~5 km coarse area shared |
 | They can read your messages | End-to-end encrypted (NIP-44) |
-| Profile portability varies by provider | Open profile formats are available; complete cross-provider portability is post-GA work |
+| Profile portability varies by provider | An open profile format and export are planned for post-GA federation; they are not available in this pre-release |
 | Advertising and data monetization may be part of the model | No advertising or tracking-based monetization in the current build |
-| Account portability varies | The protocol is designed for portable identity; cross-provider portability is not yet GA-ready |
+| Account portability varies | Portable identity is a protocol design goal; interoperable provider transfer is planned post-GA and is not available today |
 
 <br>
 
@@ -105,7 +108,7 @@ Under the hood, OpenDating runs on **Nostr** — a decentralized protocol for ce
 └──────────────────────────────────────────────┘
 ```
 
-**The mobile app does not depend on backend implementation code.** Integration uses the `opendating-protocol` package, the advertised service capabilities, and the OpenDating protocol specification. Protocol `0.1` is experimental; package `0.1.1` is pending registry publication.
+**The mobile app does not depend on backend implementation code.** Integration uses the published `opendating-protocol@0.1.0` registry artifact (installed through the `^0.1.0` range), advertised service capabilities, and the OpenDating protocol specification. Protocol `0.1` is experimental; package `0.1.1` is pending registry publication and verification.
 
 <br>
 
@@ -161,7 +164,7 @@ npm test                 # Jest test suite
 | **Navigation** | Expo Router | ~57 |
 | **UI Components** | @expo/ui | ~57 |
 | **Nostr Client** | @nostr-dev-kit/ndk | ^2.15 |
-| **Protocol** | opendating-protocol | 0.1 (experimental) |
+| **Protocol** | opendating-protocol | ^0.1.0 (registry: 0.1.0; 0.1.1 pending) |
 | **Gestures** | react-native-gesture-handler | ~2.32 |
 | **Animation** | react-native-reanimated | ^4.5 |
 | **Images** | expo-image | ~57 |

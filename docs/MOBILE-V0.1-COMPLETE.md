@@ -1,8 +1,11 @@
-# OpenDating Mobile v0.1 — Complete
+# OpenDating Mobile v0.1 — Historical Implementation Snapshot
 
-## Status: READY
+## Status: ARCHIVED — NOT RELEASE READY
 
-The OpenDating Mobile reference application is fully implemented, type-safe, and ready for device testing against the deployed OpenDating v0.1 relay.
+This file records the original v0.1 implementation snapshot. It is not a
+release claim. Production builds and submissions are blocked; current evidence
+and remaining gates are tracked in [Release Status](RELEASE-STATUS.md) and the
+[1.0 Roadmap](ROADMAP-1.0.md).
 
 ## Project Summary
 
@@ -17,7 +20,7 @@ The OpenDating Mobile reference application is fully implemented, type-safe, and
 | Components | 13 |
 | Feature modules | 11 |
 | Tests | Written (geohash, errors) |
-| Protocol | opendating-protocol@0.1.0 |
+| Protocol | opendating-protocol@^0.1.0 (registry resolves 0.1.0; 0.1.1 pending) |
 | Relay | wss://opendating-relay.jonathang132298.workers.dev |
 
 ## Architecture
@@ -31,7 +34,7 @@ The OpenDating Mobile reference application is fully implemented, type-safe, and
                          │
                  OpenDatingClient
                  /             \
-    opendating-protocol      NDK core
+ opendating-protocol@^0.1.0  NDK core
                  \             /
                       Nostr
                        │
@@ -169,7 +172,7 @@ Per the specification, the following are explicitly excluded:
 ```bash
 npm run typecheck   # TypeScript strict check — passes with 0 errors
 npm run lint        # ESLint
-npm test            # Jest tests (geohash, errors)
+npm test            # 9 Jest suites / 105 tests at the Phase 0 verification
 npm start           # Expo dev server
 npm run ios         # iOS simulator
 npm run android     # Android emulator
@@ -191,4 +194,6 @@ All installed and compatible:
 
 ---
 
-**The OpenDating Mobile v0.1 reference application is complete, type-safe, and ready for real-device integration testing against the deployed OpenDating relay.**
+**Historical milestone only:** the v0.1 feature skeleton reached a type-safe
+device-testing checkpoint. It is not complete, production-grade, or approved
+for distribution; the current release status and roadmap are authoritative.
