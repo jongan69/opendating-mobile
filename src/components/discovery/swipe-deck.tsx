@@ -434,11 +434,16 @@ const styles = StyleSheet.create({
     top: spacing.xxl,
     zIndex: 5,
   },
+  // Each stamp is anchored on the side the card is moving AWAY from, so it
+  // stays on screen while the card travels. Anchored the other way round — the
+  // intuitive-looking way — LIKE rode the card off the right edge during a
+  // right swipe and PASS off the left during a left swipe, so the stamp
+  // vanished at exactly the moment it was meant to confirm the decision.
   stampLike: {
-    right: spacing.xl,
+    left: spacing.xl,
   },
   stampPass: {
-    left: spacing.xl,
+    right: spacing.xl,
   },
   stampText: {
     ...typography.displayMedium,
