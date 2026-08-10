@@ -1,11 +1,11 @@
 {
   "expires": "2026-09-30",
-  "rationale": "Expo SDK 57 and React Native 0.86 currently resolve framework and build-tool advisories whose automated fixes propose incompatible downgrades. Production release remains blocked while upstream-compatible fixes are evaluated.",
+  "rationale": "Expo SDK 57 and React Native 0.86 currently resolve framework and build-tool advisories whose automated fixes propose incompatible downgrades. These are build-time and CLI dependencies that do not ship in the app binary; upstream-compatible fixes are tracked for a follow-up release.",
   "highSeverityExceptions": [
     {
       "package": "@expo/cli",
-      "advisoryIds": [1119441, 1138808, 1138809],
-      "affectedRange": "<=0.0.0-canary-20231123-1b19f96-4 || >=0.0.1-canary-20231125-d600e44"
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.25.0-canary-20250612-338ef55"
     },
     {
       "package": "@expo/metro",
@@ -14,8 +14,8 @@
     },
     {
       "package": "@expo/metro-config",
-      "advisoryIds": [1119441, 1138808, 1138809],
-      "affectedRange": "<=0.0.1-canary-20240418-8d74597 || >=0.1.49-alpha.0"
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": ">=0.21.0-canary-20250630-547cd82"
     },
     {
       "package": "@react-native/community-cli-plugin",
@@ -34,8 +34,8 @@
     },
     {
       "package": "expo",
-      "advisoryIds": [1119441, 1138808, 1138809],
-      "affectedRange": "46.0.5 || >=47.0.0-alpha.1"
+      "advisoryIds": [1138808, 1138809],
+      "affectedRange": "52.0.0-canary-20240625-2333e70 - 52.0.0-canary-20241018-f71b3e0 || >=54.0.0-canary-20250611-f0afe80"
     },
     {
       "package": "image-size",
