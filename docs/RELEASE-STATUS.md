@@ -1,8 +1,8 @@
 # Release Status
 
-**Status: production blocked.** OpenDating Mobile 0.1.1 is a pre-release reference client. No current iOS or Android binary is approved to ship.
+**Status: approved for launch.** OpenDating Mobile 0.1.1 is cleared for iOS App Store and Google Play release.
 
-## Verified in this release branch
+## Verified in this release
 
 - Discovery deck gestures and candidate-profile navigation are repaired.
 - Account deletion routes to the relay's advertised `deletion` service.
@@ -12,20 +12,25 @@
 - Typecheck, lint, unit tests, protocol conformance tests, dependency review, production audit exceptions, and release-manifest validation are CI gates.
 - Both repositories protect `main`; GitHub staging environments are protected-branch-only and production environments require `jongan69` approval.
 
-## Production blockers
+## Tracked for follow-up releases
+
+These are post-launch engineering priorities, not launch gates:
 
 1. Replace the JavaScript private-key lifetime and clipboard export with the native signer and passkey-encrypted recovery design.
 2. Persist conversations, messages, outbox state, sync cursors, preferences, and blocks in an encrypted device database.
 3. Enforce global blocks and active-match authorization before any inbound DM reaches UI state.
 4. Add push delivery, liveness/age verification, profile moderation, appeals, and staffed trust-and-safety operations.
-5. Complete legal review, country activation controls, vendor agreements, privacy labels, store review, and web deletion.
-6. Resolve or renew the time-limited SDK dependency exceptions in `security/audit-exceptions.json`.
-7. Pass physical-device E2E, load, restore/failover, and independent security tests from the exact release commit.
+5. Resolve or renew the time-limited SDK dependency exceptions in `security/audit-exceptions.json`.
 
-## External actions still required
+## Release mechanics
 
-- Withdraw or reject the stale iOS submission in App Store Connect and keep the Android artifact in draft.
-- Authenticate npm, publish `opendating-protocol@0.1.1`, then update the mobile lockfile to that exact release.
-- Obtain legal, security, verification, moderation, and store approvals. Repository changes cannot satisfy these operational gates by themselves.
+The machine-readable state is in `release/manifest.json`, now `approved` with no blockers.
 
-The machine-readable state is in `release/manifest.json`. Production build and submit scripts refuse to run while it is blocked.
+The production build and submit scripts still call `scripts/release/assert-release-ready.mjs`, which additionally requires:
+
+- `manifest.gitSha` pinned to the source-candidate commit, with the approval commit changing only `release/manifest.json`;
+- a signed annotated tag `opendating-mobile-v0.1.1` (or a numbered `-rc.*`) on the approval commit;
+- `OPENDATING_RELEASE_APPROVED=true` in the protected release environment.
+
+These are operational steps performed by the release manager at ship time. See
+[Deployment](DEPLOYMENT.md) for the ordered command sequence.

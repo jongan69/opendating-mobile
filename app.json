@@ -3,7 +3,7 @@
     "name": "OpenDating",
     "slug": "opendating-mobile",
     "version": "0.1.1",
-    "description": "Pre-release privacy-focused dating client with coarse location and end-to-end encrypted messaging.",
+    "description": "Privacy-focused dating app with coarse location and end-to-end encrypted messaging.",
     "orientation": "portrait",
     "icon": "./assets/brand/ios-app-icon-1024.png",
     "scheme": "opendating",

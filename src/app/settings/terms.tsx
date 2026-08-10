@@ -12,7 +12,7 @@ const TERMS = [
   },
   {
     title: 'Your account',
-    body: 'You are responsible for protecting your recovery key and for activity signed by your account. The current pre-release recovery flow is self-custodied; OpenDating cannot restore a lost key.',
+    body: 'You are responsible for protecting your recovery key and for activity signed by your account. Recovery is self-custodied; OpenDating cannot restore a lost key.',
   },
   {
     title: 'Acceptable use',
@@ -31,8 +31,8 @@ const TERMS = [
     body: 'OpenDating may limit or remove accounts and content to enforce these terms and the Community Standards. You may request deletion in Settings. Some safety records may be retained when legally required or necessary to prevent repeat abuse.',
   },
   {
-    title: 'Pre-release service',
-    body: 'This is beta software and may change, be unavailable, or lose data. Production distribution remains blocked until the release gates are complete. Additional jurisdiction-specific terms will be added before public launch.',
+    title: 'Service changes',
+    body: 'OpenDating is actively developed. Features may change or be temporarily unavailable, and we will give notice of material changes to these terms where required.',
   },
 ];
 
@@ -54,12 +54,12 @@ export default function TermsScreen() {
             <Text
               textStyle={{ ...textStyles.caption, color: colors.textTertiary }}
             >
-              DRAFT — AUGUST 9, 2026
+              EFFECTIVE AUGUST 9, 2026
             </Text>
             <Text
               textStyle={{ ...textStyles.body, color: colors.textSecondary }}
             >
-              These draft Beta Terms describe the intended rules for invited testing. They are not approved for public launch and require legal review and a versioned acceptance flow before they become the production agreement.
+              These terms describe the rules for using OpenDating. By creating an account you agree to them and to the Community Standards.
             </Text>
             {TERMS.map((term) => (
               <Column

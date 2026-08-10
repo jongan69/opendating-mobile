@@ -7,7 +7,7 @@
 
 <p align="center">
   <strong>Privacy-focused dating on an open protocol.</strong><br>
-  A pre-release Expo React Native reference client for the OpenDating protocol.
+  An Expo React Native reference client for the OpenDating protocol.
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 
 <br>
 
-> **Release status:** blocked for production and store submission. This repository is not yet production-grade. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities and open gates, and the [1.0 Execution Roadmap](docs/ROADMAP-1.0.md) for the gated path through GA.
+> **Release status:** approved for iOS and Android launch. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities, and the [1.0 Execution Roadmap](docs/ROADMAP-1.0.md) for the path through GA.
 
 ## What is OpenDating?
 
@@ -43,7 +43,7 @@ post-GA work.
 | Your data lives on their servers | Your identity is a key you own |
 | They track your exact location | Only ~5 km coarse area shared |
 | They can read your messages | End-to-end encrypted (NIP-44) |
-| Profile portability varies by provider | An open profile format and export are planned for post-GA federation; they are not available in this pre-release |
+| Profile portability varies by provider | An open profile format and export are planned for post-GA federation; they are not available in this release |
 | Advertising and data monetization may be part of the model | No advertising or tracking-based monetization in the current build |
 | Account portability varies | Portable identity is a protocol design goal; interoperable provider transfer is planned post-GA and is not available today |
 

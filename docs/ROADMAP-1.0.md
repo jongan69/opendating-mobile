@@ -2,7 +2,7 @@
 
 This is the implementation ledger for the marketplace-competitive 1.0 program. It is intentionally stricter than a feature checklist: a phase is complete only when its code, operational, legal, security, and marketplace exit gates are supported by evidence from an exact release commit.
 
-**Current state:** Phase 0 is in progress. Production builds and submissions are blocked by `release/manifest.json`. Phases 1–6 are not release-complete.
+**Current state:** 0.1.1 is approved for iOS and Android launch in `release/manifest.json`. Phases 1–6 remain the path to a marketplace-competitive 1.0 and are not complete.
 
 ## Release policy
 

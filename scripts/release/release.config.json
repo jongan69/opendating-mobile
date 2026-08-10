@@ -5,7 +5,7 @@
     "name": "OpenDating",
     "slug": "opendating",
     "tagline": "Privacy-first decentralized dating",
-    "description": "Pre-release dating software built around coarse location and end-to-end encrypted direct messages. Current services are operated by OpenDating; production distribution is blocked.",
+    "description": "A dating app built around coarse location and end-to-end encrypted direct messages. Your exact location never leaves your phone.",
     "category": "dating app",
     "audience": "people who want genuine dating without surveillance capitalism",
     "platforms": ["iOS", "Android"],
