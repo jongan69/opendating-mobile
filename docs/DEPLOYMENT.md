@@ -8,7 +8,7 @@
 
 ## Release gate
 
-Release 0.1.1 is approved for iOS and Android. The existing iOS 0.1.0 build 4 and Android 0.1.0 build 3 predate required fixes and must not be released; ship a fresh 0.1.1 build. See [Release Status](RELEASE-STATUS.md), [1.0 Execution Roadmap](ROADMAP-1.0.md), and `release/manifest.json`.
+Release 0.1.1 is the proposed launch candidate for iOS and Android, but approval is **not yet effective**: `release/manifest.json` still carries a null `gitSha` and null artifact IDs, so `assert-release-ready.mjs` refuses production builds until the reviewed source SHA, build numbers, and checksums are recorded. The existing iOS 0.1.0 build 4 and Android 0.1.0 build 3 predate required fixes and must not be released; ship a fresh 0.1.1 build. See [Release Status](RELEASE-STATUS.md), [1.0 Execution Roadmap](ROADMAP-1.0.md), and `release/manifest.json`.
 
 The production build and submit scripts call `scripts/release/assert-release-ready.mjs`. They refuse to run unless:
 

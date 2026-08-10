@@ -1,6 +1,14 @@
+import { useEffect, useState } from 'react';
 import { Column, Host, ScrollView, Text } from '@expo/ui';
 import { StatusBar } from 'expo-status-bar';
 
+import {
+  POLICY_EFFECTIVE_LABEL,
+  formatAcceptedAt,
+  isCurrentPolicy,
+  type StoredPolicyAcceptance,
+} from '@/lib/policy';
+import { storage } from '@/lib/storage';
 import { useTheme } from '@/state/theme-context';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
@@ -36,8 +44,43 @@ const TERMS = [
   },
 ];
 
+// The acceptance recorded at onboarding, surfaced so a member can see exactly
+// which version their account agreed to and when.
+function useAcceptanceSummary(): string {
+  const [acceptance, setAcceptance] = useState<StoredPolicyAcceptance | null>(
+    null
+  );
+
+  useEffect(() => {
+    let active = true;
+    storage
+      .getPolicyAcceptance()
+      .then((record) => {
+        if (active) setAcceptance(record);
+      })
+      .catch(() => {
+        // Unreadable record — fall through to the neutral summary below.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (!acceptance) {
+    return 'Your acceptance is recorded on this device when you create your profile.';
+  }
+  if (!isCurrentPolicy(acceptance)) {
+    return 'Your account accepted an earlier version of these terms. The version above applies to new profiles.';
+  }
+  const accepted = formatAcceptedAt(acceptance.acceptedAt);
+  return accepted
+    ? `You accepted this version on ${accepted}.`
+    : 'You accepted this version on this device.';
+}
+
 export default function TermsScreen() {
   const { colors, isDark } = useTheme();
+  const acceptanceSummary = useAcceptanceSummary();
 
   return (
     <>
@@ -54,12 +97,17 @@ export default function TermsScreen() {
             <Text
               textStyle={{ ...textStyles.caption, color: colors.textTertiary }}
             >
-              EFFECTIVE AUGUST 9, 2026
+              {`EFFECTIVE ${POLICY_EFFECTIVE_LABEL.toUpperCase()}`}
             </Text>
             <Text
               textStyle={{ ...textStyles.body, color: colors.textSecondary }}
             >
-              These Terms of Service include the Community Standards below. During onboarding, you must explicitly accept this August 9, 2026 version before a profile can be created.
+              {`These Terms of Service include the Community Standards below. During onboarding, you must explicitly accept this ${POLICY_EFFECTIVE_LABEL} version before a profile can be created.`}
+            </Text>
+            <Text
+              textStyle={{ ...textStyles.caption, color: colors.textTertiary }}
+            >
+              {acceptanceSummary}
             </Text>
             {TERMS.map((term) => (
               <Column

@@ -2,7 +2,7 @@
 
 ## Project Identity
 
-OpenDating Mobile is the first reference client for the [OpenDating](https://github.com/jongan69/OpenDating) protocol. It is an Expo React Native app under active security and reliability work, approved for iOS and Android launch. Production builds and submissions read their gate state from `release/manifest.json`.
+OpenDating Mobile is the first reference client for the [OpenDating](https://github.com/jongan69/OpenDating) protocol. It is an Expo React Native app under active security and reliability work. 0.1.1 is the proposed iOS and Android launch candidate; approval is not effective until `release/manifest.json` records the reviewed source SHA and artifact metadata. Production builds and submissions read their gate state from `release/manifest.json`.
 
 ## Critical Rules
 

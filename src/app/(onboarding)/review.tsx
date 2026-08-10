@@ -11,11 +11,11 @@ import {
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import {
-  CURRENT_POLICY_VERSION,
   GENDER_OPTIONS,
   INTENT_OPTIONS,
   useOnboardingDraft,
 } from '@/features/onboarding/onboarding-draft';
+import { isCurrentPolicy } from '@/lib/policy';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import {
   PROFILE_CONTENT_VERSION,
@@ -45,7 +45,7 @@ export default function ReviewScreen() {
     if (submitting) return;
 
     const policyAcceptance = draft.policyAcceptance;
-    if (policyAcceptance?.version !== CURRENT_POLICY_VERSION) {
+    if (!isCurrentPolicy(policyAcceptance)) {
       setError(
         'Go back to the privacy step and accept the Terms of Service and Community Standards.'
       );
@@ -54,6 +54,13 @@ export default function ReviewScreen() {
 
     if (isScreenshotMode) {
       router.replace('/(onboarding)/finish');
+      return;
+    }
+
+    // The button is disabled without a pubkey, but the acceptance record is
+    // bound to an account and must never be written with a missing one.
+    if (!resolvedPubkey) {
+      setError('Still setting up your account — go back and create one first.');
       return;
     }
 
@@ -71,10 +78,19 @@ export default function ReviewScreen() {
       // Mirror the bootstrap sequence: connect → capabilities → profile.
       await client.connect();
       await client.fetchCapabilities();
-      await storage.savePolicyAcceptance({
-        ...policyAcceptance,
-        pubkey: resolvedPubkey,
-      });
+      // Written before the profile exists so consent always precedes
+      // publication. Deliberately fatal, unlike the best-effort writes below:
+      // a profile must never go live without a durable acceptance record.
+      try {
+        await storage.savePolicyAcceptance({
+          ...policyAcceptance,
+          pubkey: resolvedPubkey,
+        });
+      } catch {
+        throw new Error(
+          'Could not record your acceptance of the Terms on this device. Free up some storage and try again.'
+        );
+      }
       await client.createProfile();
 
       // Publish what the user actually filled in. Without this the profile
@@ -164,8 +180,7 @@ export default function ReviewScreen() {
     return () => { active = false; };
   }, [draft.pubkey]);
 
-  const hasAcceptedPolicies =
-    draft.policyAcceptance?.version === CURRENT_POLICY_VERSION;
+  const hasAcceptedPolicies = isCurrentPolicy(draft.policyAcceptance);
   const canSubmit =
     resolvedPubkey !== null &&
     draft.displayName.length > 0 &&

@@ -87,7 +87,7 @@ review region.
 | Service | Role | Notes |
 |---|---|---|
 | OpenDating relay (Cloudflare Workers) | Sole backend. Profile storage, discovery matching, match/like routing, encrypted message transport, reports, blocks, account deletion. | Operated by the developer at `wss://opendating-relay.jonathang132298.workers.dev`. Service endpoints are discovered at runtime from the relay's public service document. |
-| Cloudflare Workers AI | Automated safety screening for profile display names and bios before publication. | The developer-operated relay sends this profile text to Cloudflare's `@cf/meta/llama-3.2-3b-instruct` model. It does not process encrypted messages. |
+| Cloudflare Workers AI | Automated safety screening for profile display names and bios before publication. | The developer-operated relay sends this profile text to Cloudflare's `@cf/meta/llama-3.2-3b-instruct` model. Photos are not sent, and it does not process encrypted messages. Disclosed in-app on the onboarding privacy screen and at Settings → Privacy. |
 | Expo Application Services (EAS) | Build and submission tooling only. | Build-time only. Not contacted by the shipped app at runtime. |
 
 **Not used:** no payment processor, no in-app purchases or subscriptions, no
@@ -190,8 +190,9 @@ EXTERNAL SERVICES
   discovery, likes, matching, encrypted-message transport, reports, blocks,
   and deletion.
 - Cloudflare Workers AI (`@cf/meta/llama-3.2-3b-instruct`): safety screening
-  of profile display names and bios before publication. It does not process
-  encrypted messages.
+  of profile display names and bios before publication. Photos are not sent to
+  it and it does not process encrypted messages. This is disclosed to the user
+  in-app on the onboarding privacy screen and at Settings -> Privacy.
 - Expo Application Services: build and submission tooling only; not contacted
   by the shipped app at runtime.
 No payment processor, advertising network, analytics provider, data broker, or

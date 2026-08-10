@@ -5,10 +5,12 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
+import { useOnboardingDraft } from '@/features/onboarding/onboarding-draft';
 import {
   CURRENT_POLICY_VERSION,
-  useOnboardingDraft,
-} from '@/features/onboarding/onboarding-draft';
+  POLICY_EFFECTIVE_LABEL,
+  isCurrentPolicy,
+} from '@/lib/policy';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
@@ -32,9 +34,14 @@ const PRIVACY_POINTS: { title: string; detail: string }[] = [
       'When you block someone, they never know. There is no notification and no trace.',
   },
   {
+    title: 'Your profile text is safety-checked',
+    detail:
+      'Your display name and bio are automatically screened for harmful content before they go live. That check runs on our service provider, Cloudflare. Your photos are not sent to it.',
+  },
+  {
     title: 'Your messages are encrypted',
     detail:
-      'Conversations are end-to-end encrypted. Only you and your match can read them — not us, and not whoever carries the message.',
+      'Conversations are end-to-end encrypted. Only you and your match can read them — not us, and not whoever carries the message. Messages are never screened.',
   },
 ];
 
@@ -43,8 +50,7 @@ export default function PrivacyScreen() {
   const { colors } = useTheme();
   const { draft, update } = useOnboardingDraft();
   const styles = makeStyles(colors);
-  const hasAcceptedPolicies =
-    draft.policyAcceptance?.version === CURRENT_POLICY_VERSION;
+  const hasAcceptedPolicies = isCurrentPolicy(draft.policyAcceptance);
 
   const togglePolicyAcceptance = () => {
     update(
@@ -150,7 +156,8 @@ export default function PrivacyScreen() {
         <Text
           style={[typography.caption, { color: colors.textTertiary }]}
         >
-          Effective August 9, 2026. You must accept before creating a profile.
+          Effective {POLICY_EFFECTIVE_LABEL}. You must accept before creating a
+          profile.
         </Text>
       </View>
     </OnboardingScreen>

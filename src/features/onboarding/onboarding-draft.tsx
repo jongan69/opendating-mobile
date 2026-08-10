@@ -19,6 +19,7 @@ import React, {
 } from 'react';
 import { isScreenshotMode } from '@/constants/env';
 import { storage } from '@/lib/storage';
+import { CURRENT_POLICY_VERSION, type PolicyAcceptance } from '@/lib/policy';
 
 // ---- Option lists ----
 // Re-exported from the canonical source so the onboarding pickers, the profile
@@ -44,12 +45,9 @@ export const MIN_AGE = 18;
 export const MAX_AGE = 99;
 export const MIN_PHOTOS = 2;
 export const MAX_PHOTOS = 6;
-export const CURRENT_POLICY_VERSION = '2026-08-09';
-
-export interface PolicyAcceptance {
-  version: string;
-  acceptedAt: string;
-}
+// Re-exported so onboarding screens keep a single import for draft concerns.
+export { CURRENT_POLICY_VERSION };
+export type { PolicyAcceptance };
 
 // ---- Draft model ----
 

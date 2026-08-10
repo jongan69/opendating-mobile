@@ -5,6 +5,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
+import type { StoredPolicyAcceptance } from '@/lib/policy';
+
 // In-memory fallback when SecureStore is unavailable (e.g., web during dev)
 const inMemoryStore = new Map<string, string>();
 
@@ -130,14 +132,26 @@ export const storage = {
   // Terms of Service and Community Standards acceptance. This survives the
   // onboarding-draft cleanup so the app retains the exact accepted policy
   // version, timestamp, and account identifier.
-  async savePolicyAcceptance(acceptance: object): Promise<void> {
+  async savePolicyAcceptance(acceptance: StoredPolicyAcceptance): Promise<void> {
     await secureSet(STORAGE_KEYS.POLICY_ACCEPTANCE, JSON.stringify(acceptance));
   },
-  async getPolicyAcceptance<T>(): Promise<T | null> {
+  async getPolicyAcceptance(): Promise<StoredPolicyAcceptance | null> {
     const raw = await secureGet(STORAGE_KEYS.POLICY_ACCEPTANCE);
     if (!raw) return null;
     try {
-      return JSON.parse(raw) as T;
+      const parsed: unknown = JSON.parse(raw);
+      // A consent record is only meaningful if every field survived intact;
+      // a partial record must read as "no acceptance on file".
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof (parsed as StoredPolicyAcceptance).version === 'string' &&
+        typeof (parsed as StoredPolicyAcceptance).acceptedAt === 'string' &&
+        typeof (parsed as StoredPolicyAcceptance).pubkey === 'string'
+      ) {
+        return parsed as StoredPolicyAcceptance;
+      }
+      return null;
     } catch {
       return null;
     }
