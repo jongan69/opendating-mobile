@@ -1,6 +1,14 @@
 {
   "expires": "2026-09-30",
   "rationale": "Expo SDK 57 and React Native 0.86 currently resolve advisories whose automated fixes propose incompatible downgrades. Expo, React Native, Reanimated, and Worklets include production runtime code, but the flagged advisory path is through their Metro, CLI, and image-inspection build subgraph; the shipped app does not expose those tooling APIs to user input. Exact versions are lockfile-pinned, CI runs the production audit and mobile test suite, and these time-limited exceptions must be removed or re-evidenced before expiry when upstream-compatible fixes are available.",
+  "blockedUpgradePaths": [
+    {
+      "package": "image-size",
+      "attempted": "npm overrides pin to 2.0.2",
+      "blockedBy": "metro 0.84.4 calls image-size with a file path string (node_modules/metro/src/Assets.js line 177). image-size 2.x removed file-path input and accepts only ArrayBuffer/ArrayBufferView, so the override throws a TypeError and breaks asset bundling. Verified empirically against 2.0.2.",
+      "revisitWhen": "Metro passes a buffer at every image-size call site, or upstream backports the advisory fix to the 1.x line."
+    }
+  ],
   "highSeverityExceptions": [
     {
       "package": "@expo/cli",
