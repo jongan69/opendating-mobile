@@ -23,27 +23,46 @@ export interface StoredPolicyAcceptance extends PolicyAcceptance {
 }
 
 /**
+ * The instant the shipped policy took effect. A record cannot have accepted
+ * this version before it existed, so this is the floor for its timestamp.
+ */
+const POLICY_EFFECTIVE_AT = Date.parse(`${CURRENT_POLICY_VERSION}T00:00:00Z`);
+
+/**
  * The single definition of "this member accepted the shipped terms". A type
  * guard so callers that go on to persist the record cannot forget the check.
+ *
+ * Checks the whole record, not just the version: a record naming the current
+ * version but carrying a missing, malformed, or pre-effective-date timestamp
+ * is not evidence of consent to the shipped terms.
  */
 export function isCurrentPolicy(
   acceptance: PolicyAcceptance | null | undefined
 ): acceptance is PolicyAcceptance {
-  return acceptance?.version === CURRENT_POLICY_VERSION;
+  if (acceptance?.version !== CURRENT_POLICY_VERSION) return false;
+  if (typeof acceptance.acceptedAt !== 'string') return false;
+  return isValidPolicyTimestamp(acceptance.acceptedAt, POLICY_EFFECTIVE_AT);
 }
 
 /**
  * Returns true when `iso` is a real calendar timestamp (parsed
  * successfully by the runtime) within a reasonable past window. Used at
  * read time so a malformed string like `"0"` never displays as valid.
+ *
+ * `minEpochMs` raises the floor for callers that know when the accepted
+ * version took effect; the default only rejects pre-epoch values.
  */
-export function isValidPolicyTimestamp(iso: string): boolean {
+export function isValidPolicyTimestamp(iso: string, minEpochMs = 0): boolean {
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) return false;
   // Must be in the past and not before the Unix epoch; any policy
   // version older than 1970 is clearly a bug or a forged record.
   const now = Date.now();
-  return parsed.getTime() > 0 && parsed.getTime() <= now;
+  return (
+    parsed.getTime() > 0 &&
+    parsed.getTime() >= minEpochMs &&
+    parsed.getTime() <= now
+  );
 }
 
 /** Renders an acceptance timestamp for display, or null if it is unusable. */

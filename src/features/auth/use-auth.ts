@@ -99,11 +99,15 @@ export function useAuth(): UseAuthResult {
     setError(null);
 
     try {
-      await getOpenDatingClient().deleteIdentity();
       // Wipe the acceptance record so a stale binding from a previous
       // account does not survive a logout/login cycle and misrepresent
-      // consent in Settings → Terms.
-      await storage.deletePolicyAcceptance().catch(() => {});
+      // consent in Settings → Terms. This runs before the identity is
+      // deleted and its failure is not swallowed: aborting here leaves the
+      // account intact and consent consistent, whereas continuing would
+      // leave a signed-out device still carrying the previous member's
+      // acceptance. The reverse order can only fail toward re-consenting.
+      await storage.deletePolicyAcceptance();
+      await getOpenDatingClient().deleteIdentity();
       if (mountedRef.current) {
         setIsAuthenticated(false);
         setPubkey(null);

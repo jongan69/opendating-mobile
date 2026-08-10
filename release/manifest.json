@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "status": "approved",
+  "status": "blocked",
   "appVersion": "0.1.1",
   "gitSha": null,
   "protocolVersion": "0.1",
@@ -20,7 +20,15 @@
     }
   },
   "migrationState": "not-started",
-  "approvedAt": "2026-08-09T00:00:00Z",
-  "approvedBy": "jongan69",
-  "blockers": []
+  "approvedAt": null,
+  "approvedBy": null,
+  "blockers": [
+    "iOS 0.1.0 build 4 is not yet withdrawn or rejected in App Store Connect with evidence attached",
+    "Android 0.1.0 build 3 is not yet confirmed held and unavailable to production users",
+    "opendating-protocol 0.1.1 is not published or verified on the registry (jongan69/OpenDating#7)",
+    "The protocol dependency is exact-pinned to 0.1.0; it is not yet moved to the verified 0.1.1 artifact and the temporary request-routing mirror is still in place",
+    "Deletion, discovery gestures, and candidate-profile navigation are not verified on physical iOS and Android devices from this release candidate",
+    "Protected CI run, signed tag, source SHA, EAS artifact IDs and checksums, store state, migrations, and rollback evidence are not recorded",
+    "Cloudflare deployment provenance and environment isolation are unproven (jongan69/OpenDating#8)"
+  ]
 }
