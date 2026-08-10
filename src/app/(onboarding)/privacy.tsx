@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Switch } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
 import { useOnboardingDraft } from '@/features/onboarding/onboarding-draft';
@@ -52,18 +53,6 @@ export default function PrivacyScreen() {
   const styles = makeStyles(colors);
   const hasAcceptedPolicies = isCurrentPolicy(draft.policyAcceptance);
 
-  const togglePolicyAcceptance = () => {
-    update(
-      'policyAcceptance',
-      hasAcceptedPolicies
-        ? null
-        : {
-            version: CURRENT_POLICY_VERSION,
-            acceptedAt: new Date().toISOString(),
-          }
-    );
-  };
-
   return (
     <OnboardingScreen
       step={3}
@@ -106,41 +95,20 @@ export default function PrivacyScreen() {
       </Text>
 
       <View style={styles.consentCard}>
-        <Pressable
-          accessibilityRole="checkbox"
-          accessibilityLabel="Accept the Terms of Service and Community Standards"
-          accessibilityState={{ checked: hasAcceptedPolicies }}
-          onPress={togglePolicyAcceptance}
-          style={({ pressed }) => [
-            styles.consentRow,
-            pressed && styles.pressed,
-          ]}
-        >
-          <View
-            style={[
-              styles.checkbox,
-              {
-                backgroundColor: hasAcceptedPolicies
-                  ? colors.accent
-                  : colors.surface,
-                borderColor: hasAcceptedPolicies ? colors.accent : colors.border,
-              },
-            ]}
-          >
-            {hasAcceptedPolicies ? (
-              <Text style={styles.checkmark}>✓</Text>
-            ) : null}
-          </View>
-          <Text
-            style={[
-              typography.bodyMedium,
-              styles.consentText,
-              { color: colors.text },
-            ]}
-          >
-            I agree to the Terms of Service and Community Standards.
-          </Text>
-        </Pressable>
+        <Switch
+          value={hasAcceptedPolicies}
+          onValueChange={(newValue) => {
+            if (newValue) {
+              update('policyAcceptance', {
+                version: CURRENT_POLICY_VERSION,
+                acceptedAt: new Date().toISOString(),
+              });
+            } else {
+              update('policyAcceptance', null);
+            }
+          }}
+          label="I agree to the Terms of Service and Community Standards."
+        />
         <Pressable
           accessibilityRole="link"
           onPress={() => router.push('/settings/terms')}
@@ -197,28 +165,6 @@ function makeStyles(colors: ThemeColors) {
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       padding: spacing.lg,
-    },
-    consentRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: spacing.md,
-    },
-    checkbox: {
-      width: 24,
-      height: 24,
-      borderRadius: radius.sm,
-      borderWidth: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    checkmark: {
-      color: '#FFFFFF',
-      fontSize: 16,
-      fontWeight: '700',
-      lineHeight: 20,
-    },
-    consentText: {
-      flex: 1,
     },
     policyLink: {
       alignSelf: 'flex-start',

@@ -32,10 +32,24 @@ export function isCurrentPolicy(
   return acceptance?.version === CURRENT_POLICY_VERSION;
 }
 
+/**
+ * Returns true when `iso` is a real calendar timestamp (parsed
+ * successfully by the runtime) within a reasonable past window. Used at
+ * read time so a malformed string like `"0"` never displays as valid.
+ */
+export function isValidPolicyTimestamp(iso: string): boolean {
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return false;
+  // Must be in the past and not before the Unix epoch; any policy
+  // version older than 1970 is clearly a bug or a forged record.
+  const now = Date.now();
+  return parsed.getTime() > 0 && parsed.getTime() <= now;
+}
+
 /** Renders an acceptance timestamp for display, or null if it is unusable. */
 export function formatAcceptedAt(iso: string): string | null {
+  if (!isValidPolicyTimestamp(iso)) return null;
   const parsed = new Date(iso);
-  if (Number.isNaN(parsed.getTime())) return null;
   return parsed.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'long',

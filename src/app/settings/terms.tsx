@@ -45,42 +45,75 @@ const TERMS = [
 ];
 
 // The acceptance recorded at onboarding, surfaced so a member can see exactly
-// which version their account agreed to and when.
-function useAcceptanceSummary(): string {
-  const [acceptance, setAcceptance] = useState<StoredPolicyAcceptance | null>(
-    null
-  );
+// which version their account agreed to and when. Returns distinct states for
+// loading (initial), error (unreadable record), missing (no acceptance on
+// file), and the three acceptance variants.
+function useAcceptanceSummary(): {
+  summary: string;
+  loading: boolean;
+} {
+  const [acceptance, setAcceptance] = useState<StoredPolicyAcceptance | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setFailed(false);
     storage
       .getPolicyAcceptance()
       .then((record) => {
-        if (active) setAcceptance(record);
+        if (active) {
+          setAcceptance(record);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        // Unreadable record — fall through to the neutral summary below.
+        if (active) {
+          setFailed(true);
+          setLoading(false);
+        }
       });
     return () => {
       active = false;
     };
   }, []);
 
+  if (loading) return { summary: '', loading: true };
+  if (failed) {
+    return {
+      summary:
+        'Unable to read your acceptance record on this device. Your acceptance from onboarding is still on file with your account.',
+      loading: false,
+    };
+  }
   if (!acceptance) {
-    return 'Your acceptance is recorded on this device when you create your profile.';
+    return {
+      summary:
+        'Your acceptance is recorded on this device when you create your profile.',
+      loading: false,
+    };
   }
   if (!isCurrentPolicy(acceptance)) {
-    return 'Your account accepted an earlier version of these terms. The version above applies to new profiles.';
+    return {
+      summary:
+        'Your account accepted an earlier version of these terms. The version above applies to new profiles.',
+      loading: false,
+    };
   }
   const accepted = formatAcceptedAt(acceptance.acceptedAt);
-  return accepted
-    ? `You accepted this version on ${accepted}.`
-    : 'You accepted this version on this device.';
+  return {
+    summary: accepted
+      ? `You accepted this version on ${accepted}.`
+      : 'You accepted this version on this device.',
+    loading: false,
+  };
 }
 
 export default function TermsScreen() {
   const { colors, isDark } = useTheme();
-  const acceptanceSummary = useAcceptanceSummary();
+  const { summary: acceptanceSummary, loading: acceptanceLoading } =
+    useAcceptanceSummary();
 
   return (
     <>
@@ -104,11 +137,13 @@ export default function TermsScreen() {
             >
               {`These Terms of Service include the Community Standards below. During onboarding, you must explicitly accept this ${POLICY_EFFECTIVE_LABEL} version before a profile can be created.`}
             </Text>
-            <Text
-              textStyle={{ ...textStyles.caption, color: colors.textTertiary }}
-            >
-              {acceptanceSummary}
-            </Text>
+            {acceptanceLoading ? null : (
+              <Text
+                textStyle={{ ...textStyles.caption, color: colors.textTertiary }}
+              >
+                {acceptanceSummary}
+              </Text>
+            )}
             {TERMS.map((term) => (
               <Column
                 key={term.title}

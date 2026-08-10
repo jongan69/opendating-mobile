@@ -2,10 +2,11 @@
 // Uses expo-secure-store for sensitive data, AsyncStorage for cache only.
 // NEVER stores: nsec, private keys, decrypted messages, raw GPS.
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-import type { StoredPolicyAcceptance } from '@/lib/policy';
+import { isValidPolicyTimestamp, type StoredPolicyAcceptance } from '@/lib/policy';
 
 // In-memory fallback when SecureStore is unavailable (e.g., web during dev)
 const inMemoryStore = new Map<string, string>();
@@ -129,25 +130,30 @@ export const storage = {
     await secureDelete(STORAGE_KEYS.ONBOARDING_DRAFT);
   },
 
-  // Terms of Service and Community Standards acceptance. This survives the
-  // onboarding-draft cleanup so the app retains the exact accepted policy
-  // version, timestamp, and account identifier.
+  // Terms of Service and Community Standards acceptance.
+  //
+  // Uses AsyncStorage (durable) rather than SecureStore so a transient
+  // keychain failure does not silently lose the record. The acceptance
+  // payload is not a secret — it contains a version string, a timestamp,
+  // and a public key — so durable persistence is the right trade-off.
   async savePolicyAcceptance(acceptance: StoredPolicyAcceptance): Promise<void> {
-    await secureSet(STORAGE_KEYS.POLICY_ACCEPTANCE, JSON.stringify(acceptance));
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.POLICY_ACCEPTANCE,
+      JSON.stringify(acceptance)
+    );
   },
   async getPolicyAcceptance(): Promise<StoredPolicyAcceptance | null> {
-    const raw = await secureGet(STORAGE_KEYS.POLICY_ACCEPTANCE);
-    if (!raw) return null;
     try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.POLICY_ACCEPTANCE);
+      if (!raw) return null;
       const parsed: unknown = JSON.parse(raw);
-      // A consent record is only meaningful if every field survived intact;
-      // a partial record must read as "no acceptance on file".
       if (
         typeof parsed === 'object' &&
         parsed !== null &&
         typeof (parsed as StoredPolicyAcceptance).version === 'string' &&
         typeof (parsed as StoredPolicyAcceptance).acceptedAt === 'string' &&
-        typeof (parsed as StoredPolicyAcceptance).pubkey === 'string'
+        typeof (parsed as StoredPolicyAcceptance).pubkey === 'string' &&
+        isValidPolicyTimestamp((parsed as StoredPolicyAcceptance).acceptedAt)
       ) {
         return parsed as StoredPolicyAcceptance;
       }
@@ -155,6 +161,9 @@ export const storage = {
     } catch {
       return null;
     }
+  },
+  async deletePolicyAcceptance(): Promise<void> {
+    await AsyncStorage.removeItem(STORAGE_KEYS.POLICY_ACCEPTANCE);
   },
 
   // Onboarding
@@ -181,5 +190,7 @@ export const storage = {
     for (const key of Object.values(STORAGE_KEYS)) {
       await secureDelete(key);
     }
+    // Policy acceptance is in AsyncStorage, not SecureStore.
+    await AsyncStorage.removeItem(STORAGE_KEYS.POLICY_ACCEPTANCE);
   },
 };

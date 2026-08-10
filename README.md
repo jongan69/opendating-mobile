@@ -21,7 +21,7 @@
 
 <br>
 
-> **Release status:** approved for iOS and Android launch. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities, and the [1.0 Execution Roadmap](docs/ROADMAP-1.0.md) for the path through GA.
+> **Release status:** 0.1.1 is a proposed launch candidate; approval is not effective until `release/manifest.json` records the reviewed source SHA, artifact IDs, and checksums. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities, and the [1.0 Execution Roadmap](docs/ROADMAP-1.0.md) for the path through GA.
 
 ## What is OpenDating?
 

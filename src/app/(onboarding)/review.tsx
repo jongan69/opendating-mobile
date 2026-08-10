@@ -81,10 +81,12 @@ export default function ReviewScreen() {
       // Written before the profile exists so consent always precedes
       // publication. Deliberately fatal, unlike the best-effort writes below:
       // a profile must never go live without a durable acceptance record.
+      // Bound to the identity that actually creates the profile, not the
+      // draft-derived pubkey, so the accepted key is authoritative.
       try {
         await storage.savePolicyAcceptance({
           ...policyAcceptance,
-          pubkey: resolvedPubkey,
+          pubkey: identity.pubkey,
         });
       } catch {
         throw new Error(

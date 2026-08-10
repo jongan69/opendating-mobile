@@ -1,6 +1,6 @@
 # Release Status
 
-**Status: approved for launch.** OpenDating Mobile 0.1.1 is cleared for iOS App Store and Google Play release.
+**Status: proposed launch candidate.** OpenDating Mobile 0.1.1 is a proposed iOS App Store and Google Play release. Launch approval is not effective until Phase 0 release-containment gates pass and `release/manifest.json` records the reviewed source SHA, artifact IDs, build numbers, and checksums.
 
 ## Verified in this release
 

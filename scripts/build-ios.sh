@@ -112,6 +112,7 @@ xcodebuild -exportArchive \
   -archivePath "$ARCHIVE_PATH" \
   -exportPath builds \
   -exportOptionsPlist "$EXPORT_OPTS" \
+  -allowProvisioningUpdates \
   2>&1 | tail -5
 
 [[ -f "$IPA_PATH" ]] || fail "IPA export failed"
