@@ -84,6 +84,10 @@ export default function PrivacyScreen() {
             body="Messages are end-to-end encrypted and readable only by you and the person you're chatting with. OpenDating can't read your conversations, and messages can't be recovered once deleted."
           />
           <Section
+            title="Profile Safety Screening"
+            body="Before your display name and bio go live, they are automatically screened for harmful content. That screening runs on our service provider, Cloudflare, and is the only place your profile text is processed by an automated system. Your photos are not sent to it, and your messages are never screened — they stay end-to-end encrypted."
+          />
+          <Section
             title="Blocking & Reporting"
             body="Blocks and reports are private. When you report someone, they never learn who filed the report. Reports are encrypted and reviewed only by moderation services, never published publicly."
           />

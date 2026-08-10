@@ -6,8 +6,8 @@ is the most credible evidence that the app works.
 
 ## Before you record
 
-- [ ] **Use a physical device.** Apple asked for one specifically. The iPhone Air
-      on iOS 26.6 is the right target.
+- [ ] **Use a physical device.** Apple asked for one specifically. The connected
+      11-inch iPad Pro (3rd generation) on iPadOS 26.6 is the test target.
 - [ ] **Use a real build, not the screenshot build.** `EXPO_PUBLIC_SCREENSHOT_MODE`
       must be unset or `false`. The `screenshot` EAS profile sets it to `true`,
       which replaces discovery, matches, and profile with fabricated demo data.
@@ -29,6 +29,11 @@ Timings are guidance, not targets. Pause on each screen long enough to read it.
 Home screen, tap the OpenDating icon. Let the splash screen and welcome screen
 load without cutting.
 
+From the welcome screen, briefly open **I already have an account** to show the
+existing-account access path. The recovery-key field is masked by default. Do
+not paste, reveal, or record a real recovery key. Go back and continue with a
+new disposable account. There is no email/password or third-party login.
+
 ### 2. Account registration (0:15–1:45)
 Apple explicitly asked for registration, login, and deletion. This app has no
 separate login step — the account is created on-device and persists. Narrate
@@ -37,13 +42,13 @@ that, or note it in the reply text.
 | Screen | What to show |
 |---|---|
 | Welcome | Tap **Create Account** |
-| Create account | Continue promptly without lingering on the generated recovery key. Use a disposable account created only for this recording, and delete it before the recording ends |
-| Privacy | Scroll the privacy summary, then continue |
+| Create account | Create a disposable account for this recording. The recovery key is generated and stored securely but is not displayed |
+| Privacy | Scroll the privacy summary, open the Terms and Community Standards, return, check the consent box, then continue |
 | Basics | Type a display name, an age of 18+, pick a gender |
 | Preferences | Set match preferences |
 | Intent | Pick what you are looking for |
 | About | Type a short bio |
-| Photos | **Permission prompt fires here.** Tap Allow, pick a photo |
+| Photos | **Permission prompt fires here.** Tap Allow and pick at least two photos |
 | Location | **Permission prompt fires here.** Tap Allow While Using App. Pause on the coarse-area readout — it shows the ~5 km region, which demonstrates that exact GPS is not used |
 | Review | Scroll the assembled profile |
 | Finish | Tap through into the app |

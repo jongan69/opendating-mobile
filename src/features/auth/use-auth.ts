@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { storage } from '@/lib/storage';
 
 export interface UseAuthResult {
   isAuthenticated: boolean;
@@ -99,6 +100,10 @@ export function useAuth(): UseAuthResult {
 
     try {
       await getOpenDatingClient().deleteIdentity();
+      // Wipe the acceptance record so a stale binding from a previous
+      // account does not survive a logout/login cycle and misrepresent
+      // consent in Settings → Terms.
+      await storage.deletePolicyAcceptance().catch(() => {});
       if (mountedRef.current) {
         setIsAuthenticated(false);
         setPubkey(null);

@@ -22,16 +22,12 @@ section does not apply. Say so explicitly in the reply rather than omitting it.
 
 ## 2. Devices and operating systems tested
 
-> **Confirm this list before sending.** Only fill in what was actually tested.
+Only devices with a completed physical-device walkthrough belong in this
+table. Add the connected 11-inch iPad Pro after its 0.1.1 walkthrough passes.
 
 | Device | OS | Notes |
 |---|---|---|
-| iPhone Air (iPhone18,4) | iOS 26.6 | Physical device — primary test target |
-| iPhone 17 | iOS 26.x Simulator | Development |
-
-Add any additional physical devices used. Apple asks specifically for physical
-devices; listing simulator-only coverage as if it were device testing is worse
-than listing a shorter honest list.
+| Samsung SM-A166U1 | Android 16 | Physical device — onboarding and discovery verified |
 
 ## 3. Purpose and target audience
 
@@ -64,19 +60,21 @@ no email/password login and no external account system. The reviewer creates a
 working account inside the app in about a minute.
 
 1. Launch the app. Tap **Create Account** on the welcome screen.
-2. The app generates an account on the device and shows a recovery key. Tap
-   through to continue. (Reviewers do not need to save the key.)
-3. Enter a display name, an age of 18 or over, and a gender.
-4. Choose what you are looking for, and set match preferences.
-5. **Allow location when prompted.** This is required for discovery to return
+2. The app generates an account and stores its recovery key securely on the
+   device. The recovery key is not displayed during account creation.
+3. Read and accept the Terms of Service and Community Standards.
+4. Enter a display name, an age of 18 or over, and a gender.
+5. Choose what you are looking for, and set match preferences.
+6. **Allow location when prompted.** This is required for discovery to return
    results. Choosing "Don't Allow" leaves the discovery deck empty — that is
    expected behavior, not a bug.
-6. Add at least one photo. Allow photo library or camera access when prompted.
-7. Review the profile and tap to finish. The account is now live on the network.
-8. **Discover** shows nearby people; swipe or use the buttons. **Matches** lists
+7. Add at least two photos, or choose **Add photos later**. For the fullest
+   review flow, add two photos and allow photo-library access when prompted.
+8. Review the profile and tap to finish. The account is now live on the network.
+9. **Discover** shows nearby people; swipe or use the buttons. **Matches** lists
    mutual likes. Tap a match to open an encrypted chat.
-9. Report and block are available from any profile and from the chat screen.
-10. Delete the account at **Profile → Settings → Account → Delete Account**.
+10. Report and block are available from any profile and from the chat screen.
+11. Delete the account at **Profile → Settings → Account → Delete Account**.
 
 **Important for discovery results.** The app shows real people in the reviewer's
 coarse area on a live network. If the review location has no other users, the
@@ -89,12 +87,13 @@ review region.
 | Service | Role | Notes |
 |---|---|---|
 | OpenDating relay (Cloudflare Workers) | Sole backend. Profile storage, discovery matching, match/like routing, encrypted message transport, reports, blocks, account deletion. | Operated by the developer at `wss://opendating-relay.jonathang132298.workers.dev`. Service endpoints are discovered at runtime from the relay's public service document. |
+| Cloudflare Workers AI | Automated safety screening for profile display names and bios before publication. | The developer-operated relay sends this profile text to Cloudflare's `@cf/meta/llama-3.2-3b-instruct` model. Photos are not sent, and it does not process encrypted messages. Disclosed in-app on the onboarding privacy screen and at Settings → Privacy. |
 | Expo Application Services (EAS) | Build and submission tooling only. | Build-time only. Not contacted by the shipped app at runtime. |
 
 **Not used:** no payment processor, no in-app purchases or subscriptions, no
-advertising SDK, no third-party analytics or crash reporting, no AI or machine
-learning service, no third-party authentication provider, no data broker, and no
-App Tracking Transparency prompt (the app does not track).
+advertising SDK, no third-party analytics or crash reporting, no third-party
+authentication provider, no data broker, and no App Tracking Transparency
+prompt (the app does not track).
 
 The app's privacy manifest declares `NSPrivacyTracking: false` with no tracking
 domains.
@@ -122,8 +121,10 @@ media. Profile photos and message content are created and uploaded by users.
 enforced at a minimum of 18, and the App Store age rating is set to 17+.
 
 **User-generated content controls,** as required by Guideline 1.2:
-- Terms of use and community standards are shown in-app at Settings → Terms, and
-  creating an account constitutes agreement to them.
+- Terms of Service and Community Standards are shown during onboarding and at
+  Settings → Terms. Profile creation is disabled until the member explicitly
+  accepts the August 9, 2026 policy version; version and acceptance time are
+  recorded locally for the account.
 - Any profile can be reported from the profile screen or from a chat.
 - Any user can be blocked; blocks take effect immediately on-device and are
   enforced server-side.
@@ -137,53 +138,76 @@ enforced at a minimum of 18, and the App Store age rating is set to 17+.
 ## Reviewer Notes — paste this into App Store Connect
 
 ```text
-ACCOUNT ACCESS
-No demo account is needed and none exists. OpenDating has no email/password
-login and no third-party sign-in. The reviewer creates an account on-device in
-about one minute: tap "Create Account" on the welcome screen, then complete
-onboarding (name, age 18+, gender, preferences, location permission, at least
-one photo). The account is fully functional immediately.
+SCREEN RECORDING
+A physical-device recording on the latest iPadOS is attached to the App Review
+reply. It begins with app launch and shows account access and registration,
+policy consent, permission prompts, discovery, reporting, blocking, matching,
+encrypted messaging, and account deletion. There are no purchases or
+subscriptions to demonstrate.
 
-WHAT THE APP DOES
-OpenDating is a privacy-focused dating app for adults 18+. Exact GPS never
-leaves the device; discovery sends only a coarse area of about 5 km. Direct
-messages between matches are end-to-end encrypted. There is no advertising SDK,
-no third-party analytics, and no data sale.
+DEVICES TESTED
+- Samsung SM-A166U1, Android 16: physical-device onboarding and discovery.
+The physical iPad model and iPadOS result shown in the recording will be added
+here after the final 0.1.1 walkthrough passes.
 
-PERMISSIONS
-- Location (when in use): required for discovery. Denying it leaves the
-  discovery deck empty, which is expected behavior.
-- Photo library / camera: required to add profile photos.
-- No App Tracking Transparency prompt. The app does not track users.
+PURPOSE AND AUDIENCE
+OpenDating is a privacy-focused dating app for adults 18+ seeking dating and
+relationships. It provides ordinary discovery, matching, and chat while
+collecting less sensitive data: exact GPS never leaves the device, discovery
+uses only a coarse area of about 5 km, and messages between matches are
+end-to-end encrypted. It particularly serves privacy-conscious adults. There
+is no advertising SDK, third-party analytics, or data sale.
 
-CORE FLOWS TO REVIEW
-- Account creation: welcome screen -> Create Account -> onboarding.
-- Discovery: the Discover tab, swipe or use the like/pass buttons.
-- Matching and messaging: the Matches tab, tap a match to open an encrypted chat.
-- Reporting: available from any profile and from any chat.
-- Blocking: available from any profile and from any chat; takes effect
-  immediately.
-- Account deletion: Profile -> Settings -> Account -> Delete Account.
+ACCOUNT ACCESS AND SETUP
+No demo credentials exist because OpenDating has no email/password login or
+third-party sign-in. Existing members tap "I already have an account" and enter
+their recovery key in a masked field. A reviewer can create a new account:
+1. Tap "Create Account." A recovery key is generated and stored securely on
+   the device; it is not displayed.
+2. Read and accept the Terms of Service and Community Standards.
+3. Enter name, age 18+, gender, preferences, intent, and bio.
+4. Add at least two photos and allow photo-library access, or choose "Add
+   photos later."
+5. Allow location while using the app. Denying it leaves discovery empty.
+6. Review the profile and tap "Create Profile."
+Report and Block are available from profiles and chats. Delete Account is at
+Profile -> Settings -> Account -> Delete Account.
 
-NOTE ON DISCOVERY RESULTS
-The app runs against a live network and shows real nearby users. If there are no
-other users in the reviewer's coarse area, the discovery deck will be empty.
-This is correct behavior rather than a defect. If a populated deck is needed for
-review, please contact us and we will coordinate test accounts in the review
-region.
+DISCOVERY RESULTS
+The app uses a live network and shows real people in the reviewer's coarse
+area. If no other users are nearby, discovery can legitimately be empty.
+Contact us and we will coordinate test accounts in the review region.
 
-PURCHASES
-The app is free. There is no paid content, no in-app purchase, and no
-subscription.
+PERMISSIONS AND PURCHASES
+- Location while using the app: converts the device location to a coarse area
+  for nearby discovery; exact GPS is not transmitted.
+- Photo library: adds profile photos.
+- No App Tracking Transparency prompt; the app does not track.
+The app is free with no paid content, purchase, or subscription.
 
 EXTERNAL SERVICES
-The only backend is the OpenDating relay, operated by the developer on
-Cloudflare Workers. No payment processor, advertising network, analytics
-provider, AI service, or third-party authentication service is used.
+- Developer-operated OpenDating relay on Cloudflare Workers: profile storage,
+  discovery, likes, matching, encrypted-message transport, reports, blocks,
+  and deletion.
+- Cloudflare Workers AI (`@cf/meta/llama-3.2-3b-instruct`): safety screening
+  of profile display names and bios before publication. Photos are not sent to
+  it and it does not process encrypted messages. This is disclosed to the user
+  in-app on the onboarding privacy screen and at Settings -> Privacy.
+- Expo Application Services: build and submission tooling only; not contacted
+  by the shipped app at runtime.
+No payment processor, advertising network, analytics provider, data broker, or
+third-party authentication service is used.
 
 REGIONS
-The app behaves identically in all regions. There is no region-locked content,
-feature gating, or regional pricing.
+The app behaves consistently across all regions. There is no region-locked
+content, feature gating, regional pricing, or in-app availability restriction.
+
+REGULATED SERVICES AND THIRD-PARTY MATERIAL
+OpenDating is a dating/social-networking app, not a financial, medical, legal,
+gambling, or other regulated service. Brand assets and shipped content are
+original developer-owned work. Profile photos and text are user-generated.
+The app is 18+, the App Store age rating is 17+, users must explicitly accept
+the Terms and Community Standards, and profiles support reporting and blocking.
 
 CONTACT
 jonny2298@live.com

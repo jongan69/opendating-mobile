@@ -21,6 +21,8 @@ OpenDating is designed so that your dating activity is private by default.
 - No one can enumerate all profiles
 - You control who sees your profile through visibility settings
 - Pausing hides you from new discovery
+- **Display name and bio are automatically screened** for harmful content
+  before publication — see [Automated safety screening](#automated-safety-screening)
 
 ### Your Activity
 - **Likes are private** — the other person only knows if you match
@@ -50,6 +52,25 @@ OpenDating is designed so that your dating activity is private by default.
 - Whether you blocked them
 - Your private discovery preferences
 - Your message history with other people
+
+## Automated safety screening
+
+Profile **display names and bios** are screened for harmful content before they
+are published. This is the only automated processing of profile content.
+
+| | |
+|---|---|
+| **What is sent** | Display name and bio text only |
+| **What is never sent** | Photos, messages, location, likes, blocks, reports, keys |
+| **Where it runs** | Cloudflare Workers AI (`@cf/meta/llama-3.2-3b-instruct`), called by the OpenDating service |
+| **Why** | Blocks abusive and exploitative profile text before other members see it |
+| **When** | At publication time only — not continuously, and not retroactively |
+
+Message content is **never** screened. It is end-to-end encrypted and the
+service cannot read it, so no automated system can act on it.
+
+This is disclosed in-app on the onboarding privacy screen and at
+Settings → Privacy → Profile Safety Screening.
 
 ## Limitations (Honest Disclosure)
 

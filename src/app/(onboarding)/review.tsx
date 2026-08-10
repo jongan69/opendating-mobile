@@ -15,6 +15,7 @@ import {
   INTENT_OPTIONS,
   useOnboardingDraft,
 } from '@/features/onboarding/onboarding-draft';
+import { isCurrentPolicy } from '@/lib/policy';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import {
   PROFILE_CONTENT_VERSION,
@@ -43,8 +44,23 @@ export default function ReviewScreen() {
   const handleSubmit = async () => {
     if (submitting) return;
 
+    const policyAcceptance = draft.policyAcceptance;
+    if (!isCurrentPolicy(policyAcceptance)) {
+      setError(
+        'Go back to the privacy step and accept the Terms of Service and Community Standards.'
+      );
+      return;
+    }
+
     if (isScreenshotMode) {
       router.replace('/(onboarding)/finish');
+      return;
+    }
+
+    // The button is disabled without a pubkey, but the acceptance record is
+    // bound to an account and must never be written with a missing one.
+    if (!resolvedPubkey) {
+      setError('Still setting up your account — go back and create one first.');
       return;
     }
 
@@ -62,6 +78,21 @@ export default function ReviewScreen() {
       // Mirror the bootstrap sequence: connect → capabilities → profile.
       await client.connect();
       await client.fetchCapabilities();
+      // Written before the profile exists so consent always precedes
+      // publication. Deliberately fatal, unlike the best-effort writes below:
+      // a profile must never go live without a durable acceptance record.
+      // Bound to the identity that actually creates the profile, not the
+      // draft-derived pubkey, so the accepted key is authoritative.
+      try {
+        await storage.savePolicyAcceptance({
+          ...policyAcceptance,
+          pubkey: identity.pubkey,
+        });
+      } catch {
+        throw new Error(
+          'Could not record your acceptance of the Terms on this device. Free up some storage and try again.'
+        );
+      }
       await client.createProfile();
 
       // Publish what the user actually filled in. Without this the profile
@@ -151,10 +182,16 @@ export default function ReviewScreen() {
     return () => { active = false; };
   }, [draft.pubkey]);
 
-  const canSubmit = resolvedPubkey !== null && draft.displayName.length > 0;
+  const hasAcceptedPolicies = isCurrentPolicy(draft.policyAcceptance);
+  const canSubmit =
+    resolvedPubkey !== null &&
+    draft.displayName.length > 0 &&
+    hasAcceptedPolicies;
   // A dead button with no explanation is the worst possible last step.
   const blockedReason = !canSubmit
-    ? draft.displayName.length === 0
+    ? !hasAcceptedPolicies
+      ? 'Go back to "Your privacy comes first" and accept the Terms and Community Standards.'
+      : draft.displayName.length === 0
       ? 'Go back to "About you" and add a display name to finish.'
       : 'Still setting up your account — go back and create one first.'
     : null;

@@ -19,6 +19,7 @@ import React, {
 } from 'react';
 import { isScreenshotMode } from '@/constants/env';
 import { storage } from '@/lib/storage';
+import { CURRENT_POLICY_VERSION, type PolicyAcceptance } from '@/lib/policy';
 
 // ---- Option lists ----
 // Re-exported from the canonical source so the onboarding pickers, the profile
@@ -44,6 +45,9 @@ export const MIN_AGE = 18;
 export const MAX_AGE = 99;
 export const MIN_PHOTOS = 2;
 export const MAX_PHOTOS = 6;
+// Re-exported so onboarding screens keep a single import for draft concerns.
+export { CURRENT_POLICY_VERSION };
+export type { PolicyAcceptance };
 
 // ---- Draft model ----
 
@@ -69,6 +73,8 @@ export interface OnboardingDraft {
   // Location
   geohashPrefix: string | null;
   countryCode: string | null;
+  // Terms of Service + Community Standards consent
+  policyAcceptance: PolicyAcceptance | null;
 }
 
 const DEMO_DRAFT: OnboardingDraft = {
@@ -88,6 +94,10 @@ const DEMO_DRAFT: OnboardingDraft = {
   photos: [],
   geohashPrefix: '9q8yy',
   countryCode: 'US',
+  policyAcceptance: {
+    version: CURRENT_POLICY_VERSION,
+    acceptedAt: '2026-08-09T00:00:00.000Z',
+  },
 };
 
 const DEFAULT_DRAFT: OnboardingDraft = isScreenshotMode
@@ -107,6 +117,7 @@ const DEFAULT_DRAFT: OnboardingDraft = isScreenshotMode
       photos: [],
       geohashPrefix: null,
       countryCode: null,
+      policyAcceptance: null,
     };
 
 // ---- Context ----
