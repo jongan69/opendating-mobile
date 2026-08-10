@@ -79,3 +79,10 @@ affect them, and every backend path behind them is verified by
   geohash, so the coarse permission alone would match both the behaviour and
   the privacy positioning, and would drop the "Precise" option from the OS
   prompt.
+
+## iOS/iPadOS review target — pending walkthrough
+
+Connected and detected on 2026-08-09: iPad Pro (11-inch) (3rd generation),
+model identifier iPad13,4, running iPadOS 26.6. Apple lists iPadOS 26.6 as the
+latest release. Do not add it to the App Review tested-device list until the
+full 0.1.1 physical-device walkthrough and recording pass.

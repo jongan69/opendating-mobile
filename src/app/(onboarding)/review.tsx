@@ -11,6 +11,7 @@ import {
   OnboardingScreen,
 } from '@/components/onboarding/onboarding-screen';
 import {
+  CURRENT_POLICY_VERSION,
   GENDER_OPTIONS,
   INTENT_OPTIONS,
   useOnboardingDraft,
@@ -43,6 +44,14 @@ export default function ReviewScreen() {
   const handleSubmit = async () => {
     if (submitting) return;
 
+    const policyAcceptance = draft.policyAcceptance;
+    if (policyAcceptance?.version !== CURRENT_POLICY_VERSION) {
+      setError(
+        'Go back to the privacy step and accept the Terms of Service and Community Standards.'
+      );
+      return;
+    }
+
     if (isScreenshotMode) {
       router.replace('/(onboarding)/finish');
       return;
@@ -62,6 +71,10 @@ export default function ReviewScreen() {
       // Mirror the bootstrap sequence: connect → capabilities → profile.
       await client.connect();
       await client.fetchCapabilities();
+      await storage.savePolicyAcceptance({
+        ...policyAcceptance,
+        pubkey: resolvedPubkey,
+      });
       await client.createProfile();
 
       // Publish what the user actually filled in. Without this the profile
@@ -151,10 +164,17 @@ export default function ReviewScreen() {
     return () => { active = false; };
   }, [draft.pubkey]);
 
-  const canSubmit = resolvedPubkey !== null && draft.displayName.length > 0;
+  const hasAcceptedPolicies =
+    draft.policyAcceptance?.version === CURRENT_POLICY_VERSION;
+  const canSubmit =
+    resolvedPubkey !== null &&
+    draft.displayName.length > 0 &&
+    hasAcceptedPolicies;
   // A dead button with no explanation is the worst possible last step.
   const blockedReason = !canSubmit
-    ? draft.displayName.length === 0
+    ? !hasAcceptedPolicies
+      ? 'Go back to "Your privacy comes first" and accept the Terms and Community Standards.'
+      : draft.displayName.length === 0
       ? 'Go back to "About you" and add a display name to finish.'
       : 'Still setting up your account — go back and create one first.'
     : null;

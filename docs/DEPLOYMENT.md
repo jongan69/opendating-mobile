@@ -13,8 +13,11 @@ Release 0.1.1 is approved for iOS and Android. The existing iOS 0.1.0 build 4 an
 The production build and submit scripts call `scripts/release/assert-release-ready.mjs`. They refuse to run unless:
 
 1. the release manifest status is `approved`;
-2. the manifest's git SHA equals the exact checked-out commit; and
-3. an authorized release manager explicitly sets the production approval variable.
+2. the manifest's git SHA identifies the reviewed source-candidate commit and
+   that commit is an ancestor of the checked-out approval commit;
+3. only `release/manifest.json` differs between the source candidate and the
+   approval commit; and
+4. an authorized release manager explicitly sets the production approval variable.
 
 Do not bypass this guard. A successful EAS build is an artifact, not approval to ship.
 

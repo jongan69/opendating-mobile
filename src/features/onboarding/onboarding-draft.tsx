@@ -44,6 +44,12 @@ export const MIN_AGE = 18;
 export const MAX_AGE = 99;
 export const MIN_PHOTOS = 2;
 export const MAX_PHOTOS = 6;
+export const CURRENT_POLICY_VERSION = '2026-08-09';
+
+export interface PolicyAcceptance {
+  version: string;
+  acceptedAt: string;
+}
 
 // ---- Draft model ----
 
@@ -69,6 +75,8 @@ export interface OnboardingDraft {
   // Location
   geohashPrefix: string | null;
   countryCode: string | null;
+  // Terms of Service + Community Standards consent
+  policyAcceptance: PolicyAcceptance | null;
 }
 
 const DEMO_DRAFT: OnboardingDraft = {
@@ -88,6 +96,10 @@ const DEMO_DRAFT: OnboardingDraft = {
   photos: [],
   geohashPrefix: '9q8yy',
   countryCode: 'US',
+  policyAcceptance: {
+    version: CURRENT_POLICY_VERSION,
+    acceptedAt: '2026-08-09T00:00:00.000Z',
+  },
 };
 
 const DEFAULT_DRAFT: OnboardingDraft = isScreenshotMode
@@ -107,6 +119,7 @@ const DEFAULT_DRAFT: OnboardingDraft = isScreenshotMode
       photos: [],
       geohashPrefix: null,
       countryCode: null,
+      policyAcceptance: null,
     };
 
 // ---- Context ----

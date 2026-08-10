@@ -2,9 +2,13 @@
 // A trust-building screen before the user shares any profile data.
 
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
+import {
+  CURRENT_POLICY_VERSION,
+  useOnboardingDraft,
+} from '@/features/onboarding/onboarding-draft';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
@@ -37,7 +41,22 @@ const PRIVACY_POINTS: { title: string; detail: string }[] = [
 export default function PrivacyScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { draft, update } = useOnboardingDraft();
   const styles = makeStyles(colors);
+  const hasAcceptedPolicies =
+    draft.policyAcceptance?.version === CURRENT_POLICY_VERSION;
+
+  const togglePolicyAcceptance = () => {
+    update(
+      'policyAcceptance',
+      hasAcceptedPolicies
+        ? null
+        : {
+            version: CURRENT_POLICY_VERSION,
+            acceptedAt: new Date().toISOString(),
+          }
+    );
+  };
 
   return (
     <OnboardingScreen
@@ -46,6 +65,7 @@ export default function PrivacyScreen() {
       subtitle="OpenDating is designed so less of you is shared — not more."
       primaryLabel="Continue"
       onPrimaryPress={() => router.push('/(onboarding)/basics')}
+      primaryDisabled={!hasAcceptedPolicies}
     >
       <View style={styles.list}>
         {PRIVACY_POINTS.map((point, index) => (
@@ -72,10 +92,67 @@ export default function PrivacyScreen() {
         ))}
       </View>
 
-      <Text style={[typography.caption, { color: colors.textTertiary }]}>
+      <Text
+        style={[typography.caption, { color: colors.textTertiary }]}
+      >
         Other OpenDating members can discover the profile details you choose to
         share. Your exact location and private likes stay hidden.
       </Text>
+
+      <View style={styles.consentCard}>
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityLabel="Accept the Terms of Service and Community Standards"
+          accessibilityState={{ checked: hasAcceptedPolicies }}
+          onPress={togglePolicyAcceptance}
+          style={({ pressed }) => [
+            styles.consentRow,
+            pressed && styles.pressed,
+          ]}
+        >
+          <View
+            style={[
+              styles.checkbox,
+              {
+                backgroundColor: hasAcceptedPolicies
+                  ? colors.accent
+                  : colors.surface,
+                borderColor: hasAcceptedPolicies ? colors.accent : colors.border,
+              },
+            ]}
+          >
+            {hasAcceptedPolicies ? (
+              <Text style={styles.checkmark}>✓</Text>
+            ) : null}
+          </View>
+          <Text
+            style={[
+              typography.bodyMedium,
+              styles.consentText,
+              { color: colors.text },
+            ]}
+          >
+            I agree to the Terms of Service and Community Standards.
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => router.push('/settings/terms')}
+          hitSlop={spacing.sm}
+          style={({ pressed }) => [styles.policyLink, pressed && styles.pressed]}
+        >
+          <Text
+            style={[typography.labelMedium, { color: colors.accent }]}
+          >
+            Read the Terms and Community Standards
+          </Text>
+        </Pressable>
+        <Text
+          style={[typography.caption, { color: colors.textTertiary }]}
+        >
+          Effective August 9, 2026. You must accept before creating a profile.
+        </Text>
+      </View>
     </OnboardingScreen>
   );
 }
@@ -104,6 +181,44 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: radius.full,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    consentCard: {
+      gap: spacing.md,
+      marginTop: spacing.xl,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      padding: spacing.lg,
+    },
+    consentRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.md,
+    },
+    checkbox: {
+      width: 24,
+      height: 24,
+      borderRadius: radius.sm,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkmark: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '700',
+      lineHeight: 20,
+    },
+    consentText: {
+      flex: 1,
+    },
+    policyLink: {
+      alignSelf: 'flex-start',
+      paddingVertical: spacing.xs,
+    },
+    pressed: {
+      opacity: 0.7,
     },
   });
 }

@@ -15,7 +15,7 @@ const TERMS = [
     body: 'You are responsible for protecting your recovery key and for activity signed by your account. Recovery is self-custodied; OpenDating cannot restore a lost key.',
   },
   {
-    title: 'Acceptable use',
+    title: 'Community Standards',
     body: 'Be truthful, respectful, and lawful. Harassment, threats, scams, impersonation, sexual exploitation, content involving minors, non-consensual intimate content, hate, spam, scraping, and attempts to bypass safety controls are prohibited.',
   },
   {
@@ -59,7 +59,7 @@ export default function TermsScreen() {
             <Text
               textStyle={{ ...textStyles.body, color: colors.textSecondary }}
             >
-              These terms describe the rules for using OpenDating. By creating an account you agree to them and to the Community Standards.
+              These Terms of Service include the Community Standards below. During onboarding, you must explicitly accept this August 9, 2026 version before a profile can be created.
             </Text>
             {TERMS.map((term) => (
               <Column

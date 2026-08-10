@@ -54,6 +54,7 @@ const STORAGE_KEYS = {
   THEME_PREFERENCE: 'opendating_theme',
   PROFILE_CONTENT: 'opendating_profile_content',
   ONBOARDING_DRAFT: 'opendating_onboarding_draft',
+  POLICY_ACCEPTANCE: 'opendating_policy_acceptance',
 } as const;
 
 export const storage = {
@@ -124,6 +125,22 @@ export const storage = {
   },
   async clearOnboardingDraft(): Promise<void> {
     await secureDelete(STORAGE_KEYS.ONBOARDING_DRAFT);
+  },
+
+  // Terms of Service and Community Standards acceptance. This survives the
+  // onboarding-draft cleanup so the app retains the exact accepted policy
+  // version, timestamp, and account identifier.
+  async savePolicyAcceptance(acceptance: object): Promise<void> {
+    await secureSet(STORAGE_KEYS.POLICY_ACCEPTANCE, JSON.stringify(acceptance));
+  },
+  async getPolicyAcceptance<T>(): Promise<T | null> {
+    const raw = await secureGet(STORAGE_KEYS.POLICY_ACCEPTANCE);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
   },
 
   // Onboarding
