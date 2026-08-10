@@ -60,6 +60,40 @@ describe('isCurrentPolicy', () => {
     ).toBe(false);
   });
 
+  // "2026-08-09" parses to UTC midnight, which is exactly the effective-date
+  // floor, so a bare date would otherwise clear the gate while recording
+  // consent at a precision no writer in the app produces.
+  it('rejects a date-only or non-canonical acceptance timestamp', () => {
+    expect(
+      isCurrentPolicy({
+        version: CURRENT_POLICY_VERSION,
+        acceptedAt: CURRENT_POLICY_VERSION,
+      })
+    ).toBe(false);
+    expect(
+      isCurrentPolicy({
+        version: CURRENT_POLICY_VERSION,
+        acceptedAt: '2026-08-09T12:00:00Z',
+      })
+    ).toBe(false);
+    expect(
+      isCurrentPolicy({
+        version: CURRENT_POLICY_VERSION,
+        acceptedAt: '1786000000000',
+      })
+    ).toBe(false);
+  });
+
+  // Every consent writer in the app records new Date().toISOString().
+  it('accepts the canonical form the app actually writes', () => {
+    expect(
+      isCurrentPolicy({
+        version: CURRENT_POLICY_VERSION,
+        acceptedAt: new Date().toISOString(),
+      })
+    ).toBe(true);
+  });
+
   // A device clock set forward would otherwise mint an acceptance that no
   // member ever made.
   it('rejects a future-dated acceptance', () => {

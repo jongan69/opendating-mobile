@@ -41,7 +41,23 @@ export function isCurrentPolicy(
 ): acceptance is PolicyAcceptance {
   if (acceptance?.version !== CURRENT_POLICY_VERSION) return false;
   if (typeof acceptance.acceptedAt !== 'string') return false;
+  if (!isCanonicalUtcTimestamp(acceptance.acceptedAt)) return false;
   return isValidPolicyTimestamp(acceptance.acceptedAt, POLICY_EFFECTIVE_AT);
+}
+
+/**
+ * True only for the exact form `new Date().toISOString()` produces, which is
+ * what every consent writer in the app records.
+ *
+ * Consent must name a complete instant. A date-only string like "2026-08-09"
+ * parses to UTC midnight — precisely the effective-date floor — so without
+ * this check a bare date would satisfy the current-policy gate while claiming
+ * a precision no writer in this app produces.
+ */
+function isCanonicalUtcTimestamp(iso: string): boolean {
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.toISOString() === iso;
 }
 
 /**
