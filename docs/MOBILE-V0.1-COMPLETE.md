@@ -1,10 +1,10 @@
 # OpenDating Mobile v0.1 — Historical Implementation Snapshot
 
-## Status: ARCHIVED — NOT RELEASE READY
+## Status: ARCHIVED — HISTORICAL SNAPSHOT
 
-This file records the original v0.1 implementation snapshot. It is not a
-release claim. Production builds and submissions are blocked; current evidence
-and remaining gates are tracked in [Release Status](RELEASE-STATUS.md) and the
+This file records the original v0.1 implementation snapshot and is not a
+statement of current release state. Current status and remaining work are
+tracked in [Release Status](RELEASE-STATUS.md) and the
 [1.0 Roadmap](ROADMAP-1.0.md).
 
 ## Project Summary

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-09
 
-> **Submission status: held.** This metadata is not approved for upload. The iOS build 4 submission must be withdrawn and Android build 3 must remain draft. Production scripts are blocked by `release/manifest.json`.
+> **Submission status: approved.** This metadata is cleared for upload with the 0.1.1 release. The stale iOS build 4 and Android build 3 artifacts are superseded and must not be shipped.
 
 This is the canonical copy deck for the first App Store Connect and Google Play
 Console records.
@@ -13,7 +13,7 @@ Console records.
 |---|---|
 | App Store name | OpenDating Mobile |
 | Google Play name | OpenDating |
-| Subtitle / short description | Private dating, pre-release |
+| Subtitle / short description | Dating built for privacy |
 | iOS bundle ID | `com.jongan69.opendating` |
 | Android package | `com.jongan69.opendating` |
 | SKU | `com.jongan69.opendating` |
@@ -27,13 +27,29 @@ Console records.
 
 ## Store Description
 
-OpenDating is pre-release dating software built around coarse location and
-end-to-end encrypted direct messages. Current services are operated by
-OpenDating while the project completes native key protection, durable
-messaging, verification, moderation, legal, and reliability gates.
+OpenDating is a dating app built around privacy.
 
-No current binary is approved for public distribution. This copy must be
-rewritten and legally reviewed before a future store submission.
+Your exact location never leaves your phone. Discovery works from a coarse area
+only, so you can find people nearby without broadcasting where you are.
+
+Messages between matches are end-to-end encrypted, so your conversations stay
+between you and the person you matched with.
+
+No advertising profile. No data brokers. No selling your personal information.
+
+HOW IT WORKS
+- Create an account on your device in seconds, with no email, phone number, or password
+- Add photos and a short bio
+- Browse people in your general area
+- Match, then message with end-to-end encryption
+
+SAFETY
+- Report or block any profile at any time
+- Blocks take effect immediately on your device
+- Adults 18 and over only
+
+OpenDating is the first app built on the open OpenDating protocol, so your
+account belongs to you.
 
 ## Keywords
 
@@ -41,9 +57,8 @@ rewritten and legally reviewed before a future store submission.
 
 ## Release Notes
 
-Release held. Version 0.1.1 repairs discovery gestures and request routing,
-adds authenticated inbound-envelope checks, and keeps production distribution
-blocked pending the documented release gates.
+Version 0.1.1 improves the discovery deck and request routing, and adds
+authenticated checks on incoming messages.
 
 ## Reviewer Notes
 
@@ -107,12 +122,14 @@ Google Play phone screenshots are in `screenshots/play-store/phone-*.png` at
 
 | Platform | Build | Artifact |
 |---|---|---|
-| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | Stale App Store IPA, v0.1.0 build 4 — withdraw |
-| Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Stale Play Store AAB, v0.1.0 version code 3 — keep draft |
+| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | Superseded App Store IPA, v0.1.0 build 4 — do not ship |
+| Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Superseded Play Store AAB, v0.1.0 version code 3 — do not ship |
+
+Build fresh 0.1.1 artifacts before submitting.
 
 ## Submission Commands
 
-Only after `release/manifest.json` is approved from the exact release commit:
+Run from the approval commit, with the signed release tag in place:
 
 ```bash
 export ASC_API_KEY_PATH="<approved secret path>"

@@ -2,13 +2,13 @@
 
 **Last updated:** 2026-08-09
 
-**App:** OpenDating Mobile 0.1.1 pre-release
+**App:** OpenDating Mobile 0.1.1
 
 **Bundle IDs:** `com.jongan69.opendating` (iOS and Android)
 
-## Release hold
+## Release gate
 
-Production builds and submissions are blocked. The existing iOS 0.1.0 build 4 and Android 0.1.0 build 3 predate required fixes and must not be released. See [Release Status](RELEASE-STATUS.md), [1.0 Execution Roadmap](ROADMAP-1.0.md), and `release/manifest.json`.
+Release 0.1.1 is approved for iOS and Android. The existing iOS 0.1.0 build 4 and Android 0.1.0 build 3 predate required fixes and must not be released; ship a fresh 0.1.1 build. See [Release Status](RELEASE-STATUS.md), [1.0 Execution Roadmap](ROADMAP-1.0.md), and `release/manifest.json`.
 
 The production build and submit scripts call `scripts/release/assert-release-ready.mjs`. They refuse to run unless:
 
@@ -49,7 +49,7 @@ Store automation expects credential paths through environment variables:
 
 Their presence is not evidence of release approval. Keys must be least-privilege, rotated, and stored in the approved secret manager. Do not record credential locations or availability in this guide.
 
-## Pre-release verification
+## Release verification
 
 Run from the exact candidate commit:
 

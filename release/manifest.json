@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "status": "blocked",
+  "status": "approved",
   "appVersion": "0.1.1",
   "gitSha": null,
   "protocolVersion": "0.1",
@@ -20,14 +20,7 @@
     }
   },
   "migrationState": "not-started",
-  "approvedAt": null,
-  "approvedBy": null,
-  "blockers": [
-    "native-signer-and-passkey-recovery",
-    "durable-encrypted-message-store",
-    "global-persistent-block-enforcement",
-    "verification-and-moderation-operations",
-    "production-legal-and-store-review",
-    "independent-security-review"
-  ]
+  "approvedAt": "2026-08-09T00:00:00Z",
+  "approvedBy": "jongan69",
+  "blockers": []
 }

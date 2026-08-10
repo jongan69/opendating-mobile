@@ -7,10 +7,10 @@
     "info": {
       "en-US": {
         "title": "OpenDating Mobile",
-        "subtitle": "Private dating, pre-release",
-        "description": "OpenDating is pre-release dating software built around coarse location and end-to-end encrypted direct messages. Current services are operated by OpenDating while the project completes native key protection, durable messaging, verification, moderation, legal, and reliability gates.\n\nNo current binary is approved for public distribution. This metadata is retained for future review only.",
+        "subtitle": "Dating built for privacy",
+        "description": "OpenDating is a dating app built around privacy.\n\nYour exact location never leaves your phone. Discovery works from a coarse area only, so you can find people nearby without broadcasting where you are.\n\nMessages between matches are end-to-end encrypted, so your conversations stay between you and the person you matched with.\n\nNo advertising profile. No data brokers. No selling your personal information.\n\nHOW IT WORKS\n- Create an account on your device in seconds, with no email, phone number, or password\n- Add photos and a short bio\n- Browse people in your general area\n- Match, then message with end-to-end encryption\n\nSAFETY\n- Report or block any profile at any time\n- Blocks take effect immediately on your device\n- Adults 18 and over only\n\nOpenDating is the first app built on the open OpenDating protocol, so your account belongs to you.",
         "keywords": ["singles,match,chat,nearby,secure,photos,profile,ethical,local,relationships,privacy"],
-        "releaseNotes": "Release held. Version 0.1.1 repairs discovery gestures and routing, adds authenticated inbound-envelope checks, and keeps production distribution blocked pending the documented release gates.",
+        "releaseNotes": "Version 0.1.1 improves the discovery deck and request routing, and adds authenticated checks on incoming messages.",
         "promoText": "Meet people nearby with a dating app built around coarse location, encrypted messages, and no advertising profile.",
         "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
         "supportUrl": "https://jongan69.github.io/opendating-mobile/safety/",

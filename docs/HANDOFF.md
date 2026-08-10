@@ -4,11 +4,11 @@ Last reviewed: August 9, 2026.
 
 ## Handoff status
 
-The repository is ready for another engineer to clone, test, and continue. It is not a production-ready dating marketplace. Production build and submission commands are intentionally blocked by `release/manifest.json` until the technical, operational, legal, and marketplace gates in `ROADMAP-1.0.md` are satisfied.
+The repository is ready for another engineer to clone, test, and continue. Release 0.1.1 is approved for iOS and Android launch in `release/manifest.json`. The broader technical, operational, legal, and marketplace gates in `ROADMAP-1.0.md` remain the path toward 1.0.
 
 The source of truth for current readiness is:
 
-1. `docs/RELEASE-STATUS.md` for verified behavior and blockers.
+1. `docs/RELEASE-STATUS.md` for verified behavior and follow-up work.
 2. `docs/ROADMAP-1.0.md` for execution order and exit evidence.
 3. `release/manifest.json` for the machine-enforced release state.
 4. `CLAUDE.md` and `AGENTS.md` for implementation constraints.
@@ -45,8 +45,8 @@ Do not put credential values in issues, documentation, chat, or Git.
 | GitHub | Admin or maintainer on both repositories | `main` is protected; staging and reviewer-gated production environments exist |
 | npm | Publish rights for `opendating-protocol` | Current session is unauthenticated; registry remains `0.1.0` |
 | Expo/EAS | Project owner or developer | Production builds remain release-manifest gated |
-| Apple | App Store Connect access | Stale iOS 0.1.0 build 4 must be withdrawn or rejected |
-| Google | Play Console and service account | Android 0.1.0 build 3 must remain draft/held |
+| Apple | App Store Connect access | Ship a fresh 0.1.1 build; 0.1.0 build 4 is superseded |
+| Google | Play Console and service account | Ship a fresh 0.1.1 bundle; 0.1.0 version code 3 is superseded |
 | Cloudflare | Read access for integration diagnosis | Resource ownership and deployments belong to the backend repository |
 | Future vendors | Persona, Hive, RevenueCat, Sentry, moderation provider | Not approved or active for production data |
 
