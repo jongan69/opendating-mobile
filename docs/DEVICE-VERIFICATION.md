@@ -1,4 +1,7 @@
-# Device Verification — 2026-08-08
+# Device Verification — historical 2026-08-08 walkthrough
+
+This evidence predates the Guideline 4.3(b) redesign. It does not establish
+device proof for the current private-introductions experience.
 
 Walked on a Samsung SM-A166U1 (Android 16) against the production relay,
 `opendating-relay.jonathang132298.workers.dev`.
@@ -21,7 +24,7 @@ All eleven onboarding steps complete, and the profile goes live.
 | 9 | Location | ✅ incl. skip |
 | 10 | Review | ✅ all values correct |
 | 11 | **Profile created** | ✅ **"You're ready! Your profile is live."** |
-| — | Discover / tabs | ✅ deck, PASS/LIKE, tab bar |
+| — | Historical Discover / tabs | ✅ legacy card flow and tab bar |
 
 Zero Compose `MissingHostException`. Zero JS errors in logcat.
 
@@ -60,7 +63,7 @@ Discovery returned "Unable to determine your area" — correct, because the
 location step was skipped during this walk, so no geohash was ever sent. The
 backend's `invalid_location` surfaced in plain language with a retry.
 
-Not yet walked on device: discovery with a real location, likes, matches,
+Not yet walked on device: introductions with a real location, choices, matches,
 chat, edit-profile, settings, filters, report, verification. All are free of
 `@expo/ui` (23 of 26 screens are), so the Compose class of failure cannot
 affect them, and every backend path behind them is verified by

@@ -40,9 +40,8 @@ export default function MatchesScreen() {
 
   // Feed the chat and candidate screens from match data.
   // These entries carry no candidate grant: a match is already mutual, so
-  // there is nothing left to like. The empty grant must never reach
-  // intent.like — the server rejects it — and the deck guards against that by
-  // treating a missing grant as a pass.
+  // there is no new interest decision to send. The empty grant must never
+  // reach intent.like because the server rejects it.
   useEffect(() => {
     for (const match of displayMatches) {
       cacheCandidate({
@@ -123,8 +122,8 @@ export default function MatchesScreen() {
         <EmptyState
           illustration={require('../../../assets/brand/empty-state-coffee-800x600.png')}
           title="No matches yet"
-          subtitle="Swipe right on profiles you like — when they like you back, you'll see them here."
-          action={{ label: 'Start discovering', onPress: () => router.navigate('/discover') }}
+          subtitle="Express private interest in an introduction — when they choose you too, you'll meet here."
+          action={{ label: 'View introductions', onPress: () => router.navigate('/discover') }}
         />
       </SafeAreaView>
     );

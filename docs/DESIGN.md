@@ -2,7 +2,7 @@
 
 ## Principles
 
-1. **Photo-first** — The person is the focus, not the UI
+1. **Context before judgment** — One person is introduced with an understandable reason
 2. **Native feel** — iOS feels SwiftUI, Android feels Material 3
 3. **Minimal** — White space, excellent typography, native controls
 4. **Safe** — Safety controls never buried, always accessible
@@ -65,8 +65,7 @@ For conventional UI:
 
 ### React Native Primitives (Escape Hatch)
 For interaction surfaces Expo UI isn't designed for:
-- Swipe deck (Reanimated + Gesture Handler)
-- Animated card stack
+- Candidate photo paging
 - Complex gesture targets
 - Custom photo overlays
 
@@ -94,14 +93,17 @@ For interaction surfaces Expo UI isn't designed for:
 
 ## Key Screens
 
-### Discovery (Card Deck)
-- Large photo, edge-to-edge
-- Bottom gradient overlay
-- Name + age primary
-- Distance bucket secondary
-- 2-3 interests tertiary
-- Pass/Like action buttons
-- Minimal chrome
+### Private Introduction
+- One candidate at a time; no endless deck
+- Human-readable compatibility reasons above the profile
+- Large photo with name, age, distance bucket, and interests
+- Privacy receipt states what is shared, withheld, and unlocked after mutual interest
+- Explicit **Skip privately** and **Express private interest** actions
+
+### Privacy Passport
+- Member-owned account identifier and backup path
+- Live pause/resume control for introduction visibility
+- Plain-language location, decision, and conversation boundaries
 
 ### Chat
 - Clean message bubbles
@@ -117,7 +119,6 @@ For interaction surfaces Expo UI isn't designed for:
 
 ## Motion
 
-- Swipe: smooth, responsive, on UI thread
 - Match celebration: subtle scale + fade
 - Navigation: native transitions
 - Respects Reduce Motion
@@ -129,4 +130,4 @@ For interaction surfaces Expo UI isn't designed for:
 - Reduce Motion support
 - Minimum 4.5:1 contrast ratio
 - Touch targets ≥ 44pt
-- Swipe actions have button alternatives
+- Decisions use explicit labeled buttons with clear accessibility labels

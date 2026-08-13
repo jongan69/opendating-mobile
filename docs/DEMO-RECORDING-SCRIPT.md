@@ -51,28 +51,32 @@ that, or note it in the reply text.
 | Photos | **Permission prompt fires here.** Tap Allow and pick at least two photos |
 | Location | **Permission prompt fires here.** Tap Allow While Using App. Pause on the coarse-area readout — it shows the ~5 km region, which demonstrates that exact GPS is not used |
 | Review | Scroll the assembled profile |
-| Finish | Tap through into the app |
+| Finish | Tap **View My Privacy Passport** |
 
 Both permission prompts must be visible in the recording. Do not pre-grant them.
 
-### 3. Discovery (1:45–2:30)
-The Discover tab. Swipe right on one profile, left on another, and tap a card to
-open the full candidate profile. Scroll that profile, then go back.
+### 3. Privacy Passport and introductions (1:45–2:45)
+Pause on **Privacy Passport** and show the account, visibility, location,
+decision, and conversation cards. Toggle introduction visibility off and back
+on. Open **Introductions**. Pause on the compatibility reasons and privacy
+receipt, then tap the card to open the full candidate profile. Return and use
+the explicit **Skip privately** or **Express private interest** action. There is
+no swipe gesture or public engagement count.
 
-### 4. User-generated content: reporting (2:30–3:00)
+### 4. User-generated content: reporting (2:45–3:15)
 From a candidate profile, open the safety menu and tap **Report**. Show the
 report screen with its reason options. Submit one, or back out — either
 demonstrates the mechanism, but submitting is stronger evidence.
 
-### 5. User-generated content: blocking (3:00–3:20)
+### 5. User-generated content: blocking (3:15–3:35)
 Open the safety menu again and tap **Block**. Show the confirmation dialog and
-confirm. Show that the profile is gone from discovery afterward.
+confirm. Show that the profile is gone from introductions afterward.
 
-### 6. Matches and encrypted messaging (3:20–4:10)
+### 6. Matches and encrypted messaging (3:35–4:25)
 The Matches tab. Open a match, send a message, and show it delivered. If you
 have a second device, show the message arriving there.
 
-### 7. Account deletion (4:10–5:00)
+### 7. Account deletion (4:25–5:15)
 Profile tab → Settings → Account → **Delete Account**. Show the confirmation
 dialog listing what deletion does, confirm it, and show the app returning to the
 welcome screen. Then relaunch the app once to show the account is genuinely gone
@@ -86,12 +90,12 @@ End on the welcome screen. Stop the recording.
 ## If the network is empty
 
 The app runs against a live relay and shows real nearby users. If nobody else is
-in your coarse area, discovery and matches will be empty.
+in your coarse area, introductions and matches will be empty.
 
 Do not fake it with the screenshot build. Instead, either:
 
 1. Create two or three accounts on other devices in the same coarse area shortly
-   before recording, so discovery has real profiles; or
+   before recording, so introductions has real profiles; or
 2. Record the empty states honestly and say so in the reply, offering to
    coordinate seeded accounts in Apple's review region.
 

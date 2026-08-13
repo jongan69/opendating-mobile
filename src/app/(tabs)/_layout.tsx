@@ -1,7 +1,7 @@
-// Main tab navigator — Discover, Matches, Profile.
+// Main tab navigator — Introductions, Matches, Passport, Profile.
 // Native bottom tabs; SF Symbols on iOS, Material Symbols on Android.
-// Discover hides the header (immersive deck); Matches and Profile keep a
-// native header, themed like the settings stack.
+// Introductions provides its own context header; the other tabs keep native
+// headers themed like the settings stack.
 
 import { Tabs } from 'expo-router';
 import { SymbolView, type AndroidSymbol, type SFSymbol } from 'expo-symbols';
@@ -57,9 +57,19 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="discover"
         options={{
-          title: 'Discover',
+          title: 'Introductions',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon ios="flame.fill" android="local_fire_department" color={color} focused={focused} />
+            <TabIcon ios="person.2.fill" android="group" color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="passport"
+        options={{
+          title: 'Passport',
+          headerShown: true,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon ios="checkmark.shield.fill" android="verified_user" color={color} focused={focused} />
           ),
         }}
       />

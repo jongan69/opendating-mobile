@@ -13,20 +13,20 @@ import { radius } from '@/theme/radius';
 
 const FEATURES: { title: string; detail: string }[] = [
   {
-    title: 'Coarse location only',
-    detail: 'People see your general area — never your exact spot.',
+    title: 'A self-owned account',
+    detail: 'No phone, email, password, or social login is required.',
   },
   {
-    title: 'Private likes',
-    detail: 'Your likes are never revealed unless you match.',
+    title: 'Location reduced on-device',
+    detail: 'Only an approximate area leaves your phone — never exact GPS.',
   },
   {
-    title: 'Encrypted messages',
-    detail: 'Conversations are end-to-end encrypted, just for you two.',
+    title: 'Private introductions',
+    detail: 'Interest stays secret unless you both choose each other.',
   },
   {
-    title: 'Private blocks',
-    detail: 'Blocking is invisible and immediate.',
+    title: 'Conversations only you can read',
+    detail: 'Every message is end-to-end encrypted for the two of you.',
   },
 ];
 
@@ -38,7 +38,7 @@ export default function WelcomeScreen() {
     <OnboardingScreen
       step={1}
       title="OpenDating"
-      subtitle="Dating that puts your privacy first."
+      subtitle="Your account. Your introductions. Your private life."
       showBack={false}
       primaryLabel="Create Account"
       onPrimaryPress={() => router.push('/(onboarding)/create-account')}
@@ -64,8 +64,8 @@ export default function WelcomeScreen() {
             { color: colors.textSecondary, textAlign: 'center' },
           ]}
         >
-          Meet people nearby without handing over your identity, your photos,
-          or your exact location.
+          Meet people without surrendering your phone number, exact location,
+          or conversations to the app.
         </Text>
       </View>
 

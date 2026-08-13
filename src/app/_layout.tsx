@@ -14,15 +14,8 @@ export default function RootLayout() {
   const isDark = colorScheme === 'dark';
 
   return (
-    // GestureHandlerRootView is required for react-native-gesture-handler to
-    // recognize anything at all. It was missing, and the failure is nearly
-    // invisible: in development GestureDetector throws, but in a release build
-    // it renders fine and the gesture is simply never recognized — so the
-    // swipe deck looked correct and did not respond to a drag. Every card
-    // decision had to go through the Pass/Like buttons.
-    //
-    // It must be the outermost view and must fill the screen; wrapping only
-    // the deck would leave a gesture near a screen edge unrecognized.
+    // GestureHandlerRootView must remain the outermost full-screen view for
+    // navigation and any gesture-driven controls used elsewhere in the app.
     <GestureHandlerRootView style={styles.root}>
       {/* Provides the insets that useSafeAreaInsets reads. Also absent, which
           left the chat composer measuring a zero bottom inset and sitting

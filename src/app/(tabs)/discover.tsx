@@ -1,33 +1,43 @@
-// Discover — the main card deck. Minimal chrome: brand header with a
-// filter entry point, the swipe deck, and pass/like controls.
+// Introductions — one deliberate, private introduction at a time.
+//
+// Unlike a swipe deck, this screen explains why two profiles were introduced
+// and what remains withheld. Decisions use the same protocol grants and local
+// privacy guarantees as before; only the member-facing interaction changes.
 
-import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
-import { SwipeDeck, type SwipeDeckHandle } from '@/components/discovery/swipe-deck';
+
+import { CandidateCard } from '@/components/discovery/candidate-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { BrandMark } from '@/components/brand/brand-mark';
 import { useDiscovery } from '@/features/discovery/use-discovery';
 import { cacheCandidates, getCachedCandidate } from '@/features/discovery/candidate-cache';
+import { introductionReasons } from '@/features/discovery/private-introduction';
 import {
-  consumeSwipeDecision,
-  subscribeSwipeDecisions,
-  type SwipeDecision,
-} from '@/features/discovery/swipe-decisions';
+  consumeIntroductionDecision,
+  subscribeIntroductionDecisions,
+  type IntroductionDecision,
+} from '@/features/discovery/introduction-decisions';
+import { useProfileContent } from '@/features/profile/profile-content';
 import { useTheme } from '@/state/theme-context';
 import { isScreenshotMode } from '@/constants/env';
-import { getScreenshotCandidates } from '@/constants/screenshot-demo';
+import {
+  getScreenshotCandidates,
+  getScreenshotProfileContent,
+} from '@/constants/screenshot-demo';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { typography } from '@/theme/typography';
 import type { Candidate } from '@/types/opendating';
 
-export default function DiscoverScreen() {
+export default function IntroductionsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { content: ownProfile } = useProfileContent();
   const {
     candidates,
     loading,
@@ -40,17 +50,25 @@ export default function DiscoverScreen() {
     fetchCandidates,
     clearError,
   } = useDiscovery();
-  const deckRef = useRef<SwipeDeckHandle>(null);
 
   const screenshotCandidates = useMemo(() => getScreenshotCandidates(), []);
-
-  // In screenshot mode, use demo candidates to show a populated deck
+  const screenshotProfile = useMemo(() => getScreenshotProfileContent(), []);
   const displayCandidates = useMemo(
     () => (isScreenshotMode ? screenshotCandidates : candidates),
     [candidates, screenshotCandidates]
   );
+  const currentCandidate = displayCandidates[0];
+  const reasons = useMemo(
+    () =>
+      currentCandidate
+        ? introductionReasons(
+            isScreenshotMode ? screenshotProfile : ownProfile,
+            currentCandidate
+          )
+        : [],
+    [currentCandidate, ownProfile, screenshotProfile]
+  );
 
-  // Feed the detail screens from whatever the deck has shown.
   useEffect(() => {
     cacheCandidates(displayCandidates);
   }, [displayCandidates]);
@@ -58,101 +76,71 @@ export default function DiscoverScreen() {
   const presentMatch = useCallback(
     (pubkey: string) => {
       const candidate = getCachedCandidate(pubkey);
-      const name = candidate?.profile.display_name?.trim() || 'your match';
-      Alert.alert("It's a match!", `You and ${name} liked each other.`, [
-        { text: 'Keep swiping', style: 'cancel' },
-        {
-          text: 'Say hello',
-          onPress: () => router.push(`/chat/${pubkey}`),
-        },
+      const name = candidate?.profile.display_name?.trim() || 'your introduction';
+      Alert.alert('Mutual interest', `You and ${name} chose each other. Your private chat is now open.`, [
+        { text: 'Later', style: 'cancel' },
+        { text: 'Say hello', onPress: () => router.push(`/chat/${pubkey}`) },
       ]);
     },
     [router]
   );
 
-  const handleLike = useCallback(
+  const handleInterest = useCallback(
     async (pubkey: string, grant: string) => {
-      try {
-        const matched = await like(pubkey, grant);
-        if (matched) presentMatch(pubkey);
-      } catch (err) {
-        // like() surfaces errors via hook state; this is a safety net.
-        if (err instanceof Error && err.message) {
-          Alert.alert('Could not like', err.message);
-        }
-      }
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      const matched = await like(pubkey, grant);
+      if (matched) presentMatch(pubkey);
     },
     [like, presentMatch]
   );
 
-  const handlePass = useCallback(
+  const handleSkip = useCallback(
     (pubkey: string) => {
+      Haptics.selectionAsync().catch(() => {});
       pass(pubkey);
     },
     [pass]
   );
 
   const handleOpenCandidate = useCallback(
-    (candidate: Candidate) => {
-      router.push(`/candidate/${candidate.pubkey}`);
-    },
+    (candidate: Candidate) => router.push(`/candidate/${candidate.pubkey}`),
     [router]
   );
 
-  // A like or pass made on the detail screen. That screen cannot act on the
-  // stack itself — discovery state lives in this component's useDiscovery()
-  // instance — so it posts the decision and this applies it.
   useEffect(() => {
-    const apply = (decision: SwipeDecision) => {
-      if (decision.direction === 'like' && decision.grant) {
-        void handleLike(decision.pubkey, decision.grant);
+    const apply = (decision: IntroductionDecision) => {
+      if (decision.choice === 'interest' && decision.grant) {
+        void handleInterest(decision.pubkey, decision.grant);
       } else {
-        // A like with no grant would be rejected by the server and surface as
-        // "no longer available", so it is treated as a pass — same rule the
-        // deck applies.
-        handlePass(decision.pubkey);
+        handleSkip(decision.pubkey);
       }
     };
-    // Drain anything posted while this screen was unmounted or backgrounded,
-    // then listen for decisions made while it stays mounted underneath.
-    const queued = consumeSwipeDecision();
+    const queued = consumeIntroductionDecision();
     if (queued) apply(queued);
-    return subscribeSwipeDecisions((decision) => {
-      consumeSwipeDecision();
+    return subscribeIntroductionDecisions((decision) => {
+      consumeIntroductionDecision();
       apply(decision);
     });
-  }, [handleLike, handlePass]);
+  }, [handleInterest, handleSkip]);
 
-  const swipe = useCallback((direction: 'left' | 'right') => {
-    if (direction === 'left') {
-      Haptics.selectionAsync().catch(() => {});
-    } else {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    }
-    deckRef.current?.swipe(direction);
-  }, []);
-
-  // A blocking state only when there is nothing to show. With cards on
-  // screen an error becomes a dismissible banner instead, so a single failed
-  // like never wipes out the deck.
   const showErrorState =
     !isScreenshotMode && !!error && candidates.length === 0 && !loading;
   const showErrorBanner =
     !isScreenshotMode && !!error && candidates.length > 0;
-  const outOfLikes = loaded && !unavailable && remainingToday === 0;
+  const outOfInterests = loaded && !unavailable && remainingToday === 0;
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={['top']}
     >
-      {/* Brand header + filters */}
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <View style={styles.brandRow}>
           <BrandMark size={28} />
-          <Text style={[typography.titleLarge, { color: colors.text }]}>
-            OpenDating
-          </Text>
+          <View>
+            <Text style={[typography.titleLarge, { color: colors.text }]}>Introductions</Text>
+            <Text style={[typography.caption, { color: colors.textSecondary }]}>One person, with context</Text>
+          </View>
         </View>
         <Pressable
           onPress={() => router.push('/filters')}
@@ -163,7 +151,7 @@ export default function DiscoverScreen() {
             pressed && styles.pressed,
           ]}
           accessibilityRole="button"
-          accessibilityLabel="Discovery filters"
+          accessibilityLabel="Introduction preferences"
         >
           <SymbolView
             name={{ ios: 'slider.horizontal.3', android: 'tune', web: 'tune' }}
@@ -181,138 +169,146 @@ export default function DiscoverScreen() {
           accessibilityLabel={`${error}. Tap to dismiss.`}
           style={[styles.errorBanner, { backgroundColor: colors.destructiveLight }]}
         >
-          <Text style={[typography.bodySmall, { color: colors.destructive, flex: 1 }]}>
-            {error}
-          </Text>
+          <Text style={[typography.bodySmall, { color: colors.destructive, flex: 1 }]}>{error}</Text>
           <Text style={[typography.labelMedium, { color: colors.destructive }]}>✕</Text>
         </Pressable>
       ) : null}
 
-      {/* Deck / states */}
-      <View style={styles.deckArea}>
-        {showErrorState ? (
-          unavailable ? (
-            <EmptyState
-              icon="🌱"
-              title="Discovery is coming online"
-              subtitle={error}
-              action={{ label: 'Check again', onPress: () => void fetchCandidates() }}
-            />
-          ) : (
-            <EmptyState
-              icon="📡"
-              title="Couldn't load candidates"
-              subtitle={error}
-              action={{ label: 'Try again', onPress: () => void fetchCandidates() }}
-            />
-          )
-        ) : (
-          <SwipeDeck
-            ref={deckRef}
-            candidates={displayCandidates}
-            onLike={(pubkey, grant) => void handleLike(pubkey, grant)}
-            onPass={handlePass}
-            onPressCard={handleOpenCandidate}
-            loading={loading && displayCandidates.length === 0 && !isScreenshotMode}
+      {showErrorState ? (
+        <View style={styles.emptyArea}>
+          <EmptyState
+            icon={unavailable ? '🌱' : '📡'}
+            title={unavailable ? 'Introductions are coming online' : "Couldn't load introductions"}
+            subtitle={error}
+            action={{ label: 'Check again', onPress: () => void fetchCandidates() }}
           />
-        )}
-      </View>
+        </View>
+      ) : currentCandidate ? (
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.whyCard, { backgroundColor: colors.accentLight, borderColor: colors.accentMuted }]}>
+            <View style={styles.cardTitleRow}>
+              <SymbolView
+                name={{ ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' }}
+                size={19}
+                tintColor={colors.accent}
+              />
+              <Text style={[typography.titleSmall, { color: colors.text }]}>Why this introduction</Text>
+            </View>
+            {reasons.map((reason) => (
+              <View key={reason} style={styles.reasonRow}>
+                <View style={[styles.reasonDot, { backgroundColor: colors.accent }]} />
+                <Text style={[typography.bodySmall, { color: colors.textSecondary, flex: 1 }]}>{reason}</Text>
+              </View>
+            ))}
+          </View>
 
-      {/* Pass / Like controls */}
-      <View style={styles.actions}>
-        <ActionButton
-          label="Pass"
-          onPress={() => swipe('left')}
-          accessibilityLabel="Pass on this profile"
-        >
-          <SymbolView
-            name={{ ios: 'xmark', android: 'close', web: 'close' }}
-            size={30}
-            tintColor={colors.text}
-            weight="semibold"
-          />
-        </ActionButton>
-        <ActionButton
-          label="Like"
-          primary
-          onPress={() => swipe('right')}
-          accessibilityLabel="Like this profile"
-        >
-          <SymbolView
-            name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }}
-            size={32}
-            tintColor="#FFFFFF"
-            weight="semibold"
-          />
-        </ActionButton>
-      </View>
+          <View style={styles.profileCard}>
+            <CandidateCard
+              candidate={currentCandidate}
+              onOpenProfile={() => handleOpenCandidate(currentCandidate)}
+            />
+          </View>
 
-      {/* Daily quota — displayed so users know how many likes they have left. */}
-      {!isScreenshotMode && loaded && !unavailable && displayCandidates.length > 0 ? (
-        <Text
-          style={[
-            typography.caption,
-            styles.quota,
-            { color: outOfLikes ? colors.warning : colors.textTertiary },
-          ]}
-        >
-          {outOfLikes
-            ? "That's all your likes for today — more tomorrow"
-            : `${remainingToday} like${remainingToday === 1 ? '' : 's'} left today`}
-        </Text>
-      ) : null}
+          <View style={[styles.receipt, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={styles.cardTitleRow}>
+              <SymbolView
+                name={{ ios: 'checkmark.shield.fill', android: 'verified_user', web: 'verified_user' }}
+                size={20}
+                tintColor={colors.success}
+              />
+              <Text style={[typography.titleSmall, { color: colors.text }]}>Privacy receipt</Text>
+            </View>
+            <ReceiptRow label="Shared now" value="Public profile · approximate area" />
+            <ReceiptRow label="Withheld" value="Exact location · your decision" />
+            <ReceiptRow label="After mutual interest" value="End-to-end encrypted chat" />
+          </View>
+
+          <View style={styles.actions}>
+            <IntroductionButton
+              label="Skip privately"
+              accessibilityLabel={`Privately skip ${currentCandidate.profile.display_name ?? 'this introduction'}`}
+              onPress={() => handleSkip(currentCandidate.pubkey)}
+            />
+            <IntroductionButton
+              label="Express private interest"
+              primary
+              disabled={!currentCandidate.candidate_grant || outOfInterests}
+              accessibilityLabel={`Express private interest in ${currentCandidate.profile.display_name ?? 'this introduction'}`}
+              onPress={() => void handleInterest(currentCandidate.pubkey, currentCandidate.candidate_grant)}
+            />
+          </View>
+
+          {!isScreenshotMode && loaded && !unavailable ? (
+            <Text style={[typography.caption, styles.quota, { color: outOfInterests ? colors.warning : colors.textTertiary }]}>
+              {outOfInterests
+                ? 'Private interests refresh tomorrow'
+                : `${remainingToday} private interest${remainingToday === 1 ? '' : 's'} available today`}
+            </Text>
+          ) : null}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyArea}>
+          <EmptyState
+            illustration={require('../../../assets/brand/empty-state-coffee-800x600.png')}
+            title={loading ? 'Preparing an introduction' : "You're all caught up"}
+            subtitle={loading ? 'Comparing only the preferences you chose.' : 'Check back soon for another private introduction.'}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
-interface ActionButtonProps {
-  label: string;
-  onPress: () => void;
-  accessibilityLabel: string;
-  primary?: boolean;
-  children: React.ReactNode;
-}
-
-function ActionButton({
-  label,
-  onPress,
-  accessibilityLabel,
-  primary = false,
-  children,
-}: ActionButtonProps) {
+function ReceiptRow({ label, value }: { label: string; value: string }) {
   const { colors } = useTheme();
   return (
-    <View style={styles.actionColumn}>
-      <Pressable
-        onPress={onPress}
-        hitSlop={spacing.md}
-        style={({ pressed }) => [
-          styles.actionButton,
-          primary
-            ? { backgroundColor: colors.accent }
-            : {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                borderWidth: StyleSheet.hairlineWidth,
-              },
-          pressed && styles.pressed,
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-      >
-        {children}
-      </Pressable>
-      <Text style={[typography.labelSmall, styles.actionLabel, { color: colors.textSecondary }]}>
-        {label}
-      </Text>
+    <View style={styles.receiptRow}>
+      <Text style={[typography.labelMedium, { color: colors.text }]}>{label}</Text>
+      <Text style={[typography.bodySmall, styles.receiptValue, { color: colors.textSecondary }]}>{value}</Text>
     </View>
   );
 }
 
+function IntroductionButton({
+  label,
+  accessibilityLabel,
+  onPress,
+  primary = false,
+  disabled = false,
+}: {
+  label: string;
+  accessibilityLabel: string;
+  onPress: () => void;
+  primary?: boolean;
+  disabled?: boolean;
+}) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled }}
+      style={({ pressed }) => [
+        styles.actionButton,
+        primary
+          ? { backgroundColor: colors.accent, borderColor: colors.accent }
+          : { backgroundColor: colors.surface, borderColor: colors.border },
+        disabled && styles.disabled,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={[typography.labelLarge, { color: primary ? '#FFFFFF' : colors.text }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -320,53 +316,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
   },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   filterButton: {
     width: 40,
     height: 40,
     borderRadius: radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.97 }],
-  },
-  deckArea: {
-    flex: 1,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xxxl,
-    paddingVertical: spacing.lg,
-  },
-  actionColumn: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
+  content: { padding: spacing.lg, paddingBottom: spacing.huge, gap: spacing.lg },
+  whyCard: { borderRadius: radius.lg, borderWidth: 1, padding: spacing.lg, gap: spacing.sm },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  reasonRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  reasonDot: { width: 6, height: 6, borderRadius: radius.full },
+  profileCard: { height: 480, minHeight: 420 },
+  receipt: { borderRadius: radius.lg, borderWidth: 1, padding: spacing.lg, gap: spacing.md },
+  receiptRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
+  receiptValue: { flex: 1, textAlign: 'right' },
+  actions: { gap: spacing.md },
   actionButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    minHeight: 52,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
   },
-  actionLabel: {
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  quota: {
-    textAlign: 'center',
-    paddingBottom: spacing.md,
-  },
+  quota: { textAlign: 'center' },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    marginHorizontal: spacing.xl,
+    marginHorizontal: spacing.lg,
     marginBottom: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    padding: spacing.md,
     borderRadius: radius.md,
   },
+  emptyArea: { flex: 1 },
+  pressed: { opacity: 0.72, transform: [{ scale: 0.99 }] },
+  disabled: { opacity: 0.5 },
 });

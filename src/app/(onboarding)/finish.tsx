@@ -1,5 +1,6 @@
 // Finish — success screen after the profile is created.
-// "Start Discovering" drops the user into the main app.
+// The first destination is the member's Privacy Passport so account control
+// is the organizing experience, not a setting hidden behind the dating flow.
 
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -28,11 +29,11 @@ export default function FinishScreen() {
   return (
     <OnboardingScreen
       step={11}
-      title="You're ready!"
-      subtitle="Your profile is live."
+      title="Your passport is ready"
+      subtitle="Your profile is live, and its privacy controls belong to you."
       showBack={false}
-      primaryLabel="Start Discovering"
-      onPrimaryPress={() => router.replace('/(tabs)/discover')}
+      primaryLabel="View My Privacy Passport"
+      onPrimaryPress={() => router.replace('/passport')}
     >
       <View style={styles.center}>
         <View style={[styles.checkCircle, { backgroundColor: colors.accent }]}>
@@ -45,14 +46,15 @@ export default function FinishScreen() {
             { color: colors.textSecondary, textAlign: 'center' },
           ]}
         >
-          People nearby can now find you. OpenDating only shares your general
-          area, keeps your likes private, and encrypts every conversation.
+          OpenDating now has only what it needs to introduce you: a public
+          profile and an approximate area. Your exact location and private
+          interest remain withheld.
         </Text>
       </View>
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
-        Your account belongs to this device and your profile is live on
-        OpenDating. You can delete your account anytime from Settings.
+        Your recovery key can restore this account on another device. Open
+        your Passport anytime to inspect or change what the app can do.
       </Text>
     </OnboardingScreen>
   );
