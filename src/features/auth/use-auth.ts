@@ -80,6 +80,10 @@ export function useAuth(): UseAuthResult {
     setError(null);
 
     try {
+      // An imported identity is a different member than whatever this device
+      // held before, so any acceptance still on disk belongs to someone else.
+      // Clear it before the swap rather than let it be re-attributed.
+      await storage.deletePolicyAcceptance();
       const result = await getOpenDatingClient().importIdentity(privkey);
       if (mountedRef.current) {
         setIsAuthenticated(true);
@@ -99,6 +103,14 @@ export function useAuth(): UseAuthResult {
     setError(null);
 
     try {
+      // Wipe the acceptance record so a stale binding from a previous
+      // account does not survive a logout/login cycle and misrepresent
+      // consent in Settings → Terms. This runs before the identity is
+      // deleted and its failure is not swallowed: aborting here leaves the
+      // account intact and consent consistent, whereas continuing would
+      // leave a signed-out device still carrying the previous member's
+      // acceptance. The reverse order can only fail toward re-consenting.
+      await storage.deletePolicyAcceptance();
       await getOpenDatingClient().deleteIdentity();
       // Wipe the acceptance record so a stale binding from a previous
       // account does not survive a logout/login cycle and misrepresent
@@ -124,6 +136,10 @@ export function useAuth(): UseAuthResult {
       const client = getOpenDatingClient();
       // Ask the server to delete the account first, then wipe local identity.
       await client.deleteAccount();
+      // Same ordering rule as logout: the acceptance record goes before the
+      // identity, so a failure here cannot leave the deleted account's
+      // consent on a device that is about to host a different member.
+      await storage.deletePolicyAcceptance();
       await client.deleteIdentity();
       if (mountedRef.current) {
         setIsAuthenticated(false);

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Column, Host, ScrollView, Text } from '@expo/ui';
 import { StatusBar } from 'expo-status-bar';
 
+import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import {
   POLICY_EFFECTIVE_LABEL,
   formatAcceptedAt,
@@ -60,11 +61,14 @@ function useAcceptanceSummary(): {
     let active = true;
     setLoading(true);
     setFailed(false);
-    storage
-      .getPolicyAcceptance()
-      .then((record) => {
+    Promise.all([storage.getPolicyAcceptance(), getOpenDatingClient().getPubkey()])
+      .then(([record, currentPubkey]) => {
         if (active) {
-          setAcceptance(record);
+          // Only attribute an acceptance to the member who actually made it.
+          // The record is bound to the accepting key, so a record left behind
+          // by a previous account on this device must not be shown as this
+          // member's consent even if a cleanup step was missed.
+          setAcceptance(record?.pubkey === currentPubkey ? record : null);
           setLoading(false);
         }
       })

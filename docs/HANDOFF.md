@@ -29,7 +29,7 @@ cp .env.example .env
 npm ci
 npm run typecheck
 npm run lint
-npm test -- --passWithNoTests
+npm test
 npm run security:audit
 npm run release:validate
 ```
