@@ -26,6 +26,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { extractNamecheapErrors } from './security-utils.mjs';
+
 const args = process.argv.slice(2);
 const argOf = (flag, fallback = null) => {
   const i = args.indexOf(flag);
@@ -81,9 +83,7 @@ async function ncCall(command, params = {}, method = 'GET') {
   const xml = await res.text();
 
   if (/Status="ERROR"/i.test(xml)) {
-    const errors = (xml.match(/<Error[^>]*>[^<]*<\/Error>/gi) ?? [])
-      .map((e) => e.replace(/<[^>]+>/g, '').trim())
-      .join('; ');
+    const errors = extractNamecheapErrors(xml).join('; ');
     throw new Error(`${command} failed: ${errors || 'unknown error'}`);
   }
   return xml;
