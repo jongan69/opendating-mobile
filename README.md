@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <strong>Privacy-focused dating on an open protocol.</strong><br>
+  <strong>Deliberate private introductions on an open protocol.</strong><br>
   An Expo React Native reference client for the OpenDating protocol.
 </p>
 
@@ -25,7 +25,7 @@
 
 ## What is OpenDating?
 
-**OpenDating** is an early dating client built around data minimization, coarse location, private service requests, and end-to-end encrypted direct messages. It currently connects to services operated by OpenDating on Cloudflare; federation and independent providers are post-GA work.
+**OpenDating** is an intentional-introduction client built around user-owned identity, data minimization, coarse location, private decisions, and end-to-end encrypted direct messages. Instead of an endless swipe feed, it presents one person with an explanation and privacy receipt. It currently connects to services operated by OpenDating on Cloudflare; federation and independent providers are post-GA work.
 
 Under the hood, OpenDating uses **Nostr** as a protocol building block. The
 current discovery, matching, moderation, media, and delivery services are
@@ -55,8 +55,10 @@ post-GA work.
 <tr>
 <td width="50%">
 
-### Discovery
-- **Photo-first swipe deck** — Tinder-style cards with Reanimated gestures
+### Introductions
+- **One person with context** — Each introduction explains the visible compatibility facts that led to it
+- **Privacy receipt** — The app says what is shared now, withheld, and unlocked only after mutual interest
+- **Explicit private choices** — Skip or express interest without public engagement counts or gesture ambiguity
 - **Privacy-first location** — Only a 5-character geohash (~5 km) ever leaves your device
 - **Customizable filters** — Age range, distance, gender, relationship intent
 - **Daily quotas** — Prevents profile scraping and enumeration
@@ -74,6 +76,11 @@ post-GA work.
 - **Unmatch** — Removes the match without explanation
 - **Report** — Encrypted to moderation service, with optional message evidence
 - **Private by default** — Likes, blocks, and reports are never public
+
+### Privacy Passport
+- **Live account boundary** — Shows the member-owned account identifier and backup path
+- **Visibility control** — Pause or resume introductions from the passport
+- **Plain-language boundaries** — Explains location, decision, and conversation privacy in one place
 
 ### Platform
 - **iOS** — Feels like a native SwiftUI app (SF Symbols, native sheets, continuous corners)

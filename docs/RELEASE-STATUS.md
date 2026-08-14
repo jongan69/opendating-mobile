@@ -4,7 +4,9 @@
 
 ## Verified in this release
 
-- Discovery deck gestures and candidate-profile navigation are repaired.
+- One-at-a-time private introductions and candidate-profile navigation are implemented.
+- Every introduction explains its visible compatibility facts and includes a privacy receipt.
+- The Privacy Passport exposes account, visibility, location, decision, and conversation boundaries.
 - Account deletion routes to the relay's advertised `deletion` service.
 - Unmatch and block removal route to the policy service; the backend implements idempotent block removal.
 - Inbound service responses require a valid signed seal, a valid rumor hash, the expected advertised sender, request ID, response type, and freshness window.
@@ -24,7 +26,9 @@ These are post-launch engineering priorities, not launch gates:
 
 ## Release mechanics
 
-The machine-readable state is in `release/manifest.json`, now `approved` with no blockers.
+The machine-readable state is in `release/manifest.json`, which remains
+`blocked` until its evidence requirements are satisfied. Product implementation
+or a successful local build alone does not approve a release.
 
 The production build and submit scripts still call `scripts/release/assert-release-ready.mjs`, which additionally requires:
 

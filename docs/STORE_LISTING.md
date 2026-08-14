@@ -1,8 +1,11 @@
 # OpenDating Store Listing
 
-**Last updated:** 2026-08-09
+**Last updated:** 2026-08-13
 
-> **Submission status: approved.** This metadata is cleared for upload with the 0.1.1 release. The stale iOS build 4 and Android build 3 artifacts are superseded and must not be shipped.
+> **Submission status: blocked.** Apple rejected iOS 0.1.0 (1) under Guideline
+> 4.3(b) on August 13, 2026. This copy belongs to the materially revised 0.1.1
+> candidate and must not be attached to the rejected binary as though it
+> described that build.
 
 This is the canonical copy deck for the first App Store Connect and Google Play
 Console records.
@@ -13,7 +16,7 @@ Console records.
 |---|---|
 | App Store name | OpenDating Mobile |
 | Google Play name | OpenDating |
-| Subtitle / short description | Dating built for privacy |
+| Subtitle / short description | Private introductions, yours |
 | iOS bundle ID | `com.jongan69.opendating` |
 | Android package | `com.jongan69.opendating` |
 | SKU | `com.jongan69.opendating` |
@@ -27,55 +30,63 @@ Console records.
 
 ## Store Description
 
-OpenDating is a dating app built around privacy.
+OpenDating is for adults who want to meet without handing an app their phone
+number, exact location, or readable conversations.
 
-Your exact location never leaves your phone. Discovery works from a coarse area
-only, so you can find people nearby without broadcasting where you are.
+A DIFFERENT KIND OF INTRODUCTION
+OpenDating presents one deliberate introduction at a time. Each introduction
+explains the visible profile signals you share and includes a privacy receipt
+showing what was shared, what remains withheld, and what unlocks only after
+mutual interest. There is no public like count and no visible rejection.
 
-Messages between matches are end-to-end encrypted, so your conversations stay
-between you and the person you matched with.
+YOUR PRIVACY PASSPORT
+The Passport is a live account-control surface, not a marketing promise. See
+whether your profile is visible, pause new introductions, inspect the app's
+location and conversation boundaries, back up your self-owned account, or
+permanently delete it.
 
-No advertising profile. No data brokers. No selling your personal information.
+BUILT AROUND DATA MINIMIZATION
+- Create a self-owned account without email, phone number, password, or social login
+- Reduce location to an approximate area on your device before it is shared
+- Keep interest private unless both people independently choose each other
+- Open an end-to-end encrypted conversation only after mutual interest
+- Block locally and report privately
+- Use the app without ads, tracking, or a data-broker business model
 
-HOW IT WORKS
-- Create an account on your device in seconds, with no email, phone number, or password
-- Add photos and a short bio
-- Browse people in your general area
-- Match, then message with end-to-end encryption
-
-SAFETY
-- Report or block any profile at any time
-- Blocks take effect immediately on your device
-- Adults 18 and over only
-
-OpenDating is the first app built on the open OpenDating protocol, so your
-account belongs to you.
+OpenDating is the first reference client for the open OpenDating protocol. Your
+recovery key can restore your account on another compatible OpenDating client or
+device. Adults 18 and over only.
 
 ## Keywords
 
-`singles,match,chat,nearby,secure,photos,profile,ethical,local,relationships,privacy`
+`privacy,introductions,encrypted,dating,identity,nearby,relationships,chat,recovery`
 
 ## Release Notes
 
-Version 0.1.1 improves the discovery deck and request routing, and adds
-authenticated checks on incoming messages.
+Replaces swipe-first browsing with deliberate private introductions, adds an
+explanation and privacy receipt to every introduction, and introduces a live
+Privacy Passport for account, visibility, location, and conversation controls.
 
 ## Reviewer Notes
 
-No demo account is required. Reviewers can create a local account directly in
-the app, complete onboarding, and allow location/photo permissions when prompted.
+No demo account is required for the single-account review path. Reviewers can
+create a local account directly in the app, complete onboarding, and allow
+location/photo permissions when prompted. The optional mutual-interest/chat
+path uses two independently created test accounts on separate devices in the
+same coarse review area; contact the developer before review if Apple wants the
+second account coordinated in its review region.
 
 Use these notes in App Store Connect and Play Console:
 
 ```text
 OpenDating creates a self-owned account on-device; there is no email/password
-login or external account required for review. Please create an account in the
-app, complete onboarding, and allow approximate location when prompted. The app
-uses a live OpenDating relay at
-wss://opendating-relay.jonathang132298.workers.dev. Exact location never leaves
-the device; the app sends only a coarse geohash area for discovery.
-Messages between matches are end-to-end encrypted. Blocks and reports are
-available from match/profile safety controls.
+login or external account required for review. After onboarding, the Privacy
+Passport shows the account and data boundaries as live controls. The
+Introductions tab presents one person at a time, explains only visible shared
+profile signals, and shows a privacy receipt. Exact location is reduced to a
+coarse area on-device. Interest stays private until mutual; only then does an
+end-to-end encrypted chat open. Blocks and private reports are available from
+the full introduction profile.
 ```
 
 ## Privacy Declarations
@@ -108,15 +119,15 @@ Use a 17+ / Mature teen posture for the first release:
 
 ## Screenshots
 
-Prepared screenshots are in `screenshots/app-store/`:
+The committed screenshot files belong to the rejected swipe-deck submission
+and are not eligible for reuse. Store metadata intentionally contains no
+screenshot uploads until a replacement set is captured from the accepted
+release candidate.
 
-- `6.7-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 1290 x 2796
-- `6.1-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 1179 x 2556
-- `ipad-13-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 2048 x 2732 for `APP_IPAD_PRO_129` and `APP_IPAD_PRO_3GEN_129`
-
-The selected flow is welcome, account creation, discovery, matches, and profile.
-Google Play phone screenshots are in `screenshots/play-store/phone-*.png` at
-1080 x 1920 for the same five screens.
+The replacement set must show welcome, Privacy Passport, private introduction
+with its privacy receipt, matches, and profile at every required iPhone, iPad,
+and Google Play size. Record the physical-device source and image hashes with
+the release evidence before adding those files back to `store.config.json`.
 
 ## Built Binaries
 

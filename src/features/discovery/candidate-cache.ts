@@ -1,6 +1,6 @@
 // Module-level candidate cache.
 // Detail screens (candidate, chat) look up profile data that was already
-// shown in the discovery deck or the match list, without a re-fetch. The
+// shown in introductions or the match list, without a re-fetch. The
 // cache is populated by the screens that own that data (discover, matches).
 
 import { useSyncExternalStore } from 'react';

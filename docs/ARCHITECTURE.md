@@ -46,7 +46,7 @@ Expo Router file-based routing. Each screen:
 ### Features (`src/features/`)
 
 Custom hooks that encapsulate domain logic:
-- `use-discovery` — candidate fetching, swipe actions, location updates
+- `use-discovery` — introduction fetching, private decisions, location updates
 - `use-matches` — match list, new match notification
 - `use-messaging` — NIP-17 send/receive, subscription management
 - `use-safety` — block/unblock, unmatch, report

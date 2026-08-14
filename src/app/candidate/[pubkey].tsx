@@ -1,4 +1,4 @@
-// Candidate detail — the full profile behind a card in the deck.
+// Candidate detail — the full profile behind a private introduction.
 //
 // Reads entirely from the candidate cache. It deliberately does NOT call
 // useDiscovery(): that hook's mount effect fetches a page of candidates and
@@ -6,8 +6,8 @@
 // read every single time a profile was opened, into a second copy of the
 // discovery stack whose state nothing else could see.
 //
-// Like and pass are posted to the swipe-decision channel and applied by the
-// Discover screen, which owns the real stack.
+// Interest and skip decisions are posted to the existing decision channel and
+// applied by the Introductions screen, which owns the live candidate grant.
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -25,7 +25,7 @@ import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
 import { SafetyMenu, type SafetyMenuHandle } from '@/components/safety/safety-menu';
 import { useCachedCandidate } from '@/features/discovery/candidate-cache';
-import { postSwipeDecision } from '@/features/discovery/swipe-decisions';
+import { postIntroductionDecision } from '@/features/discovery/introduction-decisions';
 import { distanceLabel, genderLabel, intentLabel } from '@/lib/profile-labels';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
@@ -79,9 +79,9 @@ export default function CandidateDetail() {
       } else {
         Haptics.selectionAsync().catch(() => {});
       }
-      postSwipeDecision({
+      postIntroductionDecision({
         pubkey: candidate.pubkey,
-        direction,
+        choice: direction === 'like' ? 'interest' : 'skip',
         grant: candidate.candidate_grant,
       });
       router.back();
@@ -101,13 +101,13 @@ export default function CandidateDetail() {
             onPress={() => router.back()}
             accessibilityRole="button"
             style={({ pressed }) => [
-              styles.backToDeck,
+              styles.backToIntroductions,
               { borderColor: colors.border },
               pressed && styles.pressed,
             ]}
           >
             <Text style={[typography.labelLarge, { color: colors.accent }]}>
-              Back to browsing
+              Back to introductions
             </Text>
           </Pressable>
         </View>
@@ -278,13 +278,13 @@ export default function CandidateDetail() {
         </View>
       </ScrollView>
 
-      {/* Deciding from here rather than backing out and hunting for the card
-          again is the whole point of opening a profile. */}
+      {/* Explicit text preserves the deliberate-introduction model on the full
+          profile and makes the privacy consequence of each choice clear. */}
       <View style={[styles.actions, { borderTopColor: colors.border }]}>
         <Pressable
           onPress={() => decide('pass')}
           accessibilityRole="button"
-          accessibilityLabel={`Pass on ${displayName}`}
+          accessibilityLabel={`Privately skip ${displayName}`}
           hitSlop={spacing.sm}
           style={({ pressed }) => [
             styles.actionButton,
@@ -292,17 +292,12 @@ export default function CandidateDetail() {
             pressed && styles.pressed,
           ]}
         >
-          <SymbolView
-            name={{ ios: 'xmark', android: 'close', web: 'close' }}
-            size={26}
-            tintColor={colors.text}
-            weight="semibold"
-          />
+          <Text style={[typography.labelLarge, { color: colors.text }]}>Skip privately</Text>
         </Pressable>
         <Pressable
           onPress={() => decide('like')}
           accessibilityRole="button"
-          accessibilityLabel={`Like ${displayName}`}
+          accessibilityLabel={`Express private interest in ${displayName}`}
           hitSlop={spacing.sm}
           style={({ pressed }) => [
             styles.actionButton,
@@ -311,12 +306,7 @@ export default function CandidateDetail() {
             pressed && styles.pressed,
           ]}
         >
-          <SymbolView
-            name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }}
-            size={28}
-            tintColor="#FFFFFF"
-            weight="semibold"
-          />
+          <Text style={[typography.labelLarge, { color: '#FFFFFF' }]}>Private interest</Text>
         </Pressable>
       </View>
 
@@ -443,7 +433,7 @@ function makeStyles(colors: ThemeColors, screenWidth: number) {
       gap: spacing.lg,
       padding: spacing.xl,
     },
-    backToDeck: {
+    backToIntroductions: {
       paddingHorizontal: spacing.xl,
       paddingVertical: spacing.md,
       borderRadius: radius.full,
@@ -532,18 +522,18 @@ function makeStyles(colors: ThemeColors, screenWidth: number) {
     },
     actions: {
       flexDirection: 'row',
-      justifyContent: 'center',
-      gap: spacing.xxxl,
-      paddingVertical: spacing.md,
+      gap: spacing.md,
+      padding: spacing.md,
       borderTopWidth: StyleSheet.hairlineWidth,
     },
     actionButton: {
-      width: 60,
-      height: 60,
-      borderRadius: 30,
+      flex: 1,
+      minHeight: 52,
+      borderRadius: radius.lg,
       borderWidth: StyleSheet.hairlineWidth,
       alignItems: 'center',
       justifyContent: 'center',
+      paddingHorizontal: spacing.md,
     },
     actionButtonPrimary: {
       borderWidth: 0,

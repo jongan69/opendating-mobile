@@ -21,7 +21,7 @@ marketplace-competitive 1.0 and are not complete.
 
 | Phase | Status | Required evidence before completion |
 |---|---|---|
-| 0. Release containment | In progress | Stale iOS submission withdrawn, Android held, mobile and protocol PRs merged with CI, `opendating-protocol@0.1.1` published and pinned, deletion/swiping/profile navigation verified from the release commit, public claims corrected |
+| 0. Release containment | In progress | Rejected iOS submission retained only as review history, Android held, mobile and protocol PRs merged with CI, `opendating-protocol@0.1.1` published and pinned, deletion/private-introduction/profile navigation verified from the release commit, public claims corrected, metadata lint passed, replacement screenshots captured, physical-device walkthrough passed, fresh 0.1.1 artifacts built and uploaded, and the App Review response plus recording attached |
 | 1. Secure production foundation | Not started | Protocol 0.2, native signer migration, authenticated envelopes, SQLCipher repositories/outbox/cursors, global blocks, push, deterministic sync, dependency remediation, physical-device E2E, independent security review, zero open critical/high release defects |
 | 2. Trust, safety, and legal operations | Not started | Persona/Hive integrations, fail-closed moderation, console/appeals/audit, accepted policy versions, country registry, deletion web flow, vendor DPAs, legal approval, and staffed 24/7 escalation coverage meeting documented SLAs |
 | 3. Intentional competitive product | Not started | Adaptive daily batches, reciprocal eligibility/ranking reasons/fairness, richer profiles and reactions, Opening Moves, durable chat/voice notes, Share Date/check-ins, inclusive preferences, beta activation/matching/messaging/safety gates |
@@ -38,7 +38,7 @@ marketplace-competitive 1.0 and are not complete.
 - Publish and pin `opendating-protocol@0.1.1`; remove the temporary mobile routing mirror.
 - Verify account deletion against the advertised deletion service and prove that immediate hiding and cascade receipts work.
 - Keep the configured protected branches, protected staging environments, and reviewer-gated production environments aligned with the deployment workflows.
-- Exit only with release-commit evidence for discovery gestures, profile navigation, deletion, documentation, and store hold state.
+- Exit only with release-commit evidence for private introductions, Privacy Passport, profile navigation, deletion, documentation, and store hold state.
 
 ### 1. Secure the identity, transport, and local-data boundary
 

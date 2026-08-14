@@ -31,15 +31,23 @@ table. Add the connected 11-inch iPad Pro after its 0.1.1 walkthrough passes.
 
 ## 3. Purpose and target audience
 
-**Purpose.** OpenDating is a dating app for adults that is built so the service
-itself learns as little as possible about its users.
+**Purpose.** OpenDating gives adults deliberate private introductions while the
+service itself learns as little as possible about them. It does not present an
+endless swipe feed: one person is introduced at a time with an explanation and
+a privacy receipt.
 
 **Problem it solves.** Mainstream dating apps require handing over a precise
 location, a phone number or social login, and a message history the operator can
 read. That data is retained, profiled, and monetized. People who want to date
 without accepting that trade have had no mainstream option.
 
-**How it solves it.**
+**How it is materially different.**
+- Every introduction identifies the visible compatibility facts behind it,
+  such as shared interests, matching intent, or a coarse distance bucket.
+- A privacy receipt states what is shared now, what remains withheld, and what
+  becomes available only after mutual interest.
+- The Privacy Passport is a primary tab with the member-owned account ID,
+  visibility control, backup path, and location/decision/conversation boundaries.
 - Exact GPS never leaves the device. Discovery transmits only a coarse area of
   roughly 5 km.
 - Direct messages between matches are end-to-end encrypted.
@@ -50,8 +58,9 @@ without accepting that trade have had no mainstream option.
 **Target audience.** Adults 18 and over seeking dating and relationships, with
 particular appeal to privacy-conscious users. The app is rated 17+.
 
-**Value.** Users get the ordinary dating experience — browse, match, chat —
-without the surveillance that normally accompanies it.
+**Value.** Members make a small number of understandable, private choices and
+retain a portable recovery path, instead of surrendering identity, exact
+location, or readable conversations to a conventional dating account.
 
 ## 4. Setup and access instructions
 
@@ -65,21 +74,24 @@ working account inside the app in about a minute.
 3. Read and accept the Terms of Service and Community Standards.
 4. Enter a display name, an age of 18 or over, and a gender.
 5. Choose what you are looking for, and set match preferences.
-6. **Allow location when prompted.** This is required for discovery to return
-   results. Choosing "Don't Allow" leaves the discovery deck empty — that is
-   expected behavior, not a bug.
+6. **Allow location when prompted.** This is required for introductions to load.
+   If you choose "Don't Allow," the app reports that it cannot determine your
+   area and shows no introductions. Allow location, then use **Check again**.
 7. Add at least two photos, or choose **Add photos later**. For the fullest
    review flow, add two photos and allow photo-library access when prompted.
-8. Review the profile and tap to finish. The account is now live on the network.
-9. **Discover** shows nearby people; swipe or use the buttons. **Matches** lists
-   mutual likes. Tap a match to open an encrypted chat.
+8. Review the profile and tap to finish. The app opens **Privacy Passport** so
+   the account, visibility, location, decision, and conversation boundaries are
+   visible before any profile is evaluated.
+9. **Introductions** shows one nearby person with compatibility reasons and a
+   privacy receipt. Choose **Skip privately** or **Express private interest**.
+   **Matches** lists mutual choices. Tap a match to open an encrypted chat.
 10. Report and block are available from any profile and from the chat screen.
 11. Delete the account at **Profile → Settings → Account → Delete Account**.
 
 **Important for discovery results.** The app shows real people in the reviewer's
 coarse area on a live network. If the review location has no other users, the
-discovery deck will legitimately be empty. If the reviewer needs to see a
-populated deck, contact us and we will coordinate seeded test accounts in the
+introductions screen will legitimately be empty. If the reviewer needs to see a
+populated introduction, contact us and we will coordinate test accounts in the
 review region.
 
 ## 5. External services and tools
@@ -151,12 +163,16 @@ The physical iPad model and iPadOS result shown in the recording will be added
 here after the final 0.1.1 walkthrough passes.
 
 PURPOSE AND AUDIENCE
-OpenDating is a privacy-focused dating app for adults 18+ seeking dating and
-relationships. It provides ordinary discovery, matching, and chat while
-collecting less sensitive data: exact GPS never leaves the device, discovery
-uses only a coarse area of about 5 km, and messages between matches are
-end-to-end encrypted. It particularly serves privacy-conscious adults. There
-is no advertising SDK, third-party analytics, or data sale.
+OpenDating provides deliberate private introductions for adults 18+ seeking
+dating and relationships. It does not use an endless swipe feed. The app shows
+one person at a time, explains the visible compatibility facts behind the
+introduction, and displays a privacy receipt for what is shared, withheld, and
+unlocked after mutual interest. Its primary Privacy Passport tab gives the
+member a live account identifier, visibility control, backup path, and clear
+location, decision, and conversation boundaries. Exact GPS never leaves the
+device, introductions use only a coarse area of about 5 km, and messages
+between matches are end-to-end encrypted. There is no advertising SDK,
+third-party analytics, or data sale.
 
 ACCOUNT ACCESS AND SETUP
 No demo credentials exist because OpenDating has no email/password login or
@@ -168,14 +184,19 @@ their recovery key in a masked field. A reviewer can create a new account:
 3. Enter name, age 18+, gender, preferences, intent, and bio.
 4. Add at least two photos and allow photo-library access, or choose "Add
    photos later."
-5. Allow location while using the app. Denying it leaves discovery empty.
+5. Allow location while using the app. If you deny it, the app reports that it
+   cannot determine your area. Allow location, then tap **Check again** before
+   reviewing introductions.
 6. Review the profile and tap "Create Profile."
+7. The app opens Privacy Passport. Review the live account and visibility
+   controls, then open Introductions to see one explained introduction and its
+   privacy receipt.
 Report and Block are available from profiles and chats. Delete Account is at
 Profile -> Settings -> Account -> Delete Account.
 
 DISCOVERY RESULTS
 The app uses a live network and shows real people in the reviewer's coarse
-area. If no other users are nearby, discovery can legitimately be empty.
+area. If no other users are nearby, introductions can legitimately be empty.
 Contact us and we will coordinate test accounts in the review region.
 
 PERMISSIONS AND PURCHASES

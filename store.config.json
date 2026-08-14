@@ -7,43 +7,19 @@
     "info": {
       "en-US": {
         "title": "OpenDating Mobile",
-        "subtitle": "Dating built for privacy",
-        "description": "OpenDating is a dating app built around privacy.\n\nYour exact location never leaves your phone. Discovery works from a coarse area only, so you can find people nearby without broadcasting where you are.\n\nMessages between matches are end-to-end encrypted, so your conversations stay between you and the person you matched with.\n\nNo advertising profile. No data brokers. No selling your personal information.\n\nHOW IT WORKS\n- Create an account on your device in seconds, with no email, phone number, or password\n- Add photos and a short bio\n- Browse people in your general area\n- Match, then message with end-to-end encryption\n\nSAFETY\n- Report or block any profile at any time\n- Blocks take effect immediately on your device\n- Adults 18 and over only\n\nOpenDating is the first app built on the open OpenDating protocol, so your account belongs to you.",
-        "keywords": ["singles,match,chat,nearby,secure,photos,profile,ethical,local,relationships,privacy"],
-        "releaseNotes": "Version 0.1.1 improves the discovery deck and request routing, and adds authenticated checks on incoming messages.",
-        "promoText": "Meet people nearby with a dating app built around coarse location, encrypted messages, and no advertising profile.",
+        "subtitle": "Private introductions, yours",
+        "description": "OpenDating is for adults who want to meet without handing an app their phone number, exact location, or readable conversations.\n\nA DIFFERENT KIND OF INTRODUCTION\nOpenDating presents one deliberate introduction at a time. Each introduction explains the visible profile signals you share and includes a privacy receipt showing what was shared, what remains withheld, and what unlocks only after mutual interest. There is no public like count and no visible rejection.\n\nYOUR PRIVACY PASSPORT\nThe Passport is a live account-control surface, not a marketing promise. See whether your profile is visible, pause new introductions, inspect the app's location and conversation boundaries, back up your self-owned account, or permanently delete it.\n\nBUILT AROUND DATA MINIMIZATION\n- Create a self-owned account without email, phone number, password, or social login\n- Reduce location to an approximate area on your device before it is shared\n- Keep interest private unless both people independently choose each other\n- Open an end-to-end encrypted conversation only after mutual interest\n- Block locally and report privately\n- Use the app without ads, tracking, or a data-broker business model\n\nOpenDating is the first reference client for the open OpenDating protocol. Your recovery key can restore your account on another compatible OpenDating client or device. Adults 18 and over only.",
+        "keywords": ["privacy,introductions,encrypted,dating,identity,nearby,relationships,chat,recovery"],
+        "releaseNotes": "Replaces swipe-first browsing with deliberate private introductions, adds an explanation and privacy receipt to every introduction, and introduces a live Privacy Passport for account, visibility, location, and conversation controls.",
+        "promoText": "One private introduction at a time, with a receipt showing what is shared, withheld, and unlocked only after mutual interest.",
         "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
         "supportUrl": "https://jongan69.github.io/opendating-mobile/safety/",
         "marketingUrl": "https://jongan69.github.io/opendating-mobile/",
         "screenshots": {
-          "APP_IPHONE_67": [
-            "./screenshots/app-store/6.7-01-welcome.png",
-            "./screenshots/app-store/6.7-02-create-account.png",
-            "./screenshots/app-store/6.7-12-discover.png",
-            "./screenshots/app-store/6.7-13-matches.png",
-            "./screenshots/app-store/6.7-14-profile.png"
-          ],
-          "APP_IPHONE_61": [
-            "./screenshots/app-store/6.1-01-welcome.png",
-            "./screenshots/app-store/6.1-02-create-account.png",
-            "./screenshots/app-store/6.1-12-discover.png",
-            "./screenshots/app-store/6.1-13-matches.png",
-            "./screenshots/app-store/6.1-14-profile.png"
-          ],
-          "APP_IPAD_PRO_129": [
-            "./screenshots/app-store/ipad-13-01-welcome.png",
-            "./screenshots/app-store/ipad-13-02-create-account.png",
-            "./screenshots/app-store/ipad-13-12-discover.png",
-            "./screenshots/app-store/ipad-13-13-matches.png",
-            "./screenshots/app-store/ipad-13-14-profile.png"
-          ],
-          "APP_IPAD_PRO_3GEN_129": [
-            "./screenshots/app-store/ipad-13-01-welcome.png",
-            "./screenshots/app-store/ipad-13-02-create-account.png",
-            "./screenshots/app-store/ipad-13-12-discover.png",
-            "./screenshots/app-store/ipad-13-13-matches.png",
-            "./screenshots/app-store/ipad-13-14-profile.png"
-          ]
+          "APP_IPHONE_67": [],
+          "APP_IPHONE_61": [],
+          "APP_IPAD_PRO_129": [],
+          "APP_IPAD_PRO_3GEN_129": []
         }
       }
     },
@@ -63,6 +39,9 @@
       "koreaAgeRatingOverride": "NONE",
       "lootBox": false,
       "unrestrictedWebAccess": false,
+      "messagingAndChat": true,
+      "userGeneratedContent": true,
+      "ageAssurance": false,
       "violenceCartoonOrFantasy": "NONE",
       "violenceRealistic": "NONE",
       "violenceRealisticProlongedGraphicOrSadistic": "NONE"
