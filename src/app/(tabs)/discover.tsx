@@ -4,7 +4,7 @@
 // and what remains withheld. Decisions use the same protocol grants and local
 // privacy guarantees as before; only the member-facing interaction changes.
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,6 +50,8 @@ export default function IntroductionsScreen() {
     fetchCandidates,
     clearError,
   } = useDiscovery();
+  const interestPendingRef = useRef(false);
+  const [interestPending, setInterestPending] = useState(false);
 
   const screenshotCandidates = useMemo(() => getScreenshotCandidates(), []);
   const screenshotProfile = useMemo(() => getScreenshotProfileContent(), []);
@@ -87,9 +89,17 @@ export default function IntroductionsScreen() {
 
   const handleInterest = useCallback(
     async (pubkey: string, grant: string) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-      const matched = await like(pubkey, grant);
-      if (matched) presentMatch(pubkey);
+      if (interestPendingRef.current) return;
+      interestPendingRef.current = true;
+      setInterestPending(true);
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        const matched = await like(pubkey, grant);
+        if (matched) presentMatch(pubkey);
+      } finally {
+        interestPendingRef.current = false;
+        setInterestPending(false);
+      }
     },
     [like, presentMatch]
   );
@@ -229,13 +239,14 @@ export default function IntroductionsScreen() {
           <View style={styles.actions}>
             <IntroductionButton
               label="Skip privately"
+              disabled={interestPending}
               accessibilityLabel={`Privately skip ${currentCandidate.profile.display_name ?? 'this introduction'}`}
               onPress={() => handleSkip(currentCandidate.pubkey)}
             />
             <IntroductionButton
               label="Express private interest"
               primary
-              disabled={!currentCandidate.candidate_grant || outOfInterests}
+              disabled={!currentCandidate.candidate_grant || outOfInterests || interestPending}
               accessibilityLabel={`Express private interest in ${currentCandidate.profile.display_name ?? 'this introduction'}`}
               onPress={() => void handleInterest(currentCandidate.pubkey, currentCandidate.candidate_grant)}
             />

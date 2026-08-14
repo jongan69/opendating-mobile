@@ -16,7 +16,7 @@ Console records.
 |---|---|
 | App Store name | OpenDating Mobile |
 | Google Play name | OpenDating |
-| Subtitle / short description | Private introductions, your way |
+| Subtitle / short description | Private introductions, yours |
 | iOS bundle ID | `com.jongan69.opendating` |
 | Android package | `com.jongan69.opendating` |
 | SKU | `com.jongan69.opendating` |
@@ -69,8 +69,12 @@ Privacy Passport for account, visibility, location, and conversation controls.
 
 ## Reviewer Notes
 
-No demo account is required. Reviewers can create a local account directly in
-the app, complete onboarding, and allow location/photo permissions when prompted.
+No demo account is required for the single-account review path. Reviewers can
+create a local account directly in the app, complete onboarding, and allow
+location/photo permissions when prompted. The optional mutual-interest/chat
+path uses two independently created test accounts on separate devices in the
+same coarse review area; contact the developer before review if Apple wants the
+second account coordinated in its review region.
 
 Use these notes in App Store Connect and Play Console:
 
@@ -115,16 +119,15 @@ Use a 17+ / Mature teen posture for the first release:
 
 ## Screenshots
 
-Prepared screenshots are in `screenshots/app-store/`:
+The committed screenshot files belong to the rejected swipe-deck submission
+and are not eligible for reuse. Store metadata intentionally contains no
+screenshot uploads until a replacement set is captured from the accepted
+release candidate.
 
-- `6.7-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 1290 x 2796
-- `6.1-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 1179 x 2556
-- `ipad-13-{01-welcome,02-create-account,12-discover,13-matches,14-profile}.png` at 2048 x 2732 for `APP_IPAD_PRO_129` and `APP_IPAD_PRO_3GEN_129`
-
-The replacement flow must be welcome, Privacy Passport, private introduction,
-matches, and profile. Do not reuse the rejected swipe-deck screenshots.
-Google Play phone screenshots are in `screenshots/play-store/phone-*.png` at
-1080 x 1920 for the same five screens.
+The replacement set must show welcome, Privacy Passport, private introduction
+with its privacy receipt, matches, and profile at every required iPhone, iPad,
+and Google Play size. Record the physical-device source and image hashes with
+the release evidence before adding those files back to `store.config.json`.
 
 ## Built Binaries
 

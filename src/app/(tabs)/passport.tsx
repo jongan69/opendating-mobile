@@ -3,7 +3,6 @@
 // Material 3 on Android.
 
 import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
 import { Button, Column, Host, Row, ScrollView, Text } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +22,7 @@ export default function PassportScreen() {
   const { profile, pauseProfile, resumeProfile, isPaused } = useProfile();
   const [publicId, setPublicId] = useState('');
   const [changingVisibility, setChangingVisibility] = useState(false);
+  const [visibilityError, setVisibilityError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -39,14 +39,16 @@ export default function PassportScreen() {
 
   const toggleDiscovery = useCallback(async () => {
     if (changingVisibility) return;
+    setVisibilityError('');
     setChangingVisibility(true);
     try {
       if (isPaused) await resumeProfile();
       else await pauseProfile();
     } catch (err) {
-      Alert.alert(
-        'Could not change visibility',
-        err instanceof Error ? err.message : 'Please try again.'
+      setVisibilityError(
+        err instanceof Error
+          ? `Could not change visibility: ${err.message}`
+          : 'Could not change visibility. Please try again.'
       );
     } finally {
       setChangingVisibility(false);
@@ -155,6 +157,11 @@ export default function PassportScreen() {
                   ? 'Your profile is withheld from new introductions. Existing matches remain available.'
                   : 'Your public profile and approximate area can be considered for new introductions.'}
               </Text>
+              {visibilityError ? (
+                <Text textStyle={{ ...textStyles.body, color: colors.destructive }}>
+                  {visibilityError}
+                </Text>
+              ) : null}
               <Button
                 label={isPaused ? 'Resume introductions' : 'Pause introductions'}
                 variant={isPaused ? 'filled' : 'outlined'}

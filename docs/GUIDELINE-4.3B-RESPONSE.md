@@ -47,8 +47,11 @@ indistinguishable from established dating apps.
 5. Open **Introductions**. Read **Why this introduction** and the three-line
    **Privacy receipt**.
 6. Open the full profile and use **Skip privately** or **Private interest**.
-7. With two seeded accounts, choose each other and open the resulting
-   end-to-end encrypted chat.
+7. For the coordinated two-account portion, use two independently created test
+   accounts on separate devices in the same coarse review area. Complete both
+   profiles before recording, choose each other, and open the resulting
+   end-to-end encrypted chat. Contact the developer before review if Apple
+   needs the second test account coordinated in its review region.
 8. Demonstrate report, block, and permanent account deletion.
 
 ## App Review reply after the new build and evidence exist
