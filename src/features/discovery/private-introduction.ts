@@ -18,10 +18,12 @@ export function introductionReasons(
   const reasons: string[] = [];
   const ownInterests = new Map(
     (ownProfile?.interests ?? [])
+      .map((interest) => interest.trim())
       .filter(Boolean)
-      .map((interest) => [normalized(interest), interest.trim()])
+      .map((interest) => [normalized(interest), interest])
   );
   const sharedInterests = (candidate.profile.interests ?? [])
+    .map((interest) => interest.trim())
     .filter(Boolean)
     .map((interest) => ownInterests.get(normalized(interest)))
     .filter((interest): interest is string => Boolean(interest));

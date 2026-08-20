@@ -1,84 +1,18 @@
 {
   "expires": "2026-09-30",
-  "rationale": "Expo SDK 57 and React Native 0.86 currently resolve advisories whose automated fixes propose incompatible downgrades. Expo, React Native, Reanimated, and Worklets include production runtime code, but the flagged advisory path is through their Metro, CLI, and image-inspection build subgraph; the shipped app does not expose those tooling APIs to user input. Exact versions are lockfile-pinned, CI runs the production audit and mobile test suite, and these time-limited exceptions must be removed or re-evidenced before expiry when upstream-compatible fixes are available.",
+  "rationale": "The only remaining high advisories are in image-size through Expo and React Native Metro build tooling. The shipped app does not expose Metro asset inspection to remote user input. This exception is exact, owned, and time-limited; CI rejects a changed advisory set or any additional high or critical finding.",
   "blockedUpgradePaths": [
     {
       "package": "image-size",
-      "attempted": "npm overrides pin to 2.0.2",
-      "blockedBy": "metro 0.84.4 calls image-size with a file path string (node_modules/metro/src/Assets.js line 177). image-size 2.x removed file-path input and accepts only ArrayBuffer/ArrayBufferView, so the override throws a TypeError and breaks asset bundling. Verified empirically against 2.0.2.",
-      "revisitWhen": "Metro passes a buffer at every image-size call site, or upstream backports the advisory fix to the 1.x line."
+      "blockedBy": "The npm registry currently reports 2.0.2 as the latest image-size release, while both advisories affect versions through 2.0.2. Metro also still contains file-path based image-size call sites.",
+      "revisitWhen": "A patched image-size release and compatible Metro call sites are available."
     }
   ],
   "highSeverityExceptions": [
     {
-      "package": "@expo/cli",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.25.0-canary-20250612-338ef55"
-    },
-    {
-      "package": "@expo/metro",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": "*"
-    },
-    {
-      "package": "@expo/metro-config",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.21.0-canary-20250630-547cd82"
-    },
-    {
-      "package": "@react-native/community-cli-plugin",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": "*"
-    },
-    {
-      "package": "@react-native/metro-config",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": "*"
-    },
-    {
-      "package": "@react-native/virtualized-lists",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.85.0-nightly-20260108-1236b6be4"
-    },
-    {
-      "package": "expo",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": "52.0.0-canary-20240625-2333e70 - 52.0.0-canary-20241018-f71b3e0 || >=54.0.0-canary-20250611-f0afe80"
-    },
-    {
       "package": "image-size",
       "advisoryIds": [1138808, 1138809],
-      "affectedRange": "*"
-    },
-    {
-      "package": "metro",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.22.1"
-    },
-    {
-      "package": "metro-config",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": "*"
-    },
-    {
-      "package": "metro-transform-worker",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.60.0"
-    },
-    {
-      "package": "react-native",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.73.0-nightly-20230506-1af868c52"
-    },
-    {
-      "package": "react-native-reanimated",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": "3.20.0-nightly-20250722-b6c8b9a3c - 4.0.0-nightly-20250309-9ce9085cb || 4.1.7 - 4.2.0-nightly-20251017-235c127fd || >=4.2.3"
-    },
-    {
-      "package": "react-native-worklets",
-      "advisoryIds": [1138808, 1138809],
-      "affectedRange": ">=0.8.0-bundle-mode-preview-1"
+      "issue": "https://github.com/jongan69/opendating-mobile/issues/17"
     }
   ]
 }

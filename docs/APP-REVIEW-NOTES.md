@@ -74,9 +74,9 @@ working account inside the app in about a minute.
 3. Read and accept the Terms of Service and Community Standards.
 4. Enter a display name, an age of 18 or over, and a gender.
 5. Choose what you are looking for, and set match preferences.
-6. **Allow location when prompted.** This is required for introductions to return
-   results. Choosing "Don't Allow" leaves introductions empty — that is
-   expected behavior, not a bug.
+6. **Allow location when prompted.** This is required for introductions to load.
+   If you choose "Don't Allow," the app reports that it cannot determine your
+   area and shows no introductions. Allow location, then use **Check again**.
 7. Add at least two photos, or choose **Add photos later**. For the fullest
    review flow, add two photos and allow photo-library access when prompted.
 8. Review the profile and tap to finish. The app opens **Privacy Passport** so
@@ -184,7 +184,9 @@ their recovery key in a masked field. A reviewer can create a new account:
 3. Enter name, age 18+, gender, preferences, intent, and bio.
 4. Add at least two photos and allow photo-library access, or choose "Add
    photos later."
-5. Allow location while using the app. Denying it leaves introductions empty.
+5. Allow location while using the app. If you deny it, the app reports that it
+   cannot determine your area. Allow location, then tap **Check again** before
+   reviewing introductions.
 6. Review the profile and tap "Create Profile."
 7. The app opens Privacy Passport. Review the live account and visibility
    controls, then open Introductions to see one explained introduction and its

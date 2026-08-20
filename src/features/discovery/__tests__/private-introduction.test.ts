@@ -39,6 +39,15 @@ describe('introductionReasons', () => {
     ).toEqual(['Nearby, based on approximate area only']);
   });
 
+  it('ignores whitespace-only interests', () => {
+    expect(
+      introductionReasons(
+        { ...ownProfile, interests: ['   '] },
+        candidate({ profile: { display_name: 'Jordan', interests: ['  '] } })
+      )
+    ).not.toContain('You both chose ');
+  });
+
   it('falls back to a truthful privacy explanation', () => {
     expect(
       introductionReasons(

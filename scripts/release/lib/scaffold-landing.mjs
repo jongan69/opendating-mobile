@@ -18,6 +18,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 
+import { escapeTemplateLiteral } from './security-utils.mjs';
+
 const args = process.argv.slice(2);
 const argOf = (f, d = null) => { const i = args.indexOf(f); return i === -1 ? d : args[i + 1]; };
 const DRY_RUN = args.includes('--dry-run');
@@ -50,7 +52,7 @@ function emit(relPath, contents) {
   written++;
 }
 
-const esc = (s) => String(s ?? '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+const esc = escapeTemplateLiteral;
 const bullets = project.differentiators ?? [];
 
 // ── project files ─────────────────────────────────────────────────────────────
