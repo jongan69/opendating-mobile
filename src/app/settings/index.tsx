@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { useTheme } from '@/state/theme-context';
+import { useRevenueCat } from '@/state/revenuecat-context';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
@@ -78,6 +79,7 @@ function SectionHeader({ children }: { children: string }) {
 export default function SettingsScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
+  const revenueCat = useRevenueCat();
 
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -192,6 +194,21 @@ export default function SettingsScreen() {
               onPress={() => router.push('/settings/privacy')}
             />
           </View>
+
+          {revenueCat.enabled ? (
+            <>
+              <SectionHeader>Plus</SectionHeader>
+              <View
+                style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              >
+                <MenuRow
+                  label={revenueCat.isPlus ? 'OpenDating Plus · Active' : 'OpenDating Plus'}
+                  supportingText="Customization and convenience, never ranking"
+                  onPress={() => router.push('/settings/plus' as Href)}
+                />
+              </View>
+            </>
+          ) : null}
 
           {/* Discovery */}
           <SectionHeader>Discovery</SectionHeader>

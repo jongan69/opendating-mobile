@@ -6,6 +6,7 @@ import { StyleSheet, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/state/theme-context';
+import { RevenueCatProvider } from '@/state/revenuecat-context';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StatusBar } from 'expo-status-bar';
 
@@ -23,14 +24,16 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ErrorBoundary>
           <ThemeProvider>
-            <StatusBar style={isDark ? 'light' : 'dark'} />
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="candidate/[pubkey]" />
-              <Stack.Screen name="chat/[pubkey]" />
-              <Stack.Screen name="filters" options={{ presentation: 'modal' }} />
-            </Stack>
+            <RevenueCatProvider>
+              <StatusBar style={isDark ? 'light' : 'dark'} />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="candidate/[pubkey]" />
+                <Stack.Screen name="chat/[pubkey]" />
+                <Stack.Screen name="filters" options={{ presentation: 'modal' }} />
+              </Stack>
+            </RevenueCatProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </SafeAreaProvider>
