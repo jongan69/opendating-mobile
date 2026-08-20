@@ -2,6 +2,11 @@
 
 **Status: proposed launch candidate.** OpenDating Mobile 0.1.1 is a proposed iOS App Store and Google Play release. Launch approval is not effective until Phase 0 release-containment gates pass and `release/manifest.json` records the reviewed source SHA, artifact IDs, build numbers, and checksums.
 
+Apple rejected the previous submission under Guideline 4.3(b). The valid
+0.1.1 build already in App Store Connect predates the private-introductions
+redesign and must not be resubmitted. The next attempt needs a fresh build and
+the evidence listed in `docs/GUIDELINE-4.3B-RESPONSE.md`.
+
 ## Verified in this release
 
 - One-at-a-time private introductions and candidate-profile navigation are implemented.
@@ -23,6 +28,7 @@ These are post-launch engineering priorities, not launch gates:
 3. Enforce global blocks and active-match authorization before any inbound DM reaches UI state.
 4. Add push delivery, liveness/age verification, profile moderation, appeals, and staffed trust-and-safety operations.
 5. Resolve or renew the time-limited SDK dependency exceptions in `security/audit-exceptions.json`.
+6. Finish or remove the development-only RevenueCat integration before selecting a release commit.
 
 ## Release mechanics
 

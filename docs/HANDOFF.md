@@ -1,10 +1,19 @@
 # OpenDating Mobile Handoff
 
-Last reviewed: August 9, 2026.
+Last reviewed: August 20, 2026.
 
 ## Handoff status
 
-The repository is ready for another engineer to clone, test, and continue. Release 0.1.1 is approved for iOS and Android launch in `release/manifest.json`. The broader technical, operational, legal, and marketplace gates in `ROADMAP-1.0.md` remain the path toward 1.0.
+The repository is ready for another engineer to clone, test, and continue.
+Release 0.1.1 is **not approved for launch**: `release/manifest.json` is blocked,
+Apple rejected the previous submission under Guideline 4.3(b), and the next
+candidate still needs external and physical-device evidence.
+
+`main` remains the production branch. `dev` contains the reconciled remote
+baseline plus disabled, development-only monetization work. Do not merge that
+work into the next App Review candidate until `docs/MONETIZATION.md` is
+satisfied; the safest next candidate is the private-introductions redesign
+without paid features.
 
 The source of truth for current readiness is:
 
@@ -26,12 +35,12 @@ Historical documents with `COMPLETE` in their filenames describe the v0.1 featur
 
 ```bash
 cp .env.example .env
-npm ci
-npm run typecheck
-npm run lint
-npm test
-npm run security:audit
-npm run release:validate
+bun install --frozen-lockfile
+bun run typecheck
+bun run lint
+bun run test
+bun run security:audit
+bun run release:validate
 ```
 
 Expo SDK 57 APIs must be checked against the versioned Expo documentation. Protocol calls must be checked against the installed package declarations in `node_modules/opendating-protocol/dist/index.d.ts`.
@@ -52,15 +61,21 @@ Do not put credential values in issues, documentation, chat, or Git.
 
 ## Known dependency state
 
-The mobile lockfile currently contains two high `image-size` advisories without patched releases and one medium `uuid` advisory through Expo/Metro/Xcode build tooling. `security/audit-exceptions.json` binds exceptions to exact advisories, affected ranges, owners, and a September 30, 2026 expiry. They must be removed or explicitly renewed with evidence before expiry.
+`security/audit-exceptions.json` is the only allowed dependency exception
+source. The audit fails when Bun reports a new high/critical advisory, when the
+documented advisory set changes, or when the exception expires. Do not expand
+the exception merely to make CI green; first update the Expo-compatible
+dependency set and inspect the remaining paths.
 
 ## Immediate continuation order
 
-1. Authenticate npm, publish and verify `opendating-protocol@0.1.1`, then pin the exact artifact here.
-2. Record App Store withdrawal and Android hold evidence.
-3. Begin Phase 1 with the native signer boundary and SQLCipher repositories; these precede public acquisition.
-4. Implement deterministic sync/outbox/global blocks, then push and verification.
-5. Do not start public beta until the trust-and-safety, legal, vendor, deletion, security, and staffing gates are evidenced.
+1. Keep `dev` clean and run the Bun quality gates above before new work.
+2. Authenticate npm, publish and verify `opendating-protocol@0.1.1`, then pin the exact artifact here and remove the temporary request-routing mirror.
+3. Resolve the dependency audit without broad or permanent exceptions.
+4. Choose a release commit without unfinished RevenueCat behavior, then perform the complete iOS and Android physical-device walkthroughs.
+5. Capture fresh Passport/private-introduction screenshots and the App Review video; create a fresh 0.1.1 build with a new build number.
+6. Confirm App Privacy, Regulations and Permits, release notes, pricing/availability, and the 0.1.1 Store version before resubmitting with the prepared 4.3(b) response.
+7. Do not start public beta until the trust-and-safety, legal, vendor, deletion, security, and staffing gates are evidenced.
 
 ## Release handoff rule
 
