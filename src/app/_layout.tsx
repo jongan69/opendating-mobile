@@ -11,7 +11,10 @@ import { RevenueCatProvider } from '@/state/revenuecat-context';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StatusBar } from 'expo-status-bar';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
-import { requiresWebIdentity } from '@/features/auth/web-route-access';
+import {
+  isOnboardingWebRoute,
+  requiresWebIdentity,
+} from '@/features/auth/web-route-access';
 
 export default function RootLayout() {
   return (
@@ -69,8 +72,12 @@ function AppNavigator() {
       .getIdentityState()
       .then((identityState) => {
         if (!active) return;
-        if (identityState !== 'ready' || !client.getCapabilities()) {
+        if (identityState !== 'ready') {
           router.replace(identityState === 'locked' ? '/unlock' : '/');
+          return;
+        }
+        if (!isOnboardingWebRoute(pathname) && !client.getCapabilities()) {
+          router.replace('/');
           return;
         }
         setWebRouteReady(true);
@@ -82,7 +89,7 @@ function AppNavigator() {
     return () => {
       active = false;
     };
-  }, [isPublicWebRoute, router]);
+  }, [isPublicWebRoute, pathname, router]);
 
   if (!isPublicWebRoute && !webRouteReady) return null;
 
