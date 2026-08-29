@@ -12,6 +12,9 @@ import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { StatusBar } from 'expo-status-bar';
+import { storage } from '@/lib/storage';
+import type { OnboardingDraft } from '@/features/onboarding/onboarding-draft';
+import { getOnboardingResumePath } from '@/features/onboarding/onboarding-resume';
 
 const STATUS_COPY: Record<string, string> = {
   loading: 'Loading…',
@@ -30,18 +33,29 @@ export default function BootstrapScreen() {
   const effectiveState = isScreenshotMode ? 'no_identity' : state;
 
   useEffect(() => {
+    let active = true;
     switch (effectiveState) {
       case 'no_identity':
         router.replace('/(onboarding)/welcome');
         break;
+      case 'identity_locked':
+        router.replace('/unlock');
+        break;
       case 'no_profile':
-        router.replace('/(onboarding)/basics');
+        void storage
+          .getOnboardingDraft<Partial<OnboardingDraft>>()
+          .then((saved) => {
+            if (active) router.replace(getOnboardingResumePath(saved));
+          });
         break;
       case 'ready':
         router.replace('/(tabs)/discover');
         break;
       // loading, connecting, services_unavailable, error — handled below
     }
+    return () => {
+      active = false;
+    };
   }, [effectiveState, router]);
 
   return (

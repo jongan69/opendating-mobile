@@ -31,6 +31,8 @@ export interface ThemeColors {
   skeleton: string;
 }
 
+export type AccentPreference = 'coral' | 'sage' | 'ocean' | 'plum';
+
 const lightColors: ThemeColors = {
   // Backgrounds
   background: '#FAF9F7',
@@ -127,3 +129,31 @@ export const colors = {
 };
 
 export type ColorScheme = 'light' | 'dark';
+
+const accentOverrides: Record<
+  Exclude<AccentPreference, 'coral'>,
+  Record<ColorScheme, Pick<ThemeColors, 'accent' | 'accentLight' | 'accentMuted'>>
+> = {
+  sage: {
+    light: { accent: '#4F7A68', accentLight: '#EDF5F1', accentMuted: '#CFE2D8' },
+    dark: { accent: '#83B49F', accentLight: '#192821', accentMuted: '#2F4B3F' },
+  },
+  ocean: {
+    light: { accent: '#3C78A8', accentLight: '#EBF4FA', accentMuted: '#C9DEEC' },
+    dark: { accent: '#72A9D2', accentLight: '#182633', accentMuted: '#29475E' },
+  },
+  plum: {
+    light: { accent: '#8B5A83', accentLight: '#F6EEF4', accentMuted: '#E3CDDE' },
+    dark: { accent: '#C190B8', accentLight: '#2B1D28', accentMuted: '#503947' },
+  },
+};
+
+export function getThemeColors(
+  scheme: ColorScheme,
+  accentPreference: AccentPreference,
+): ThemeColors {
+  const base = colors[scheme];
+  return accentPreference === 'coral'
+    ? base
+    : { ...base, ...accentOverrides[accentPreference][scheme] };
+}

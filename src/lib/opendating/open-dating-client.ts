@@ -25,7 +25,6 @@ import {
   validateEnvelope,
   type OpenDatingEnvelope,
 } from 'opendating-protocol';
-import * as SecureStore from 'expo-secure-store';
 import { randomUUID } from 'expo-crypto';
 import {
   type OpenDatingCapabilities,
@@ -49,6 +48,9 @@ import { mapServiceError, ServiceUnavailableError } from './errors';
 import { parseCapabilities, serviceLabel } from './capabilities';
 import { unwrapGiftWrap } from './gift-wrap';
 import { uploadPendingPhotos } from './media';
+import { rememberMessage } from '@/features/messaging/message-history';
+import { identityVault, type IdentityState } from '@/lib/storage/identity-vault';
+import { storage } from '@/lib/storage';
 import {
   getRequestRoute,
   type ClientRequestType,
@@ -64,10 +66,6 @@ const INFO_URL =
   'https://opendating-relay.jonathang132298.workers.dev';
 const PROTOCOL_VERSION =
   process.env.EXPO_PUBLIC_OPENDATING_PROTOCOL_VERSION ?? '0.1';
-
-const SECURE_STORE_PRIVKEY_KEY = 'opendating_privkey';
-const SECURE_STORE_PUBKEY_KEY = 'opendating_pubkey';
-const SERVICES_CACHE_KEY = 'opendating_services_cache';
 
 const CONNECT_TIMEOUT_MS = 15_000;
 /** How long to wait for NIP-42 before proceeding without it. */
@@ -104,6 +102,10 @@ interface OpenDatingClientConfig {
   infoUrl?: string;
 }
 
+interface IdentityPersistenceOptions {
+  vaultPassphrase?: string;
+}
+
 // ---- Client Implementation ----
 
 class OpenDatingClientImpl {
@@ -120,8 +122,8 @@ class OpenDatingClientImpl {
   private messageListeners = new Set<(msg: ODMessage) => void>();
   /** Rumor ids already delivered — relays re-send, and we must not double-fire. */
   private seenRumorIds = new Set<string>();
-  /** DMs that arrive during bootstrap, before the conversation hook mounts. */
-  private bufferedMessages: ODMessage[] = [];
+  /** Bounded, memory-only replay for every conversation subscriber. */
+  private messageHistory: ODMessage[] = [];
   /** From the relay's NIP-11 `limitation.auth_required`. */
   private relayRequiresAuth = true;
 
@@ -144,50 +146,78 @@ class OpenDatingClientImpl {
   // ---- Identity ----
 
   async hasIdentity(): Promise<boolean> {
-    const pubkey = await SecureStore.getItemAsync(SECURE_STORE_PUBKEY_KEY);
-    const privkey = await SecureStore.getItemAsync(SECURE_STORE_PRIVKEY_KEY);
-    return !!(pubkey && privkey);
+    return (await identityVault.getState()) === 'ready';
+  }
+
+  async getIdentityState(): Promise<IdentityState> {
+    return identityVault.getState();
   }
 
   async getPubkey(): Promise<string | null> {
     if (this.userPubkey) return this.userPubkey;
-    return SecureStore.getItemAsync(SECURE_STORE_PUBKEY_KEY);
+    try {
+      return (await identityVault.load())?.pubkey ?? null;
+    } catch {
+      return null;
+    }
   }
 
-  async createIdentity(): Promise<{ pubkey: string }> {
+  async createIdentity(
+    options: IdentityPersistenceOptions = {}
+  ): Promise<{ pubkey: string }> {
     const kp = generateKeypair();
-    await SecureStore.setItemAsync(SECURE_STORE_PRIVKEY_KEY, kp.privateKey);
-    await SecureStore.setItemAsync(SECURE_STORE_PUBKEY_KEY, kp.publicKey);
+    await identityVault.save(
+      { privkey: kp.privateKey, pubkey: kp.publicKey },
+      options.vaultPassphrase
+    );
     this.userPubkey = kp.publicKey;
     this.userPrivkey = kp.privateKey;
     return { pubkey: kp.publicKey };
   }
 
-  async importIdentity(privkeyHex: string): Promise<{ pubkey: string }> {
+  async importIdentity(
+    privkeyHex: string,
+    options: IdentityPersistenceOptions = {}
+  ): Promise<{ pubkey: string }> {
     const { derivePublicKey } = await import('opendating-protocol');
     const pubkey = derivePublicKey(privkeyHex);
-    await SecureStore.setItemAsync(SECURE_STORE_PRIVKEY_KEY, privkeyHex);
-    await SecureStore.setItemAsync(SECURE_STORE_PUBKEY_KEY, pubkey);
+    await identityVault.save(
+      { privkey: privkeyHex, pubkey },
+      options.vaultPassphrase
+    );
     this.userPubkey = pubkey;
     this.userPrivkey = privkeyHex;
     return { pubkey };
   }
 
+  async unlockIdentity(vaultPassphrase: string): Promise<{ pubkey: string }> {
+    const identity = await identityVault.unlock(vaultPassphrase);
+    this.userPubkey = identity.pubkey;
+    this.userPrivkey = identity.privkey;
+    return { pubkey: identity.pubkey };
+  }
+
   async loadIdentity(): Promise<{ pubkey: string; privkey: string } | null> {
-    const pubkey = await SecureStore.getItemAsync(SECURE_STORE_PUBKEY_KEY);
-    const privkey = await SecureStore.getItemAsync(SECURE_STORE_PRIVKEY_KEY);
-    if (!pubkey || !privkey) return null;
-    this.userPubkey = pubkey;
-    this.userPrivkey = privkey;
-    return { pubkey, privkey };
+    const identity = await identityVault.load();
+    if (!identity) return null;
+    this.userPubkey = identity.pubkey;
+    this.userPrivkey = identity.privkey;
+    return identity;
   }
 
   async deleteIdentity(): Promise<void> {
-    await SecureStore.deleteItemAsync(SECURE_STORE_PRIVKEY_KEY);
-    await SecureStore.deleteItemAsync(SECURE_STORE_PUBKEY_KEY);
+    await identityVault.clear();
     this.userPubkey = '';
     this.userPrivkey = '';
-    this.bufferedMessages = [];
+    this.messageHistory = [];
+  }
+
+  async lockIdentity(): Promise<void> {
+    await this.disconnect();
+    await identityVault.lock();
+    this.userPubkey = '';
+    this.userPrivkey = '';
+    this.messageHistory = [];
   }
 
   // ---- Connection ----
@@ -319,7 +349,7 @@ class OpenDatingClientImpl {
     }
     this.pendingRequests.clear();
     this.seenRumorIds.clear();
-    this.bufferedMessages = [];
+    this.messageHistory = [];
 
     // NDK manages relay connections via its pool; no explicit disconnect() method.
     // Just drop the reference and let GC handle cleanup.
@@ -368,10 +398,7 @@ class OpenDatingClientImpl {
 
       // Cache services
       try {
-        await SecureStore.setItemAsync(
-          SERVICES_CACHE_KEY,
-          JSON.stringify(this.capabilities)
-        );
+        await storage.saveServicesCache(this.capabilities);
       } catch {
         // Non-critical
       }
@@ -380,9 +407,8 @@ class OpenDatingClientImpl {
     } catch (err) {
       // Try cached services
       try {
-        const cached = await SecureStore.getItemAsync(SERVICES_CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached) as OpenDatingCapabilities;
+        const parsed = await storage.getServicesCache<OpenDatingCapabilities>();
+        if (parsed) {
           this.capabilities = parsed;
           this.services = parsed.roles;
           return parsed;
@@ -636,13 +662,9 @@ class OpenDatingClientImpl {
       outgoing,
     };
 
-    if (this.messageListeners.size === 0) {
-      this.bufferedMessages.push(msg);
-      if (this.bufferedMessages.length > 100) this.bufferedMessages.shift();
-    } else {
-      for (const listener of this.messageListeners) {
-        listener(msg);
-      }
+    rememberMessage(this.messageHistory, msg);
+    for (const listener of this.messageListeners) {
+      listener(msg);
     }
     return true;
   }
@@ -864,9 +886,7 @@ class OpenDatingClientImpl {
 
   subscribeToMessages(callback: (msg: ODMessage) => void): () => void {
     this.messageListeners.add(callback);
-    const buffered = this.bufferedMessages;
-    this.bufferedMessages = [];
-    for (const message of buffered) callback(message);
+    for (const message of this.messageHistory) callback(message);
     // The inbox subscription is opened on connect and shared by every
     // listener, so attaching here never opens a second relay subscription.
     this.startInboxSubscription();

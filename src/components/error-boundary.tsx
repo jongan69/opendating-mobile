@@ -4,9 +4,13 @@
 // Wraps the root layout so any uncaught render error anywhere in the tree
 // is contained here.
 
-import React from 'react';
-import { Pressable, StyleSheet, Text, View, useColorScheme } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Constants from 'expo-constants';
+import * as Clipboard from 'expo-clipboard';
+import { randomUUID } from 'expo-crypto';
+import { buildCrashDiagnostic, type SafeBuildContext } from '@/lib/feedback';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
@@ -62,6 +66,14 @@ function ErrorScreen({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const c = isDark ? colors.dark : colors.light;
+  const [diagnostic, setDiagnostic] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const context = useMemo<SafeBuildContext>(() => ({
+    appVersion: Constants.expoConfig?.version ?? 'unknown',
+    build: String(Platform.OS === 'ios' ? Constants.expoConfig?.ios?.buildNumber ?? 'unknown' : Constants.expoConfig?.android?.versionCode ?? 'web'),
+    platform: Platform.OS,
+    osVersion: String(Platform.Version),
+  }), []);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.background }]}>
@@ -90,6 +102,29 @@ function ErrorScreen({
         >
           <Text style={styles.buttonText}>Try Again</Text>
         </Pressable>
+        {!diagnostic ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setDiagnostic(buildCrashDiagnostic(context, randomUUID()))}
+            style={styles.linkButton}
+          >
+            <Text style={[typography.labelMedium, { color: c.accent }]}>Preview diagnostic report</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.diagnosticGroup}>
+            <Text style={[typography.caption, styles.diagnosticCopy, { color: c.textSecondary }]}>
+              This contains only version, build, platform, timestamp, and a generic error ID. It does not include the error, logs, routes, location, messages, files, or account data.
+            </Text>
+            <Text selectable style={[typography.caption, styles.diagnostic, { color: c.text, backgroundColor: c.surface }]}>{diagnostic}</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void Clipboard.setStringAsync(diagnostic).then(() => setCopied(true))}
+              style={[styles.diagnosticButton, { borderColor: c.border }]}
+            >
+              <Text style={[typography.labelMedium, { color: c.accent }]}>{copied ? 'Copied' : 'Copy diagnostic report'}</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -136,5 +171,27 @@ const styles = StyleSheet.create({
   buttonText: {
     ...typography.button,
     color: '#FFFFFF',
+  },
+  linkButton: {
+    padding: spacing.sm,
+  },
+  diagnosticGroup: {
+    width: '100%',
+    maxWidth: 520,
+    gap: spacing.sm,
+  },
+  diagnosticCopy: {
+    textAlign: 'center',
+  },
+  diagnostic: {
+    padding: spacing.md,
+    borderRadius: radius.md,
+  },
+  diagnosticButton: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

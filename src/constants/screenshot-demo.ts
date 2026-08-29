@@ -1,18 +1,20 @@
-import { Image as RNImage, type ImageSourcePropType } from 'react-native';
+import { Asset } from 'expo-asset';
 import type { Candidate, CandidatePhoto, Match, ProfileContent } from '@/types/opendating';
 
+type AssetModule = Parameters<typeof Asset.fromModule>[0];
+
 const PHOTO_SOURCES = {
-  alex: require('../../assets/demo/alex.png') as ImageSourcePropType,
-  emma: require('../../assets/demo/emma.png') as ImageSourcePropType,
-  marcus: require('../../assets/demo/marcus.png') as ImageSourcePropType,
-  jordan: require('../../assets/demo/jordan.png') as ImageSourcePropType,
+  alex: require('../../assets/demo/alex.png') as AssetModule,
+  emma: require('../../assets/demo/emma.png') as AssetModule,
+  marcus: require('../../assets/demo/marcus.png') as AssetModule,
+  jordan: require('../../assets/demo/jordan.png') as AssetModule,
 };
 
-function photo(id: string, source: ImageSourcePropType, order = 0): CandidatePhoto {
+function photo(id: string, source: AssetModule, order = 0): CandidatePhoto {
   return {
     id,
     order,
-    url: RNImage.resolveAssetSource(source).uri,
+    url: Asset.fromModule(source).uri,
   };
 }
 

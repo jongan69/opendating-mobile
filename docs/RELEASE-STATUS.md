@@ -2,6 +2,20 @@
 
 **Status: proposed launch candidate.** OpenDating Mobile 0.1.1 is a proposed iOS App Store and Google Play release. Launch approval is not effective until Phase 0 release-containment gates pass and `release/manifest.json` records the reviewed source SHA, artifact IDs, build numbers, and checksums.
 
+Apple rejected the previous submission under Guideline 4.3(b). Fresh production
+build 0.1.1 (5), built from `c505b83a11b986bb29879c178327460f187ec370`,
+is valid in App Store Connect and attached to the editable 0.1.1 version. It is
+waiting for App Review in submission
+`278e4366-f6a6-4f02-a7a7-2fcce7980f42`, submitted on August 29, 2026.
+Replacement screenshots, physical-device recording, purchase/restore proof,
+and the evidence in `docs/GUIDELINE-4.3B-RESPONSE.md` remain required before
+the repository can record launch approval.
+
+The stale rejected review submission is canceled. `asc review doctor` reports
+no public-API blocking checks; the IAP review image and the initial-version
+release-note warning remain, along with website-only Regulations and Permits
+declarations.
+
 ## Verified in this release
 
 - One-at-a-time private introductions and candidate-profile navigation are implemented.
@@ -13,6 +27,8 @@
 - Early direct messages are buffered during bootstrap and in-memory replay tracking is bounded.
 - Typecheck, lint, unit tests, protocol conformance tests, dependency review, production audit exceptions, and release-manifest validation are CI gates.
 - Both repositories protect `main`; GitHub staging environments are protected-branch-only and production environments require `jongan69` approval.
+- The production web app and Cloudflare Worker respond successfully over HTTPS, and the web export includes the restrictive CSP.
+- RevenueCat project `proj3363ecdc` contains the App Store product, `plus` entitlement, current `default` offering, and `$rc_lifetime` package used by build 5.
 
 ## Tracked for follow-up releases
 
@@ -23,6 +39,7 @@ These are post-launch engineering priorities, not launch gates:
 3. Enforce global blocks and active-match authorization before any inbound DM reaches UI state.
 4. Add push delivery, liveness/age verification, profile moderation, appeals, and staffed trust-and-safety operations.
 5. Resolve or renew the time-limited SDK dependency exceptions in `security/audit-exceptions.json`.
+6. Validate RevenueCat purchase, restore, revocation, identity changes, reinstall, and offline behavior on a physical iOS device.
 
 ## Release mechanics
 

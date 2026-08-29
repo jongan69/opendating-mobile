@@ -63,3 +63,6 @@ coverage/
 *.tmp
 screenshots/*.png
 screenshots/app-store/
+
+# Local brand source exports; app-ready assets live under assets/brand.
+/BrandAssetPack/animations/

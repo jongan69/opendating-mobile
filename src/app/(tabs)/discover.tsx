@@ -5,7 +5,7 @@
 // privacy guarantees as before; only the member-facing interaction changes.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
@@ -81,7 +81,10 @@ export default function IntroductionsScreen() {
       const name = candidate?.profile.display_name?.trim() || 'your introduction';
       Alert.alert('Mutual interest', `You and ${name} chose each other. Your private chat is now open.`, [
         { text: 'Later', style: 'cancel' },
-        { text: 'Say hello', onPress: () => router.push(`/chat/${pubkey}`) },
+        {
+          text: 'Say hello',
+          onPress: () => router.push({ pathname: '/chat', params: { pubkey } }),
+        },
       ]);
     },
     [router]
@@ -93,7 +96,9 @@ export default function IntroductionsScreen() {
       interestPendingRef.current = true;
       setInterestPending(true);
       try {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (Platform.OS !== 'web') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        }
         const matched = await like(pubkey, grant);
         if (matched) presentMatch(pubkey);
       } finally {
@@ -106,14 +111,15 @@ export default function IntroductionsScreen() {
 
   const handleSkip = useCallback(
     (pubkey: string) => {
-      Haptics.selectionAsync().catch(() => {});
+      if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
       pass(pubkey);
     },
     [pass]
   );
 
   const handleOpenCandidate = useCallback(
-    (candidate: Candidate) => router.push(`/candidate/${candidate.pubkey}`),
+    (candidate: Candidate) =>
+      router.push({ pathname: '/candidate', params: { pubkey: candidate.pubkey } }),
     [router]
   );
 
@@ -137,6 +143,7 @@ export default function IntroductionsScreen() {
     !isScreenshotMode && !!error && candidates.length === 0 && !loading;
   const showErrorBanner =
     !isScreenshotMode && !!error && candidates.length > 0;
+  const needsArea = error?.toLowerCase().includes('area') ?? false;
   const outOfInterests = loaded && !unavailable && remainingToday === 0;
 
   return (
@@ -190,7 +197,14 @@ export default function IntroductionsScreen() {
             icon={unavailable ? '🌱' : '📡'}
             title={unavailable ? 'Introductions are coming online' : "Couldn't load introductions"}
             subtitle={error}
-            action={{ label: 'Check again', onPress: () => void fetchCandidates() }}
+            action={
+              needsArea
+                ? {
+                    label: 'Set my approximate area',
+                    onPress: () => router.push('/(onboarding)/location?mode=update'),
+                  }
+                : { label: 'Check again', onPress: () => void fetchCandidates() }
+            }
           />
         </View>
       ) : currentCandidate ? (

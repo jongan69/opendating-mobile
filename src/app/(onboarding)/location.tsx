@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ErrorBanner,
   OnboardingScreen,
@@ -12,6 +12,7 @@ import {
 import { useOnboardingDraft } from '@/features/onboarding/onboarding-draft';
 import { isScreenshotMode } from '@/constants/env';
 import { getCoarseLocation } from '@/lib/location';
+import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
@@ -25,6 +26,8 @@ interface CoarseArea {
 
 export default function LocationScreen() {
   const router = useRouter();
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const isUpdate = mode === 'update';
   const { colors } = useTheme();
   const { draft, update } = useOnboardingDraft();
 
@@ -47,6 +50,12 @@ export default function LocationScreen() {
       setArea(coarse);
       update('geohashPrefix', coarse.geohashPrefix);
       update('countryCode', coarse.countryCode ?? null);
+      if (isUpdate) {
+        await getOpenDatingClient().updateLocation(
+          coarse.geohashPrefix,
+          coarse.countryCode
+        );
+      }
     } catch (err) {
       setError(
         err instanceof Error
@@ -59,7 +68,8 @@ export default function LocationScreen() {
   };
 
   const handleContinue = () => {
-    router.push('/(onboarding)/review');
+    if (isUpdate) router.back();
+    else router.push('/(onboarding)/review');
   };
 
   return (
@@ -78,7 +88,7 @@ export default function LocationScreen() {
           style={styles.skip}
         >
           <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
-            {area ? 'Continue' : 'Not now — skip for later'}
+            {isUpdate ? 'Done' : area ? 'Continue' : 'Not now — skip for later'}
           </Text>
         </Pressable>
       }
@@ -122,8 +132,8 @@ export default function LocationScreen() {
       ) : null}
 
       <Text style={[typography.caption, { color: colors.textTertiary }]}>
-        You can skip this and enable location later from Settings — without it,
-        you'll only see people worldwide.
+        You can skip this and set an area later from your Privacy Passport. An
+        approximate area is required before OpenDating can offer introductions.
       </Text>
     </OnboardingScreen>
   );

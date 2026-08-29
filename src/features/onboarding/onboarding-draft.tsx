@@ -19,7 +19,10 @@ import React, {
 } from 'react';
 import { isScreenshotMode } from '@/constants/env';
 import { storage } from '@/lib/storage';
-import { CURRENT_POLICY_VERSION, type PolicyAcceptance } from '@/lib/policy';
+import {
+  CURRENT_POLICY_VERSION,
+  type PolicyAcceptance,
+} from '@/lib/policy';
 
 // ---- Option lists ----
 // Re-exported from the canonical source so the onboarding pickers, the profile
@@ -96,7 +99,7 @@ const DEMO_DRAFT: OnboardingDraft = {
   countryCode: 'US',
   policyAcceptance: {
     version: CURRENT_POLICY_VERSION,
-    acceptedAt: '2026-08-09T00:00:00.000Z',
+    acceptedAt: '2026-08-29T00:00:00.000Z',
   },
 };
 
@@ -139,6 +142,7 @@ export function OnboardingDraftProvider({
   children: React.ReactNode;
 }) {
   const [draft, setDraft] = useState<OnboardingDraft>(DEFAULT_DRAFT);
+  const [hydrated, setHydrated] = useState(isScreenshotMode);
 
   // Rehydrate anything from a previous run. Onboarding is eleven steps; losing
   // it to a reload, a backgrounded app, or an OS memory kill left the member
@@ -158,6 +162,9 @@ export function OnboardingDraftProvider({
       })
       .catch(() => {
         // A corrupt draft must not block onboarding — start fresh instead.
+      })
+      .finally(() => {
+        if (active) setHydrated(true);
       });
     return () => {
       active = false;
@@ -186,7 +193,7 @@ export function OnboardingDraftProvider({
 
   return (
     <OnboardingDraftContext.Provider value={api}>
-      {children}
+      {hydrated ? children : null}
     </OnboardingDraftContext.Provider>
   );
 }

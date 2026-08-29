@@ -1,6 +1,7 @@
 // Local storage abstraction.
 // Uses expo-secure-store for sensitive data, AsyncStorage for cache only.
-// NEVER stores: nsec, private keys, decrypted messages, raw GPS.
+// Identity is owned by identity-vault.ts. This module never stores decrypted
+// messages or raw GPS.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
@@ -49,36 +50,18 @@ async function secureDelete(key: string): Promise<void> {
 // ---- Public API ----
 
 const STORAGE_KEYS = {
-  IDENTITY_PRIVKEY: 'opendating_privkey',
-  IDENTITY_PUBKEY: 'opendating_pubkey',
   SERVICES_CACHE: 'opendating_services',
   LOCATION_PREFIX: 'opendating_location_prefix',
   ONBOARDING_COMPLETE: 'opendating_onboarding_done',
   THEME_PREFERENCE: 'opendating_theme',
+  ACCENT_PREFERENCE: 'opendating_accent',
   PROFILE_CONTENT: 'opendating_profile_content',
   ONBOARDING_DRAFT: 'opendating_onboarding_draft',
   POLICY_ACCEPTANCE: 'opendating_policy_acceptance',
+  DISCOVERY_PREFERENCES: 'opendating_discovery_preferences',
 } as const;
 
 export const storage = {
-  // Identity (secure)
-  async savePrivateKey(key: string): Promise<void> {
-    await secureSet(STORAGE_KEYS.IDENTITY_PRIVKEY, key);
-  },
-  async getPrivateKey(): Promise<string | null> {
-    return secureGet(STORAGE_KEYS.IDENTITY_PRIVKEY);
-  },
-  async savePublicKey(key: string): Promise<void> {
-    await secureSet(STORAGE_KEYS.IDENTITY_PUBKEY, key);
-  },
-  async getPublicKey(): Promise<string | null> {
-    return secureGet(STORAGE_KEYS.IDENTITY_PUBKEY);
-  },
-  async deleteIdentity(): Promise<void> {
-    await secureDelete(STORAGE_KEYS.IDENTITY_PRIVKEY);
-    await secureDelete(STORAGE_KEYS.IDENTITY_PUBKEY);
-  },
-
   // Services cache
   async saveServicesCache(data: object): Promise<void> {
     await secureSet(STORAGE_KEYS.SERVICES_CACHE, JSON.stringify(data));
@@ -183,6 +166,30 @@ export const storage = {
     const val = await secureGet(STORAGE_KEYS.THEME_PREFERENCE);
     if (val === 'light' || val === 'dark' || val === 'system') return val;
     return null;
+  },
+  async saveAccentPreference(accent: 'coral' | 'sage' | 'ocean' | 'plum'): Promise<void> {
+    await secureSet(STORAGE_KEYS.ACCENT_PREFERENCE, accent);
+  },
+  async getAccentPreference(): Promise<'coral' | 'sage' | 'ocean' | 'plum' | null> {
+    const value = await secureGet(STORAGE_KEYS.ACCENT_PREFERENCE);
+    return value === 'coral' || value === 'sage' || value === 'ocean' || value === 'plum'
+      ? value
+      : null;
+  },
+
+  async saveDiscoveryPreferences(preferences: object): Promise<void> {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.DISCOVERY_PREFERENCES,
+      JSON.stringify(preferences)
+    );
+  },
+  async getDiscoveryPreferences<T>(): Promise<T | null> {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.DISCOVERY_PREFERENCES);
+      return raw ? (JSON.parse(raw) as T) : null;
+    } catch {
+      return null;
+    }
   },
 
   // Clear all app data

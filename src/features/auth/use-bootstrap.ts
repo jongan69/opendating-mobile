@@ -41,10 +41,14 @@ export function useBootstrap(): BootstrapResult {
 
       // Step 1: Check identity
       setAppState('loading');
-      const hasId = await client.hasIdentity();
+      const identityState = await client.getIdentityState();
 
-      if (!hasId) {
+      if (identityState === 'missing') {
         setAppState('no_identity');
+        return;
+      }
+      if (identityState === 'locked') {
+        setAppState('identity_locked');
         return;
       }
 

@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
@@ -34,6 +34,12 @@ export default function MatchesScreen() {
   const { matches, newMatches, loading, error, refresh, markMessaged } = useMatches();
   const conversationLog = useConversationLog();
 
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
+
   const screenshotMatches = useMemo(() => getScreenshotMatches(), []);
   const displayMatches = isScreenshotMode ? screenshotMatches : matches;
   const displayNewMatches = isScreenshotMode ? screenshotMatches : newMatches;
@@ -44,6 +50,7 @@ export default function MatchesScreen() {
   // reach intent.like because the server rejects it.
   useEffect(() => {
     for (const match of displayMatches) {
+      if (!match.profile) continue;
       cacheCandidate({
         pubkey: match.pubkey,
         profile: match.profile,
@@ -57,7 +64,7 @@ export default function MatchesScreen() {
     (match: Match) => {
       markMessaged(match.match_id);
       markConversationRead(match.pubkey);
-      router.push(`/chat/${match.pubkey}`);
+      router.push({ pathname: '/chat', params: { pubkey: match.pubkey } });
     },
     [markMessaged, router]
   );
@@ -329,7 +336,7 @@ interface AvatarProps {
 
 function Avatar({ match, size, ring = false, ringColor }: AvatarProps) {
   const { colors } = useTheme();
-  const photoUrl = match.profile.photos?.find((p) => p.url.length > 0)?.url;
+  const photoUrl = match.profile?.photos?.find((p) => p.url.length > 0)?.url;
 
   return (
     <View
@@ -366,7 +373,7 @@ function Avatar({ match, size, ring = false, ringColor }: AvatarProps) {
 }
 
 function displayNameOf(match: Match): string {
-  return match.profile.display_name?.trim() || shortPubkey(match.pubkey, 6, 4);
+  return match.profile?.display_name?.trim() || shortPubkey(match.pubkey, 6, 4);
 }
 
 function firstNameOf(match: Match): string {

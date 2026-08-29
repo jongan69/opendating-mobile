@@ -44,7 +44,6 @@ export interface DiscoveryPreferences {
   max_age?: number;
   intent?: string;
   genders?: string[];
-  relationship_intents?: string[];
 }
 
 export interface CandidateQuery {
@@ -107,7 +106,7 @@ export interface LikeResult {
 export interface Match {
   match_id: string;
   pubkey: string;
-  profile: CandidateProfile;
+  profile?: CandidateProfile;
   distance_bucket?: string;
   created_at: number;
 }
@@ -248,6 +247,7 @@ export type ConnectionState =
 export type AppBootstrapState =
   | 'loading'
   | 'no_identity'
+  | 'identity_locked'
   | 'connecting'
   | 'authenticating'
   | 'fetching_capabilities'

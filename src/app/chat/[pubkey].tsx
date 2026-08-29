@@ -1,6 +1,6 @@
 // Chat screen — NIP-17 encrypted messaging with safety controls.
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   ActionSheetIOS,
   Alert,
@@ -22,6 +22,7 @@ import { useSafety } from '@/features/safety/use-safety';
 import { useCachedCandidate } from '@/features/discovery/candidate-cache';
 import { MessageList } from '@/components/chat/message-list';
 import { ChatComposer } from '@/components/chat/chat-composer';
+import { SafetyMenu, type SafetyMenuHandle } from '@/components/safety/safety-menu';
 import { shortPubkey } from '@/lib/format';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
@@ -33,12 +34,18 @@ export default function ChatScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { messages, sendMessage, error } = useMessaging(pubkey);
-  const { blockUser, unmatchUser } = useSafety();
+  const { blockUser, unmatchUser, error: safetyError } = useSafety();
+  const safetyRef = useRef<SafetyMenuHandle>(null);
 
   const candidate = useCachedCandidate(pubkey);
   const displayName =
     candidate?.profile.display_name?.trim() || (pubkey ? shortPubkey(pubkey) : 'Chat');
   const photoUrl = candidate?.profile.photos?.find((p) => p.url.length > 0)?.url;
+  const evidenceEventIds = messages
+    .filter((message) => !message.pending)
+    .slice(-5)
+    .map((message) => message.id)
+    .join(',');
 
   // Opening the conversation clears its badge; new arrivals while it is open
   // are already visible, so they must not re-raise it either.
@@ -52,40 +59,63 @@ export default function ChatScreen() {
   }, [router]);
 
   const openProfile = useCallback(() => {
-    router.push(`/candidate/${pubkey}`);
+    router.push({ pathname: '/candidate', params: { pubkey } });
   }, [router, pubkey]);
 
   const openReport = useCallback(() => {
-    router.push({ pathname: '/report', params: { pubkey, name: displayName } });
-  }, [router, pubkey, displayName]);
+    router.push({
+      pathname: '/report',
+      params: {
+        pubkey,
+        name: displayName,
+        ...(evidenceEventIds ? { evidence_event_ids: evidenceEventIds } : {}),
+      },
+    });
+  }, [router, pubkey, displayName, evidenceEventIds]);
 
   const confirmUnmatch = useCallback(() => {
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm("Unmatch? You'll both disappear from each other's matches.")) {
+        void unmatchUser(pubkey).then(goBack).catch(() => {});
+      }
+      return;
+    }
     Alert.alert('Unmatch?', "You'll both disappear from each other's matches.", [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Unmatch',
         style: 'destructive',
         onPress: () => {
-          void unmatchUser(pubkey).then(goBack);
+          void unmatchUser(pubkey).then(goBack).catch(() => {});
         },
       },
     ]);
   }, [pubkey, unmatchUser, goBack]);
 
   const confirmBlock = useCallback(() => {
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm("Block? They won't be able to message you or see you in discovery.")) {
+        void blockUser(pubkey).then(goBack).catch(() => {});
+      }
+      return;
+    }
     Alert.alert('Block?', "They won't be able to message you or see you in discovery.", [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Block',
         style: 'destructive',
         onPress: () => {
-          void blockUser(pubkey).then(goBack);
+          void blockUser(pubkey).then(goBack).catch(() => {});
         },
       },
     ]);
   }, [pubkey, blockUser, goBack]);
 
   const openSafetyMenu = useCallback(() => {
+    if (Platform.OS === 'web') {
+      safetyRef.current?.present();
+      return;
+    }
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
@@ -193,9 +223,11 @@ export default function ChatScreen() {
             all at once. */}
         <MessageList messages={messages} />
 
-        {error ? (
+        {error || safetyError ? (
           <View style={[styles.errorBar, { backgroundColor: colors.destructiveLight }]}>
-            <Text style={[typography.caption, { color: colors.destructive }]}>{error}</Text>
+            <Text style={[typography.caption, { color: colors.destructive }]}>
+              {error || safetyError}
+            </Text>
           </View>
         ) : null}
 
@@ -203,6 +235,14 @@ export default function ChatScreen() {
           <ChatComposer onSend={handleSend} />
         </View>
       </KeyboardAvoidingView>
+      <SafetyMenu
+        ref={safetyRef}
+        targetPubkey={pubkey}
+        targetName={displayName}
+        evidenceEventIds={evidenceEventIds}
+        onUnmatch={() => void unmatchUser(pubkey).then(goBack).catch(() => {})}
+        onBlock={() => void blockUser(pubkey).then(goBack).catch(() => {})}
+      />
     </SafeAreaView>
   );
 }

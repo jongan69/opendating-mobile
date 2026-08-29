@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { radius } from '@/theme/radius';
 import {
   applyDiscoveryPreferences,
   getDiscoveryPreferences,
+  hydrateDiscoveryPreferences,
   kmToMiles,
   resetDiscoveryPreferences,
 } from '@/features/discovery/discovery-preferences';
@@ -29,9 +30,9 @@ export default function FiltersScreen() {
     const saved = getDiscoveryPreferences();
     return saved.genders ?? [];
   });
-  const [intents, setIntents] = useState<string[]>(() => {
+  const [intent, setIntent] = useState<string | undefined>(() => {
     const saved = getDiscoveryPreferences();
-    return saved.relationship_intents ?? [];
+    return saved.intent;
   });
   const [minAge, setMinAge] = useState(() => {
     const saved = getDiscoveryPreferences();
@@ -50,9 +51,15 @@ export default function FiltersScreen() {
     setGenders((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]));
   };
 
-  const toggleIntent = (i: string) => {
-    setIntents((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]));
-  };
+  useEffect(() => {
+    void hydrateDiscoveryPreferences().then((saved) => {
+      setGenders(saved.genders ?? []);
+      setIntent(saved.intent);
+      setMinAge(saved.min_age ?? 18);
+      setMaxAge(saved.max_age != null ? Math.min(saved.max_age, 80) : 55);
+      setDistance(saved.max_distance_km != null ? kmToMiles(saved.max_distance_km) : 25);
+    });
+  }, []);
 
   // Apply persists the filters (local store + server, best-effort), then
   // closes the sheet.
@@ -62,14 +69,14 @@ export default function FiltersScreen() {
       max_age: maxAge,
       max_distance_km: Math.round(distance * KM_PER_MILE),
       genders: genders.length > 0 ? genders : undefined,
-      relationship_intents: intents.length > 0 ? intents : undefined,
+      intent,
     });
     router.back();
   };
 
   const handleReset = async () => {
     setGenders([]);
-    setIntents([]);
+    setIntent(undefined);
     setMinAge(18);
     setMaxAge(55);
     setDistance(25);
@@ -191,16 +198,16 @@ export default function FiltersScreen() {
           {INTENT_OPTIONS.map((option) => (
             <Pressable
               key={option.value}
-              onPress={() => toggleIntent(option.value)}
+              onPress={() => setIntent((value) => (value === option.value ? undefined : option.value))}
               style={[
                 styles.chip,
                 {
-                  backgroundColor: intents.includes(option.value) ? colors.accent : colors.surface,
-                  borderColor: intents.includes(option.value) ? colors.accent : colors.border,
+                  backgroundColor: intent === option.value ? colors.accent : colors.surface,
+                  borderColor: intent === option.value ? colors.accent : colors.border,
                 },
               ]}
             >
-              <Text style={[typography.labelMedium, { color: intents.includes(option.value) ? colors.textInverse : colors.text }]}>
+              <Text style={[typography.labelMedium, { color: intent === option.value ? colors.textInverse : colors.text }]}>
                 {option.label}
               </Text>
             </Pressable>

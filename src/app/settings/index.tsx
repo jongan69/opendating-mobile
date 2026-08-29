@@ -1,18 +1,21 @@
 // Settings — grouped menu with account, discovery, about, and danger sections.
 
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useRouter, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { useTheme } from '@/state/theme-context';
+import { useRevenueCat } from '@/state/revenuecat-context';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { ChevronRight } from '@/components/chevron';
+import { ConfirmationDialog } from '@/components/confirmation-dialog';
+import { POLICY_EFFECTIVE_LABEL } from '@/lib/policy';
 
 interface MenuRowProps {
   label: string;
@@ -77,12 +80,14 @@ function SectionHeader({ children }: { children: string }) {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, themePreference, setThemePreference } = useTheme();
+  const revenueCat = useRevenueCat();
 
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [paused, setPaused] = useState(false);
   const [visibility, setVisibility] = useState('visible');
   const [pausing, setPausing] = useState(false);
+  const [pendingVisibility, setPendingVisibility] = useState<string | null>(null);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -145,6 +150,11 @@ export default function SettingsScreen() {
   );
 
   const changeVisibility = useCallback(() => {
+    if (Platform.OS === 'web') {
+      const next = visibility === 'hidden' ? 'visible' : 'hidden';
+      setPendingVisibility(next);
+      return;
+    }
     Alert.alert(
       'Visibility',
       'Choose who can see your profile in discovery.',
@@ -160,9 +170,18 @@ export default function SettingsScreen() {
         },
       ]
     );
-  }, [updateVisibility]);
+  }, [updateVisibility, visibility]);
 
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+  const cycleTheme = useCallback(() => {
+    setThemePreference(
+      themePreference === 'system'
+        ? 'light'
+        : themePreference === 'light'
+          ? 'dark'
+          : 'system'
+    );
+  }, [setThemePreference, themePreference]);
 
   return (
     <SafeAreaView
@@ -170,7 +189,7 @@ export default function SettingsScreen() {
       edges={['left', 'right', 'bottom']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Account */}
           <SectionHeader>Account</SectionHeader>
           <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -192,6 +211,21 @@ export default function SettingsScreen() {
               onPress={() => router.push('/settings/privacy')}
             />
           </View>
+
+          {revenueCat.enabled ? (
+            <>
+              <SectionHeader>Plus</SectionHeader>
+              <View
+                style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              >
+                <MenuRow
+                  label={revenueCat.isPlus ? 'OpenDating Plus · Active' : 'OpenDating Plus'}
+                  supportingText="Customization and convenience, never ranking"
+                  onPress={() => router.push('/settings/plus' as Href)}
+                />
+              </View>
+            </>
+          ) : null}
 
           {/* Discovery */}
           <SectionHeader>Discovery</SectionHeader>
@@ -227,14 +261,26 @@ export default function SettingsScreen() {
           <SectionHeader>About</SectionHeader>
           <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <MenuRow
+              label="Theme"
+              supportingText={`${themePreference.charAt(0).toUpperCase()}${themePreference.slice(1)} · Tap to change`}
+              onPress={cycleTheme}
+            />
+            <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+            <MenuRow
               label="Privacy Policy"
               onPress={() => router.push('/settings/privacy')}
             />
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />
             <MenuRow
               label="Terms of Service"
-              supportingText="Effective August 9, 2026"
+              supportingText={`Effective ${POLICY_EFFECTIVE_LABEL}`}
               onPress={() => router.push('/settings/terms')}
+            />
+            <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+            <MenuRow
+              label="Report a Problem"
+              supportingText="Preview a privacy-safe report"
+              onPress={() => router.push('/settings/report-problem')}
             />
           </View>
 
@@ -253,7 +299,20 @@ export default function SettingsScreen() {
           <Text style={[typography.caption, styles.version, { color: colors.textTertiary }]}>
             OpenDating v{appVersion}
           </Text>
-        </View>
+        </ScrollView>
+      <ConfirmationDialog
+        visible={pendingVisibility !== null}
+        title="Change profile visibility?"
+        message={`Make your profile ${pendingVisibility ?? 'visible'} in discovery?`}
+        confirmLabel={pendingVisibility === 'hidden' ? 'Hide profile' : 'Make visible'}
+        destructive={pendingVisibility === 'hidden'}
+        onCancel={() => setPendingVisibility(null)}
+        onConfirm={() => {
+          const next = pendingVisibility;
+          setPendingVisibility(null);
+          if (next) void updateVisibility(next);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -263,7 +322,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.lg,
     paddingTop: spacing.md,
   },

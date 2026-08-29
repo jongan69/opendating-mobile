@@ -4,7 +4,7 @@ Copy the **Reviewer Notes** block at the bottom into the Notes field of the App
 Review Information section in App Store Connect. The rest of this document is
 the working source for that block.
 
-**Last updated:** 2026-08-09 · **App version:** 0.1.1
+**Last updated:** 2026-08-29 · **App version:** 0.1.1
 
 ---
 
@@ -17,8 +17,9 @@ beginning with app launch, showing the typical user flow. Must include account
 registration, login, and deletion; user-generated content with reporting and
 blocking; and every permission prompt.
 
-There is no paid content, purchase, or subscription flow in this app, so that
-section does not apply. Say so explicitly in the reply rather than omitting it.
+Show the optional one-time OpenDating Plus purchase, selecting a custom accent,
+and Restore Purchases. The recording must use an Apple sandbox account and must
+not show credentials or payment details.
 
 ## 2. Devices and operating systems tested
 
@@ -100,12 +101,12 @@ review region.
 |---|---|---|
 | OpenDating relay (Cloudflare Workers) | Sole backend. Profile storage, discovery matching, match/like routing, encrypted message transport, reports, blocks, account deletion. | Operated by the developer at `wss://opendating-relay.jonathang132298.workers.dev`. Service endpoints are discovered at runtime from the relay's public service document. |
 | Cloudflare Workers AI | Automated safety screening for profile display names and bios before publication. | The developer-operated relay sends this profile text to Cloudflare's `@cf/meta/llama-3.2-3b-instruct` model. Photos are not sent, and it does not process encrypted messages. Disclosed in-app on the onboarding privacy screen and at Settings → Privacy. |
+| RevenueCat | Optional one-time OpenDating Plus purchase and entitlement status. | Receives an opaque, domain-separated billing identifier and Apple purchase/entitlement data. It does not receive profile text, photos, location, recovery keys, likes, matches, reports, or messages. |
 | Expo Application Services (EAS) | Build and submission tooling only. | Build-time only. Not contacted by the shipped app at runtime. |
 
-**Not used:** no payment processor, no in-app purchases or subscriptions, no
-advertising SDK, no third-party analytics or crash reporting, no third-party
-authentication provider, no data broker, and no App Tracking Transparency
-prompt (the app does not track).
+**Not used:** no subscriptions, advertising SDK, third-party analytics or crash
+reporting, third-party authentication provider, data broker, or App Tracking
+Transparency prompt (the app does not track).
 
 The app's privacy manifest declares `NSPrivacyTracking: false` with no tracking
 domains.
@@ -113,8 +114,8 @@ domains.
 ## 6. Regional differences
 
 **The app functions identically in all regions.** There is no region-locked
-content, no country-specific feature gating, no regional pricing (the app is
-free everywhere), and no geographic availability restriction in the app itself.
+content or country-specific feature gating. The app is free; Apple localizes the
+optional one-time Plus price by storefront.
 
 A country code derived from the user's coarse location is used only to scope
 discovery to a sensible area. It does not enable or disable features.
@@ -135,7 +136,7 @@ enforced at a minimum of 18, and the App Store age rating is set to 17+.
 **User-generated content controls,** as required by Guideline 1.2:
 - Terms of Service and Community Standards are shown during onboarding and at
   Settings → Terms. Profile creation is disabled until the member explicitly
-  accepts the August 9, 2026 policy version; version and acceptance time are
+  accepts the August 29, 2026 policy version; version and acceptance time are
   recorded locally for the account.
 - Any profile can be reported from the profile screen or from a chat.
 - Any user can be blocked; blocks take effect immediately on-device and are
@@ -154,8 +155,8 @@ SCREEN RECORDING
 A physical-device recording on the latest iPadOS is attached to the App Review
 reply. It begins with app launch and shows account access and registration,
 policy consent, permission prompts, discovery, reporting, blocking, matching,
-encrypted messaging, and account deletion. There are no purchases or
-subscriptions to demonstrate.
+encrypted messaging, the one-time Plus purchase and restore flow, and account
+deletion.
 
 DEVICES TESTED
 - Samsung SM-A166U1, Android 16: physical-device onboarding and discovery.
@@ -204,7 +205,10 @@ PERMISSIONS AND PURCHASES
   for nearby discovery; exact GPS is not transmitted.
 - Photo library: adds profile photos.
 - No App Tracking Transparency prompt; the app does not track.
-The app is free with no paid content, purchase, or subscription.
+- OpenDating Plus is an optional $4.99 one-time purchase that unlocks Sage,
+  Ocean, and Plum app accents. It does not affect discovery, ranking, matching,
+  messaging, recovery, deletion, or safety. Restore Purchases is available on
+  the same screen. There is no subscription.
 
 EXTERNAL SERVICES
 - Developer-operated OpenDating relay on Cloudflare Workers: profile storage,
@@ -214,14 +218,17 @@ EXTERNAL SERVICES
   of profile display names and bios before publication. Photos are not sent to
   it and it does not process encrypted messages. This is disclosed to the user
   in-app on the onboarding privacy screen and at Settings -> Privacy.
+- RevenueCat: validates the optional lifetime Plus entitlement using an opaque
+  billing identifier. It does not receive profile, location, key, safety, or
+  message content.
 - Expo Application Services: build and submission tooling only; not contacted
   by the shipped app at runtime.
-No payment processor, advertising network, analytics provider, data broker, or
-third-party authentication service is used.
+No advertising network, analytics provider, data broker, or third-party
+authentication service is used.
 
 REGIONS
 The app behaves consistently across all regions. There is no region-locked
-content, feature gating, regional pricing, or in-app availability restriction.
+content or feature gating. Apple localizes the optional one-time Plus price.
 
 REGULATED SERVICES AND THIRD-PARTY MATERIAL
 OpenDating is a dating/social-networking app, not a financial, medical, legal,

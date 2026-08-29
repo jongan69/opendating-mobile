@@ -73,6 +73,7 @@ export function useSafety(): UseSafetyResult {
         // Reconcile: revert the optimistic block.
         setBlocks((prev) => prev.filter((b) => b.target_pubkey !== pubkey));
         setError(toUserMessage(err));
+        throw err;
       }
     },
     [isBlocked]
@@ -101,6 +102,7 @@ export function useSafety(): UseSafetyResult {
             : [removed, ...prev]
         );
         setError(toUserMessage(err));
+        throw err;
       }
     },
     [blocks]
@@ -112,6 +114,7 @@ export function useSafety(): UseSafetyResult {
       await getOpenDatingClient().unmatch(pubkey);
     } catch (err) {
       setError(toUserMessage(err));
+      throw err;
     }
   }, []);
 
@@ -121,6 +124,7 @@ export function useSafety(): UseSafetyResult {
       await getOpenDatingClient().report(report);
     } catch (err) {
       setError(toUserMessage(err));
+      throw err;
     }
   }, []);
 

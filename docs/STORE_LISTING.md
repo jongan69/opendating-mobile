@@ -1,11 +1,11 @@
 # OpenDating Store Listing
 
-**Last updated:** 2026-08-13
+**Last updated:** 2026-08-29
 
-> **Submission status: blocked.** Apple rejected iOS 0.1.0 (1) under Guideline
-> 4.3(b) on August 13, 2026. This copy belongs to the materially revised 0.1.1
-> candidate and must not be attached to the rejected binary as though it
-> described that build.
+> **Submission status: waiting for App Review.** Apple rejected iOS 0.1.0 (1)
+> under Guideline 4.3(b) on August 13, 2026. The materially revised 0.1.1 (5)
+> candidate was submitted on August 29, 2026. Repository launch approval stays
+> blocked until its independent release evidence is complete.
 
 This is the canonical copy deck for the first App Store Connect and Google Play
 Console records.
@@ -52,6 +52,7 @@ BUILT AROUND DATA MINIMIZATION
 - Open an end-to-end encrypted conversation only after mutual interest
 - Block locally and report privately
 - Use the app without ads, tracking, or a data-broker business model
+- Optionally unlock Sage, Ocean, and Plum app accents with one lifetime purchase
 
 OpenDating is the first reference client for the open OpenDating protocol. Your
 recovery key can restore your account on another compatible OpenDating client or
@@ -101,6 +102,7 @@ Safety. Confirm the final console answers before submitting for review.
 | Messages and user-generated content | Messaging and safety | Yes | No |
 | Public account ID | Account functionality | Yes | No |
 | Reports and block actions | Safety and moderation | Yes | No |
+| Purchase history | Optional Plus entitlement | Yes, through an opaque billing ID | No |
 
 The app does not use third-party advertising SDKs and does not sell personal
 data. iOS export compliance is configured as standard encryption with no France
@@ -133,10 +135,11 @@ the release evidence before adding those files back to `store.config.json`.
 
 | Platform | Build | Artifact |
 |---|---|---|
-| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | Superseded App Store IPA, v0.1.0 build 4 — do not ship |
+| iOS | `cf5d4b22-f7aa-430b-980f-f4b191718612` | EAS production IPA, v0.1.1 build 5; App Store Connect build `12dd3ff2-f9bd-491a-984f-b14aafd02ef8`, valid and attached but not submitted |
 | Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Superseded Play Store AAB, v0.1.0 version code 3 — do not ship |
 
-Build fresh 0.1.1 artifacts before submitting.
+Build a fresh Android 0.1.1 artifact before any Android submission. Do not
+replace iOS build 5 unless physical testing finds a release-blocking defect.
 
 ## Submission Commands
 

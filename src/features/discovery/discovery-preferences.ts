@@ -4,6 +4,7 @@
 
 import type { DiscoveryPreferences } from '@/types/opendating';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { storage } from '@/lib/storage';
 
 const KM_PER_MILE = 1.609344;
 
@@ -12,13 +13,19 @@ export const DEFAULT_DISCOVERY_PREFERENCES: DiscoveryPreferences = {
   max_age: 99,
   max_distance_km: 80, // ~50 mi
   genders: undefined,
-  relationship_intents: undefined,
+  intent: undefined,
 };
 
 let current: DiscoveryPreferences = { ...DEFAULT_DISCOVERY_PREFERENCES };
 const listeners = new Set<() => void>();
 
 export function getDiscoveryPreferences(): DiscoveryPreferences {
+  return current;
+}
+
+export async function hydrateDiscoveryPreferences(): Promise<DiscoveryPreferences> {
+  const saved = await storage.getDiscoveryPreferences<DiscoveryPreferences>();
+  if (saved) current = { ...DEFAULT_DISCOVERY_PREFERENCES, ...saved };
   return current;
 }
 
@@ -40,6 +47,12 @@ export async function applyDiscoveryPreferences(
 ): Promise<void> {
   current = { ...next };
   for (const fn of listeners) fn();
+
+  try {
+    await storage.saveDiscoveryPreferences(current);
+  } catch {
+    // Server sync can still succeed when local browser storage is unavailable.
+  }
 
   try {
     await getOpenDatingClient().updateDiscoveryPreferences(current);

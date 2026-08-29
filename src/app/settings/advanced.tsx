@@ -2,12 +2,14 @@
 // Deliberately out of the normal flow.
 
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
 
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { encodeRecoveryKey } from '@/lib/opendating/recovery-key';
 import { connectionStateLabel, shortPubkey } from '@/lib/format';
 import type { ConnectionState, OpenDatingCapabilities } from '@/types/opendating';
 import { useTheme } from '@/state/theme-context';
@@ -75,12 +77,17 @@ function Section({ title, children }: SectionProps) {
 }
 
 export default function AdvancedScreen() {
+  const router = useRouter();
   const { colors, isDark } = useTheme();
 
   const [pubkey, setPubkey] = useState<string | null>(null);
   const [capabilities, setCapabilities] = useState<OpenDatingCapabilities | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>('starting');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportPassphrase, setExportPassphrase] = useState('');
+  const [exportKey, setExportKey] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     const client = getOpenDatingClient();
@@ -123,7 +130,7 @@ export default function AdvancedScreen() {
         Alert.alert('No identity found', 'There is no account on this device to export.');
         return;
       }
-      await copyValue('recovery-key', identity.privkey);
+      await copyValue('recovery-key', encodeRecoveryKey(identity.privkey));
       Alert.alert(
         'Recovery key copied',
         'Your recovery key is now on your clipboard. Store it somewhere safe, then clear your clipboard.'
@@ -137,6 +144,13 @@ export default function AdvancedScreen() {
   }, [copyValue]);
 
   const exportPrivateKey = useCallback(async () => {
+    if (Platform.OS === 'web') {
+      setExportPassphrase('');
+      setExportKey(null);
+      setExportError(null);
+      setExportOpen(true);
+      return;
+    }
     Alert.alert(
       'Export Recovery Key',
       'Your recovery key unlocks full access to your account. Anyone who has it can impersonate you and take over your account. Only export it to a place you fully trust.',
@@ -146,6 +160,25 @@ export default function AdvancedScreen() {
       ]
     );
   }, [doExportPrivateKey]);
+
+  const revealWebRecoveryKey = useCallback(async () => {
+    setExportError(null);
+    try {
+      const client = getOpenDatingClient();
+      await client.unlockIdentity(exportPassphrase);
+      const identity = await client.loadIdentity();
+      if (!identity) throw new Error('No account is stored in this browser.');
+      setExportKey(encodeRecoveryKey(identity.privkey));
+      setExportPassphrase('');
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : 'Could not unlock this browser.');
+    }
+  }, [exportPassphrase]);
+
+  const lockBrowser = useCallback(async () => {
+    await getOpenDatingClient().lockIdentity();
+    router.replace('/unlock');
+  }, [router]);
 
   const networkUrl = getOpenDatingClient().getRelayUrl();
   const infoUrl = getOpenDatingClient().getInfoUrl();
@@ -275,6 +308,22 @@ export default function AdvancedScreen() {
               </Text>
             </Pressable>
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+            {Platform.OS === 'web' ? (
+              <>
+                <Pressable
+                  onPress={() => void lockBrowser()}
+                  style={({ pressed }) => [
+                    styles.row,
+                    { backgroundColor: pressed ? colors.surfaceSheet : colors.surface },
+                  ]}
+                  accessibilityRole="button"
+                >
+                  <Text style={[typography.bodyMedium, { color: colors.text, flex: 1 }]}>Lock this browser</Text>
+                  <Text style={[typography.caption, { color: colors.textTertiary }]}>Now</Text>
+                </Pressable>
+                <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+              </>
+            ) : null}
             <View style={[styles.row, { paddingVertical: spacing.sm }]}>
               <Text style={[typography.caption, { color: colors.textTertiary, flex: 1 }]}>
                 The recovery key is the only way to restore your account on another device.
@@ -283,6 +332,66 @@ export default function AdvancedScreen() {
             </View>
           </Section>
         </ScrollView>
+        <Modal visible={exportOpen} transparent animationType="fade" onRequestClose={() => setExportOpen(false)}>
+          <View style={styles.modalBackdrop}>
+            <View style={[styles.modalCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[typography.titleLarge, { color: colors.text }]}>Export recovery key</Text>
+              <Text style={[typography.bodySmall, { color: colors.textSecondary }]}>
+                Anyone with this key controls your account. Re-enter your browser-lock passphrase, preview the key, then copy it only to a place you trust.
+              </Text>
+              {exportKey ? (
+                <>
+                  <Text selectable style={[typography.caption, styles.keyPreview, { color: colors.text, backgroundColor: colors.surfaceSheet }]}>
+                    {exportKey}
+                  </Text>
+                  <Pressable
+                    onPress={() => void copyValue('recovery-key', exportKey)}
+                    style={[styles.modalButton, { backgroundColor: colors.destructive }]}
+                    accessibilityRole="button"
+                  >
+                    <Text style={[typography.button, { color: '#FFFFFF' }]}>
+                      {copiedKey === 'recovery-key' ? 'Copied' : 'Copy recovery key'}
+                    </Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <TextInput
+                    value={exportPassphrase}
+                    onChangeText={setExportPassphrase}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="current-password"
+                    placeholder="Browser-lock passphrase"
+                    placeholderTextColor={colors.textTertiary}
+                    onSubmitEditing={() => void revealWebRecoveryKey()}
+                    style={[styles.modalInput, { color: colors.text, borderColor: colors.border }]}
+                  />
+                  {exportError ? <Text style={[typography.bodySmall, { color: colors.destructive }]}>{exportError}</Text> : null}
+                  <Pressable
+                    onPress={() => void revealWebRecoveryKey()}
+                    style={[styles.modalButton, { backgroundColor: colors.destructive }]}
+                    accessibilityRole="button"
+                  >
+                    <Text style={[typography.button, { color: '#FFFFFF' }]}>Preview recovery key</Text>
+                  </Pressable>
+                </>
+              )}
+              <Pressable
+                onPress={() => {
+                  setExportOpen(false);
+                  setExportKey(null);
+                  setExportPassphrase('');
+                }}
+                style={styles.modalCancel}
+                accessibilityRole="button"
+              >
+                <Text style={[typography.labelMedium, { color: colors.accent }]}>Close</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 }
@@ -329,5 +438,43 @@ const styles = StyleSheet.create({
   },
   mono: {
     fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+  },
+  modalBackdrop: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 520,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: spacing.xl,
+    gap: spacing.md,
+  },
+  modalInput: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    fontSize: 17,
+  },
+  keyPreview: {
+    padding: spacing.md,
+    borderRadius: radius.md,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+  },
+  modalButton: {
+    minHeight: 48,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  modalCancel: {
+    alignSelf: 'center',
+    padding: spacing.sm,
   },
 });

@@ -172,6 +172,11 @@ export default function PassportScreen() {
 
             <Column spacing={spacing.md}>
               <Button
+                label="Set or update my approximate area"
+                variant="outlined"
+                onPress={() => router.push('/(onboarding)/location?mode=update')}
+              />
+              <Button
                 label="Back up or restore my account"
                 variant="filled"
                 onPress={() => router.push('/settings/advanced')}
