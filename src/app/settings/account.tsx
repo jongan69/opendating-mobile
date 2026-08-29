@@ -1,7 +1,7 @@
 // Account — delete account with confirmation, local cleanup, and redirect.
 
 import { useCallback, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +23,7 @@ export default function AccountScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
   const [deleting, setDeleting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const deleteAccount = useCallback(async () => {
     if (deleting) return;
@@ -59,9 +60,7 @@ export default function AccountScreen() {
 
   const confirmDelete = useCallback(() => {
     if (Platform.OS === 'web') {
-      if (globalThis.confirm(`Delete Account?\n\n${DELETE_CONSEQUENCES}`)) {
-        void deleteAccount();
-      }
+      setConfirming(true);
       return;
     }
     Alert.alert('Delete Account?', DELETE_CONSEQUENCES, [
@@ -72,6 +71,11 @@ export default function AccountScreen() {
         onPress: () => void deleteAccount(),
       },
     ]);
+  }, [deleteAccount]);
+
+  const confirmWebDelete = useCallback(() => {
+    setConfirming(false);
+    void deleteAccount();
   }, [deleteAccount]);
 
   return (
@@ -132,6 +136,49 @@ export default function AccountScreen() {
             make sure you want to go before you confirm.
           </Text>
         </ScrollView>
+
+      {Platform.OS === 'web' ? (
+        <Modal
+          visible={confirming}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setConfirming(false)}
+        >
+          <Pressable
+            style={styles.confirmBackdrop}
+            onPress={() => setConfirming(false)}
+            accessibilityLabel="Cancel account deletion"
+          />
+          <View style={styles.confirmOverlay} pointerEvents="box-none">
+            <View
+              style={[styles.confirmCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              accessibilityViewIsModal
+              accessibilityRole="alert"
+            >
+              <Text style={[typography.headlineMedium, { color: colors.text }]}>Delete Account?</Text>
+              <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
+                {DELETE_CONSEQUENCES}
+              </Text>
+              <View style={styles.confirmActions}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setConfirming(false)}
+                  style={[styles.confirmButton, { borderColor: colors.border }]}
+                >
+                  <Text style={[typography.labelLarge, { color: colors.text }]}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={confirmWebDelete}
+                  style={[styles.confirmButton, { backgroundColor: colors.destructive, borderColor: colors.destructive }]}
+                >
+                  <Text style={[typography.labelLarge, { color: '#FFFFFF' }]}>Delete permanently</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -160,5 +207,36 @@ const styles = StyleSheet.create({
   note: {
     textAlign: 'center',
     paddingHorizontal: spacing.xl,
+  },
+  confirmBackdrop: {
+    ...StyleSheet.absoluteFill,
+  },
+  confirmOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    paddingHorizontal: spacing.xxl,
+  },
+  confirmCard: {
+    width: '100%',
+    maxWidth: 380,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: spacing.xl,
+    gap: spacing.lg,
+  },
+  confirmActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  confirmButton: {
+    flex: 1,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
   },
 });
