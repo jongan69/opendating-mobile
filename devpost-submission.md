@@ -156,8 +156,8 @@ message content in screenshots or bug reports.
 
 - Includes App Icon (27378): `BrandAssetPack/icons/ios-app-icon-1024.png` is
   already the project thumbnail; confirm the checkbox during final review
-- Includes screenshot (27379): prepared at
-  `screenshots/devpost/opendating-welcome-1179x2556.png`; pending Devpost upload
+- Includes screenshot (27379): uploaded to the public Devpost gallery from
+  `screenshots/devpost/opendating-welcome-1179x2556.png`
 - First Version Date Confirmation (27380): answer only after the revised build is published
 - Is Staff or Sponsor (27381): false
 - App type (27382): iOS (iPhone and/or iPad)
@@ -192,7 +192,7 @@ message content in screenshots or bug reports.
 - [x] Build 5 attached to App Store version 0.1.1 and internal TestFlight QA
 - [ ] Purchase, restore, and entitlement verified on a physical iOS device
 - [x] Fresh 1179 × 2556 screenshot captured without a device frame or user data
-- [ ] Fresh screenshot uploaded to Devpost
+- [x] Fresh screenshot uploaded and verified on the public Devpost project
 - [ ] Public YouTube or Vimeo demo, two minutes or less
 - [x] Revised iOS 0.1.1 build 5 submitted and waiting for App Review
 - [ ] Revised app fully published on the App Store
