@@ -5,9 +5,11 @@
 Apple rejected the previous submission under Guideline 4.3(b). Fresh production
 build 0.1.1 (5), built from `c505b83a11b986bb29879c178327460f187ec370`,
 is valid in App Store Connect and attached to the editable 0.1.1 version. It is
-not submitted for review. Replacement screenshots, physical-device recording,
-purchase/restore proof, and the evidence in `docs/GUIDELINE-4.3B-RESPONSE.md`
-remain required.
+waiting for App Review in submission
+`278e4366-f6a6-4f02-a7a7-2fcce7980f42`, submitted on August 29, 2026.
+Replacement screenshots, physical-device recording, purchase/restore proof,
+and the evidence in `docs/GUIDELINE-4.3B-RESPONSE.md` remain required before
+the repository can record launch approval.
 
 The stale rejected review submission is canceled. `asc review doctor` reports
 no public-API blocking checks; the IAP review image and the initial-version

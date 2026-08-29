@@ -2,10 +2,10 @@
 
 **Last updated:** 2026-08-29
 
-> **Submission status: blocked.** Apple rejected iOS 0.1.0 (1) under Guideline
-> 4.3(b) on August 13, 2026. This copy belongs to the materially revised 0.1.1
-> candidate and must not be attached to the rejected binary as though it
-> described that build.
+> **Submission status: waiting for App Review.** Apple rejected iOS 0.1.0 (1)
+> under Guideline 4.3(b) on August 13, 2026. The materially revised 0.1.1 (5)
+> candidate was submitted on August 29, 2026. Repository launch approval stays
+> blocked until its independent release evidence is complete.
 
 This is the canonical copy deck for the first App Store Connect and Google Play
 Console records.

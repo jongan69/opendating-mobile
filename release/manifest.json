@@ -23,7 +23,7 @@
   "approvedAt": null,
   "approvedBy": null,
   "blockers": [
-    "App Store version 0.1.1 has fresh build 5 attached, but still requires replacement screenshots, a physical-device recording, purchase and restore evidence, and the reviewed Guideline 4.3(b) response",
+    "App Store version 0.1.1 build 5 is waiting for review in submission 278e4366-f6a6-4f02-a7a7-2fcce7980f42, but still requires physical-device purchase and restore evidence before repository launch approval",
     "Android 0.1.0 build 3 is not yet confirmed held and unavailable to production users",
     "opendating-protocol 0.1.1 is not published or verified on the registry (jongan69/OpenDating#7)",
     "The protocol dependency is exact-pinned to 0.1.0; it is not yet moved to the verified 0.1.1 artifact and the temporary request-routing mirror is still in place",

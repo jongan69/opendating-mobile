@@ -12,8 +12,9 @@ candidate still needs external and physical-device evidence.
 `main` remains the production branch. `dev` contains the production web app and
 the one-time Plus implementation. EAS production build 0.1.1 (5) enables the
 RevenueCat public SDK configuration and is attached to the editable App Store
-version, but it is not approved for release until `docs/MONETIZATION.md` and the
-physical-device gates are satisfied.
+version. App Review submission `278e4366-f6a6-4f02-a7a7-2fcce7980f42` is
+waiting for review, but the repository does not approve release until
+`docs/MONETIZATION.md` and the physical-device gates are satisfied.
 
 The source of truth for current readiness is:
 
@@ -54,7 +55,7 @@ Do not put credential values in issues, documentation, chat, or Git.
 | GitHub | Admin or maintainer on both repositories | `main` is protected; staging and reviewer-gated production environments exist |
 | npm | Publish rights for `opendating-protocol` | Current session is unauthenticated; registry remains `0.1.0` |
 | Expo/EAS | Project owner or developer | Production builds remain release-manifest gated |
-| Apple | App Store Connect access | 0.1.1 build 5 is valid, attached, and in the internal `OpenDating QA` TestFlight group; physical proof and replacement media remain |
+| Apple | App Store Connect access | 0.1.1 build 5 is waiting for App Review and is in the internal `OpenDating QA` TestFlight group; physical proof and replacement media remain |
 | Google | Play Console and service account | Ship a fresh 0.1.1 bundle; 0.1.0 version code 3 is superseded |
 | Cloudflare | Read access for integration diagnosis | Resource ownership and deployments belong to the backend repository |
 | RevenueCat | Project `proj3363ecdc` | Catalog and public SDK key are active for build 5; Apple credentials and native transaction proof remain |
@@ -75,7 +76,7 @@ dependency set and inspect the remaining paths.
 3. Resolve the dependency audit without broad or permanent exceptions.
 4. Install TestFlight build 5 on a physical iOS device and verify purchase, restore, revocation, identity changes, reinstall, offline behavior, and the complete critical walkthrough.
 5. Capture fresh Passport/private-introduction screenshots, the Plus review screenshot, and the App Review video from that verified build.
-6. Confirm App Privacy, Regulations and Permits, release notes, pricing/availability, and the 0.1.1 Store version before any resubmission with the prepared 4.3(b) response.
+6. Monitor App Review submission `278e4366-f6a6-4f02-a7a7-2fcce7980f42`; respond truthfully with the prepared 4.3(b) evidence if Apple requests clarification.
 7. Do not start public beta until the trust-and-safety, legal, vendor, deletion, security, and staffing gates are evidenced.
 
 ## Release handoff rule
