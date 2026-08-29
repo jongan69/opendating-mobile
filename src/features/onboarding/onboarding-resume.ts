@@ -19,3 +19,10 @@ export function getOnboardingResumePath(
   }
   return saved.intent ? '/(onboarding)/review' : '/(onboarding)/preferences';
 }
+
+export function getPostUnlockPath(
+  onboardingComplete: boolean,
+  saved: ResumeDraft | null
+): '/' | ReturnType<typeof getOnboardingResumePath> {
+  return onboardingComplete ? '/' : getOnboardingResumePath(saved);
+}

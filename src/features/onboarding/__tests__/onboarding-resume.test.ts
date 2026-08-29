@@ -1,4 +1,7 @@
-import { getOnboardingResumePath } from '@/features/onboarding/onboarding-resume';
+import {
+  getOnboardingResumePath,
+  getPostUnlockPath,
+} from '@/features/onboarding/onboarding-resume';
 import { CURRENT_POLICY_VERSION } from '@/lib/policy';
 
 it('resumes a complete unpublished draft at review', () => {
@@ -14,4 +17,9 @@ it('resumes a complete unpublished draft at review', () => {
       },
     })
   ).toBe('/(onboarding)/review');
+});
+
+it('resumes unfinished onboarding after browser unlock', () => {
+  expect(getPostUnlockPath(false, null)).toBe('/(onboarding)/privacy');
+  expect(getPostUnlockPath(true, null)).toBe('/');
 });

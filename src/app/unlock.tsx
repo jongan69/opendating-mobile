@@ -8,6 +8,8 @@ import { BrandMark } from '@/components/brand/brand-mark';
 import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { getOpenDatingClient, resetOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { storage } from '@/lib/storage';
+import type { OnboardingDraft } from '@/features/onboarding/onboarding-draft';
+import { getPostUnlockPath } from '@/features/onboarding/onboarding-resume';
 import { useTheme } from '@/state/theme-context';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
@@ -28,7 +30,11 @@ export default function UnlockScreen() {
     try {
       await getOpenDatingClient().unlockIdentity(passphrase);
       setPassphrase('');
-      router.replace('/');
+      const [onboardingComplete, savedDraft] = await Promise.all([
+        storage.isOnboardingComplete(),
+        storage.getOnboardingDraft<Partial<OnboardingDraft>>(),
+      ]);
+      router.replace(getPostUnlockPath(onboardingComplete, savedDraft));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not unlock this browser.');
     } finally {
