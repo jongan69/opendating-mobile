@@ -44,6 +44,7 @@ export default function MatchesScreen() {
   // reach intent.like because the server rejects it.
   useEffect(() => {
     for (const match of displayMatches) {
+      if (!match.profile) continue;
       cacheCandidate({
         pubkey: match.pubkey,
         profile: match.profile,
@@ -329,7 +330,7 @@ interface AvatarProps {
 
 function Avatar({ match, size, ring = false, ringColor }: AvatarProps) {
   const { colors } = useTheme();
-  const photoUrl = match.profile.photos?.find((p) => p.url.length > 0)?.url;
+  const photoUrl = match.profile?.photos?.find((p) => p.url.length > 0)?.url;
 
   return (
     <View
@@ -366,7 +367,7 @@ function Avatar({ match, size, ring = false, ringColor }: AvatarProps) {
 }
 
 function displayNameOf(match: Match): string {
-  return match.profile.display_name?.trim() || shortPubkey(match.pubkey, 6, 4);
+  return match.profile?.display_name?.trim() || shortPubkey(match.pubkey, 6, 4);
 }
 
 function firstNameOf(match: Match): string {

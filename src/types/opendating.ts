@@ -107,7 +107,7 @@ export interface LikeResult {
 export interface Match {
   match_id: string;
   pubkey: string;
-  profile: CandidateProfile;
+  profile?: CandidateProfile;
   distance_bucket?: string;
   created_at: number;
 }
