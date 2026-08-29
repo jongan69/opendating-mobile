@@ -50,13 +50,13 @@ export default function UnlockScreen() {
   }, [router]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <View style={styles.content}>
         <BrandMark size={72} />
         <View style={styles.copy}>
           <Text style={[typography.headlineMedium, { color: colors.text }]}>Welcome back</Text>
-          <Text style={[typography.bodyMedium, styles.centered, { color: colors.textSecondary }]}> 
+          <Text style={[typography.bodyMedium, styles.centered, { color: colors.textSecondary }]}>
             Enter the browser-lock passphrase you created here. It encrypts this browser copy; it is not your OpenDating account password.
           </Text>
         </View>

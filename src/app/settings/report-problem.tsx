@@ -41,7 +41,7 @@ export default function ReportProblemScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['left', 'right', 'bottom']}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}> 
+        <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
           Tell us what went wrong. OpenDating does not automatically attach screenshots, logs, routes, location, messages, account IDs, or recovery keys.
         </Text>
         {([
