@@ -107,7 +107,7 @@ post-hackathon work.
 - Is Staff or Sponsor (27381): false
 - App type (27382): iOS (iPhone and/or iPad)
 - Published App Store URL (27383): pending
-- RevenueCat project ID (28118): pending RevenueCat account connection
+- RevenueCat project ID (28118): `proj3363ecdc`
 - Promo code (28135): pending App Store promo-code creation
 - HAMM Award (27388): OpenDating uses one transparent lifetime purchase for
   cosmetic themes. A non-consumable purchase fits a privacy-first utility better
@@ -131,7 +131,7 @@ post-hackathon work.
 - [x] Production web preview deployed
 - [x] Cloudflare Worker responds in production
 - [x] App Store non-consumable created
-- [ ] RevenueCat project, entitlement, offering, and product connected
+- [x] RevenueCat project, entitlement, offering, and product connected
 - [ ] Fresh iOS production build uploaded
 - [ ] Purchase, restore, and entitlement verified on a physical iOS device
 - [ ] Fresh 1179 × 2556 screenshot uploaded without a device frame
