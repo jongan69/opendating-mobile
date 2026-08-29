@@ -3,13 +3,12 @@
 import 'react-native-get-random-values';
 import { useEffect, useState } from 'react';
 import { Stack, usePathname, useRouter } from 'expo-router';
-import { Platform, StyleSheet, useColorScheme } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider } from '@/state/theme-context';
+import { ThemeProvider, useTheme } from '@/state/theme-context';
 import { RevenueCatProvider } from '@/state/revenuecat-context';
 import { ErrorBoundary } from '@/components/error-boundary';
-import { colors } from '@/theme/colors';
 import { StatusBar } from 'expo-status-bar';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
 
@@ -33,42 +32,42 @@ const PUBLIC_WEB_ROUTES = new Set([
 ]);
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
   return (
     // GestureHandlerRootView must remain the outermost full-screen view for
     // navigation and any gesture-driven controls used elsewhere in the app.
-    <GestureHandlerRootView
+    <GestureHandlerRootView style={styles.root}>
+      <ThemeProvider>
+        <ThemedRoot />
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function ThemedRoot() {
+  const { colors, isDark } = useTheme();
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+
+    document.documentElement.style.backgroundColor = colors.background;
+    document.body.style.backgroundColor = colors.background;
+  }, [colors.background]);
+
+  return (
+    <SafeAreaProvider
       style={[
-        styles.root,
-        Platform.OS === 'web' && {
-          backgroundColor: isDark ? colors.dark.background : colors.light.background,
-        },
+        styles.app,
+        Platform.OS === 'web' && styles.webApp,
+        Platform.OS === 'web' && { backgroundColor: colors.background },
       ]}
     >
-      {/* Provides the insets that useSafeAreaInsets reads. Also absent, which
-          left the chat composer measuring a zero bottom inset and sitting
-          under the home indicator. */}
-      <SafeAreaProvider
-        style={[
-          styles.app,
-          Platform.OS === 'web' && styles.webApp,
-          Platform.OS === 'web' && {
-            backgroundColor: isDark ? colors.dark.background : colors.light.background,
-          },
-        ]}
-      >
-        <ErrorBoundary>
-          <ThemeProvider>
-            <RevenueCatProvider>
-              <StatusBar style={isDark ? 'light' : 'dark'} />
-              <AppNavigator />
-            </RevenueCatProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+      <ErrorBoundary>
+        <RevenueCatProvider>
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+          <AppNavigator />
+        </RevenueCatProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 
