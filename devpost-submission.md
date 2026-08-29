@@ -1,6 +1,7 @@
 # OpenDating — RevenueCat Shipaton 2026
 
-Status: draft only. Nothing in this file has been submitted to Devpost.
+Status: draft only. The public project page is published, but OpenDating has not
+been entered into Shipaton judging.
 
 The live web build is the same Expo application and is the public demo. It does
 not replace the native Store URL for a standard Shipaton entry: Shipaton states
@@ -99,16 +100,64 @@ and verify deployment and release artifacts.
 
 ### What's next
 
-Complete the RevenueCat catalog, run the lifetime purchase and restore flow on
-a physical iOS device, publish the revised App Store build, and validate the
-live Store listing. Federation and independent service providers remain
+Wait for App Review of iOS 0.1.1 (5), complete the App Store metadata for the
+lifetime purchase, run purchase and restore on a physical iOS device, and add
+the resulting Store URL, promo code, screenshot, and public demo video to the
+Shipaton entry. Federation and independent service providers remain
 post-hackathon work.
+
+## Testing instructions
+
+1. Open https://opendating-mobile.expo.app in a modern HTTPS browser.
+2. Create a browser account with a 12-character-or-longer browser-lock
+   passphrase, or import a disposable Nostr `nsec`/hex recovery key.
+3. Complete onboarding, then verify Privacy Passport, introductions, profile,
+   visibility, blocking/reporting, matches, browser lock, and recovery-key
+   export/import.
+4. Reload the page and verify the encrypted identity locks before reconnecting.
+5. On iOS, use App Store build 0.1.1 (5) and verify the lifetime Plus purchase,
+   restore, and entitlement removal with a disposable StoreKit account.
+
+Do not use a personal recovery key or include private keys, exact location, or
+message content in screenshots or bug reports.
+
+## Public demo and repository
+
+- Live app: https://opendating-mobile.expo.app
+- Source: https://github.com/jongan69/opendating-mobile
+- Demo video: pending a public YouTube or Vimeo upload, two minutes or less
+
+## Demo video outline
+
+- 0:00–0:15 — problem and OpenDating's private-introduction model
+- 0:15–0:45 — create/import account and coarse-location boundary
+- 0:45–1:15 — Privacy Passport, introduction reasons, and privacy receipt
+- 1:15–1:35 — mutual match, encrypted messaging, report/block controls
+- 1:35–1:50 — $4.99 lifetime Plus themes and RevenueCat restore
+- 1:50–2:00 — live web app, open protocol, and closing result
+
+## Screenshot shot list
+
+- Prepared: `screenshots/devpost/opendating-welcome-1179x2556.png` — live app,
+  exact required dimensions, no device frame, no user data
+- Pending physical capture: Privacy Passport and introduction privacy receipt
+- Pending IAP review capture: Plus lifetime-purchase screen
+
+## Known limitations
+
+- The public web app is a functional preview, but standard Shipaton eligibility
+  requires the fully published native Store listing.
+- OpenDating Plus remains unavailable until Apple accepts its missing review
+  metadata and the purchase is proven on a physical device.
+- The relay and protocol are an early public implementation without federation
+  or a production availability SLA.
 
 ## Shipaton submission fields
 
-- Includes App Icon (27378): pending upload of
-  `BrandAssetPack/icons/ios-app-icon-1024.png`
-- Includes screenshot (27379): pending fresh 1179 × 2556 physical-device capture
+- Includes App Icon (27378): `BrandAssetPack/icons/ios-app-icon-1024.png` is
+  already the project thumbnail; confirm the checkbox during final review
+- Includes screenshot (27379): prepared at
+  `screenshots/devpost/opendating-welcome-1179x2556.png`; pending Devpost upload
 - First Version Date Confirmation (27380): answer only after the revised build is published
 - Is Staff or Sponsor (27381): false
 - App type (27382): iOS (iPhone and/or iPad)
@@ -142,8 +191,10 @@ post-hackathon work.
 - [x] Fresh iOS 0.1.1 build 5 uploaded and valid in App Store Connect
 - [x] Build 5 attached to App Store version 0.1.1 and internal TestFlight QA
 - [ ] Purchase, restore, and entitlement verified on a physical iOS device
-- [ ] Fresh 1179 × 2556 screenshot uploaded without a device frame
+- [x] Fresh 1179 × 2556 screenshot captured without a device frame or user data
+- [ ] Fresh screenshot uploaded to Devpost
 - [ ] Public YouTube or Vimeo demo, two minutes or less
+- [x] Revised iOS 0.1.1 build 5 submitted and waiting for App Review
 - [ ] Revised app fully published on the App Store
 - [ ] App Store promo code created for judges
 - [ ] Devpost project update confirmed by Jonathan
