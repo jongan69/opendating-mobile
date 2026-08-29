@@ -34,7 +34,7 @@ export default function FinishScreen() {
       subtitle="Your profile is live, and its privacy controls belong to you."
       showBack={false}
       primaryLabel="View My Privacy Passport"
-      onPrimaryPress={() => router.replace('/passport')}
+      onPrimaryPress={() => router.replace('/(tabs)/passport')}
     >
       <View style={styles.center}>
         <View style={[styles.checkCircle, { backgroundColor: colors.accent }]}>
