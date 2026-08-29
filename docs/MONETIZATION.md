@@ -1,8 +1,8 @@
 # OpenDating monetization contract
 
-**Status:** implementation complete but disabled until the store and RevenueCat
-catalogs are connected and the purchase/restore flow passes on a physical iOS
-device.
+**Status:** implementation and catalogs are connected in production candidate
+0.1.1 (5). The feature remains a blocked release candidate until the
+purchase/restore flow passes on a physical iOS device.
 
 OpenDating Plus may sell customization and convenience. It must never sell
 ranking, boosts, hidden admirers, safety, verification, recovery, deletion,
@@ -10,6 +10,8 @@ matching, reactions, discovery, filters, or messaging.
 
 ## RevenueCat catalog
 
+- Project: `proj3363ecdc`
+- iOS app: `app8aaadf2571`
 - Entitlement: `plus`
 - Offering: `default`
 - Product: `opendating_plus_lifetime` (non-consumable)
@@ -18,6 +20,8 @@ matching, reactions, discovery, filters, or messaging.
 - Package: `$rc_lifetime`
 - Price: $4.99 in the US, with store-localized pricing elsewhere
 - Benefit: Sage, Ocean, and Plum app accent themes
+- EAS build: `cf5d4b22-f7aa-430b-980f-f4b191718612`
+- App Store Connect build: `12dd3ff2-f9bd-491a-984f-b14aafd02ef8` (0.1.1 build 5, valid)
 
 Prices are never hardcoded in the app. The paywall renders the localized store
 price delivered by RevenueCat.

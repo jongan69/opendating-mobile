@@ -135,10 +135,11 @@ the release evidence before adding those files back to `store.config.json`.
 
 | Platform | Build | Artifact |
 |---|---|---|
-| iOS | `79e9b81e-6f66-4dcc-b46f-4ae53da4ae67` | Superseded App Store IPA, v0.1.0 build 4 — do not ship |
+| iOS | `cf5d4b22-f7aa-430b-980f-f4b191718612` | EAS production IPA, v0.1.1 build 5; App Store Connect build `12dd3ff2-f9bd-491a-984f-b14aafd02ef8`, valid and attached but not submitted |
 | Android | `f5b79c72-91ee-4dd3-96e7-0343911e2ca2` | Superseded Play Store AAB, v0.1.0 version code 3 — do not ship |
 
-Build fresh 0.1.1 artifacts before submitting.
+Build a fresh Android 0.1.1 artifact before any Android submission. Do not
+replace iOS build 5 unless physical testing finds a release-blocking defect.
 
 ## Submission Commands
 

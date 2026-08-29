@@ -128,11 +128,12 @@ post-hackathon work.
 
 - [x] Description drafted
 - [x] 1024 × 1024 icon exists
+- [x] Devpost project, write-up, links, and app icon published
 - [x] Production web preview deployed
 - [x] Cloudflare Worker responds in production
 - [x] App Store non-consumable created
 - [x] RevenueCat project, entitlement, offering, and product connected
-- [ ] Fresh iOS production build uploaded
+- [x] Fresh iOS 0.1.1 build 5 uploaded and valid in App Store Connect
 - [ ] Purchase, restore, and entitlement verified on a physical iOS device
 - [ ] Fresh 1179 × 2556 screenshot uploaded without a device frame
 - [ ] Public YouTube or Vimeo demo, two minutes or less
