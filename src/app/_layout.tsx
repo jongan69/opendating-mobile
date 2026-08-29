@@ -11,25 +11,7 @@ import { RevenueCatProvider } from '@/state/revenuecat-context';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { StatusBar } from 'expo-status-bar';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
-
-const PUBLIC_WEB_ROUTES = new Set([
-  '/',
-  '/unlock',
-  '/welcome',
-  '/create-account',
-  '/import-account',
-  '/privacy',
-  '/basics',
-  '/preferences',
-  '/intent',
-  '/about',
-  '/photos',
-  '/location',
-  '/review',
-  '/finish',
-  '/settings/terms',
-  '/settings/privacy',
-]);
+import { requiresWebIdentity } from '@/features/auth/web-route-access';
 
 export default function RootLayout() {
   return (
@@ -75,7 +57,8 @@ function AppNavigator() {
   const pathname = usePathname();
   const router = useRouter();
   const [webRouteReady, setWebRouteReady] = useState(false);
-  const isPublicWebRoute = Platform.OS !== 'web' || PUBLIC_WEB_ROUTES.has(pathname);
+  const isPublicWebRoute =
+    Platform.OS !== 'web' || !requiresWebIdentity(pathname);
 
   useEffect(() => {
     if (isPublicWebRoute) return;
@@ -87,7 +70,7 @@ function AppNavigator() {
       .then((identityState) => {
         if (!active) return;
         if (identityState !== 'ready' || !client.getCapabilities()) {
-          router.replace('/');
+          router.replace(identityState === 'locked' ? '/unlock' : '/');
           return;
         }
         setWebRouteReady(true);
