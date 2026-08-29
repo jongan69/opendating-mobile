@@ -2,6 +2,12 @@
 
 Status: draft only. Nothing in this file has been submitted to Devpost.
 
+The live web build is the same Expo application and is the public demo. It does
+not replace the native Store URL for a standard Shipaton entry: Shipaton states
+that web apps and TestFlight builds are not eligible. The only no-Store path is
+the Next Gen Award for an eligible student using a verifiable academic email,
+public repository, and demo video.
+
 ## Project details
 
 - Project: OpenDating
@@ -134,6 +140,7 @@ post-hackathon work.
 - [x] App Store non-consumable created
 - [x] RevenueCat project, entitlement, offering, and product connected
 - [x] Fresh iOS 0.1.1 build 5 uploaded and valid in App Store Connect
+- [x] Build 5 attached to App Store version 0.1.1 and internal TestFlight QA
 - [ ] Purchase, restore, and entitlement verified on a physical iOS device
 - [ ] Fresh 1179 × 2556 screenshot uploaded without a device frame
 - [ ] Public YouTube or Vimeo demo, two minutes or less

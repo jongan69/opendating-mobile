@@ -9,6 +9,11 @@ not submitted for review. Replacement screenshots, physical-device recording,
 purchase/restore proof, and the evidence in `docs/GUIDELINE-4.3B-RESPONSE.md`
 remain required.
 
+The stale rejected review submission is canceled. `asc review doctor` reports
+no public-API blocking checks; the IAP review image and the initial-version
+release-note warning remain, along with website-only Regulations and Permits
+declarations.
+
 ## Verified in this release
 
 - One-at-a-time private introductions and candidate-profile navigation are implemented.
