@@ -138,9 +138,14 @@ message content in screenshots or bug reports.
 
 ## Screenshot shot list
 
-- Prepared: `screenshots/devpost/opendating-welcome-1179x2556.png` — live app,
-  exact required dimensions, no device frame, no user data
-- Pending physical capture: Privacy Passport and introduction privacy receipt
+- Published gallery: six live-web screenshots at exactly 1179 × 2556, without
+  device frames or user data:
+  - `screenshots/devpost/01-welcome-1179x2556.png`
+  - `screenshots/devpost/02-browser-lock-1179x2556.png`
+  - `screenshots/devpost/03-create-account-1179x2556.png`
+  - `screenshots/devpost/04-import-recovery-key-1179x2556.png`
+  - `screenshots/devpost/05-privacy-boundaries-1179x2556.png`
+  - `screenshots/devpost/06-terms-1179x2556.png`
 - Pending IAP review capture: Plus lifetime-purchase screen
 
 ## Known limitations
@@ -156,8 +161,8 @@ message content in screenshots or bug reports.
 
 - Includes App Icon (27378): `BrandAssetPack/icons/ios-app-icon-1024.png` is
   already the project thumbnail; confirm the checkbox during final review
-- Includes screenshot (27379): uploaded to the public Devpost gallery from
-  `screenshots/devpost/opendating-welcome-1179x2556.png`
+- Includes screenshot (27379): six exact-size screenshots uploaded and verified
+  in the public Devpost gallery
 - First Version Date Confirmation (27380): answer only after the revised build is published
 - Is Staff or Sponsor (27381): false
 - App type (27382): iOS (iPhone and/or iPad)
@@ -191,11 +196,11 @@ message content in screenshots or bug reports.
 - [x] Fresh iOS 0.1.1 build 5 uploaded and valid in App Store Connect
 - [x] Build 5 attached to App Store version 0.1.1 and internal TestFlight QA
 - [ ] Purchase, restore, and entitlement verified on a physical iOS device
-- [x] Fresh 1179 × 2556 screenshot captured without a device frame or user data
-- [x] Fresh screenshot uploaded and verified on the public Devpost project
+- [x] Six 1179 × 2556 screenshots captured without device frames or user data
+- [x] Six-image gallery uploaded and verified on the public Devpost project
 - [ ] Public YouTube or Vimeo demo, two minutes or less
 - [x] Revised iOS 0.1.1 build 5 submitted and waiting for App Review
 - [ ] Revised app fully published on the App Store
 - [ ] App Store promo code created for judges
-- [ ] Devpost project update confirmed by Jonathan
+- [x] Devpost project update confirmed by Jonathan
 - [ ] Final Devpost submission explicitly confirmed by Jonathan
