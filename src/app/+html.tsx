@@ -36,11 +36,13 @@ export default function RootHtml({ children }: { children: ReactNode }) {
           property="og:image"
           content="https://opendating.org/images/lockup-coral.png"
         />
-        <meta name="theme-color" content="#FAF9F7" />
+        <meta name="color-scheme" content="light dark" />
+        <meta name="theme-color" content="#FAF9F7" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
         <style
           dangerouslySetInnerHTML={{
             __html:
-              '*:focus-visible{outline:3px solid #D95F59!important;outline-offset:3px}body{background:#EDE9E4}button,input,textarea{font:inherit}',
+              '*:focus-visible{outline:3px solid #D95F59!important;outline-offset:3px}html,body{background:#FAF9F7}button,input,textarea{font:inherit}@media(prefers-color-scheme:dark){html,body{background:#141413}}',
           }}
         />
         <link rel="canonical" href="https://opendating-mobile.expo.app/" />

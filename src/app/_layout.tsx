@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/state/theme-context';
 import { RevenueCatProvider } from '@/state/revenuecat-context';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { colors } from '@/theme/colors';
 import { StatusBar } from 'expo-status-bar';
 
 export default function RootLayout() {
@@ -21,7 +22,7 @@ export default function RootLayout() {
       style={[
         styles.root,
         Platform.OS === 'web' && {
-          backgroundColor: isDark ? '#111111' : '#EDE9E4',
+          backgroundColor: isDark ? colors.dark.background : colors.light.background,
         },
       ]}
     >
@@ -33,7 +34,7 @@ export default function RootLayout() {
           styles.app,
           Platform.OS === 'web' && styles.webApp,
           Platform.OS === 'web' && {
-            backgroundColor: isDark ? '#181818' : '#FAF9F7',
+            backgroundColor: isDark ? colors.dark.background : colors.light.background,
           },
         ]}
       >
@@ -68,9 +69,5 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 760,
     alignSelf: 'center',
-    shadowColor: '#000000',
-    shadowOpacity: 0.08,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 4 },
   },
 });
