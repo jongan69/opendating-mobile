@@ -88,6 +88,10 @@ export default function PrivacyScreen() {
             body="Before your display name and bio go live, they are automatically screened for harmful content. That screening runs on our service provider, Cloudflare, and is the only place your profile text is processed by an automated system. Your photos are not sent to it, and your messages are never screened — they stay end-to-end encrypted."
           />
           <Section
+            title="Optional Purchases"
+            body="RevenueCat validates the optional Plus entitlement using an opaque billing identifier. It receives Apple purchase status, not your profile, photos, location, recovery key, likes, matches, reports, or messages."
+          />
+          <Section
             title="Blocking & Reporting"
             body="Blocks and reports are private. When you report someone, they never learn who filed the report. Reports are encrypted and reviewed only by moderation services, never published publicly."
           />

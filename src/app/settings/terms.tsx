@@ -40,6 +40,10 @@ const TERMS = [
     body: 'OpenDating may limit or remove accounts and content to enforce these terms and the Community Standards. You may request deletion in Settings. Some safety records may be retained when legally required or necessary to prevent repeat abuse.',
   },
   {
+    title: 'Optional purchases',
+    body: 'OpenDating Plus is an optional one-time purchase for cosmetic app accents. Discovery, matching, messaging, recovery, deletion, and safety features remain free. Apple processes payment and refunds, and Restore Purchases can recover the entitlement on supported devices.',
+  },
+  {
     title: 'Service changes',
     body: 'OpenDating is actively developed. Features may change or be temporarily unavailable, and we will give notice of material changes to these terms where required.',
   },

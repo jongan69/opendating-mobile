@@ -1,17 +1,23 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { Redirect } from 'expo-router';
 
 import { AppButton } from '@/components/ui/app-button';
 import { useRevenueCat } from '@/state/revenuecat-context';
 import { useTheme } from '@/state/theme-context';
+import { getThemeColors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
 export default function PlusScreen() {
-  const { colors } = useTheme();
+  const {
+    colors,
+    isDark,
+    accentPreference,
+    setAccentPreference,
+  } = useTheme();
   const revenueCat = useRevenueCat();
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
@@ -50,13 +56,49 @@ export default function PlusScreen() {
         <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
           Core discovery, reactions, matching, messaging, verification, recovery, filters,
           deletion, and every safety tool remain free. Plus adds customization and reusable
-          convenience controls only.
+          convenience controls only. The lifetime purchase unlocks custom app accents.
         </Text>
       </View>
 
       {revenueCat.isPlus ? (
         <Text style={[styles.status, { color: colors.success }]}>Plus is active.</Text>
       ) : null}
+      <View style={[styles.feature, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[typography.titleMedium, { color: colors.text }]}>Custom app accents</Text>
+        <Text style={[typography.bodyMedium, { color: colors.textSecondary }]}>
+          Choose Coral, Sage, Ocean, or Plum. Your selection stays on this device and never
+          changes who sees your profile.
+        </Text>
+        <View style={styles.accents}>
+          {(['coral', 'sage', 'ocean', 'plum'] as const).map((accent) => {
+            const swatch = getThemeColors(isDark ? 'dark' : 'light', accent).accent;
+            const selected = accentPreference === accent;
+            return (
+              <Pressable
+                key={accent}
+                accessibilityRole="button"
+                accessibilityLabel={`${accent} accent${selected ? ', selected' : ''}`}
+                accessibilityState={{
+                  disabled: !revenueCat.isPlus && accent !== 'coral',
+                  selected,
+                }}
+                disabled={!revenueCat.isPlus && accent !== 'coral'}
+                onPress={() => setAccentPreference(accent)}
+                style={[
+                  styles.accentButton,
+                  { borderColor: selected ? colors.text : colors.border },
+                  !revenueCat.isPlus && accent !== 'coral' && styles.disabled,
+                ]}
+              >
+                <View style={[styles.swatch, { backgroundColor: swatch }]} />
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                  {accent[0].toUpperCase() + accent.slice(1)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
       {revenueCat.packages.map((pkg) => (
         <View
           key={pkg.identifier}
@@ -101,8 +143,8 @@ export default function PlusScreen() {
         <Text style={[typography.labelLarge, { color: colors.text }]}>Restore purchases</Text>
       </AppButton>
       <Text style={[typography.caption, styles.footnote, { color: colors.textTertiary }]}>
-        Subscriptions renew through your store account until canceled there. Store-localized price
-        and terms appear before confirmation.
+        One-time purchase. No subscription. The store-localized price and terms appear before
+        confirmation.
       </Text>
     </ScrollView>
   );
@@ -113,6 +155,24 @@ const styles = StyleSheet.create({
   content: { gap: spacing.md, padding: spacing.lg, paddingBottom: spacing.xxl },
   hero: { borderRadius: radius.xl, gap: spacing.sm, padding: spacing.xl },
   status: { ...typography.titleMedium },
+  feature: {
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  accents: { flexDirection: 'row', gap: spacing.sm },
+  accentButton: {
+    alignItems: 'center',
+    borderRadius: radius.md,
+    borderWidth: 2,
+    flex: 1,
+    gap: spacing.xs,
+    minHeight: 64,
+    padding: spacing.sm,
+  },
+  swatch: { borderRadius: 12, height: 24, width: 24 },
+  disabled: { opacity: 0.42 },
   plan: {
     alignItems: 'center',
     borderRadius: radius.lg,

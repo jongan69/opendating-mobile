@@ -5,8 +5,8 @@
 // CURRENT_POLICY_VERSION and POLICY_EFFECTIVE_LABEL together whenever the
 // policy text in src/app/settings/terms.tsx changes materially.
 
-export const CURRENT_POLICY_VERSION = '2026-08-09';
-export const POLICY_EFFECTIVE_LABEL = 'August 9, 2026';
+export const CURRENT_POLICY_VERSION = '2026-08-29';
+export const POLICY_EFFECTIVE_LABEL = 'August 29, 2026';
 
 /** What the member accepted, as captured in the onboarding draft. */
 export interface PolicyAcceptance {
@@ -49,7 +49,7 @@ export function isCurrentPolicy(
  * True only for the exact form `new Date().toISOString()` produces, which is
  * what every consent writer in the app records.
  *
- * Consent must name a complete instant. A date-only string like "2026-08-09"
+ * Consent must name a complete instant. A date-only string like "2026-08-29"
  * parses to UTC midnight — precisely the effective-date floor — so without
  * this check a bare date would satisfy the current-policy gate while claiming
  * a precision no writer in this app produces.

@@ -18,9 +18,13 @@ export default function RootLayout() {
     // GestureHandlerRootView must remain the outermost full-screen view for
     // navigation and any gesture-driven controls used elsewhere in the app.
     <GestureHandlerRootView style={styles.root}>
-      <ThemeProvider>
-        <ThemedRoot />
-      </ThemeProvider>
+      <ErrorBoundary>
+        <RevenueCatProvider>
+          <ThemeProvider>
+            <ThemedRoot />
+          </ThemeProvider>
+        </RevenueCatProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }
@@ -43,12 +47,8 @@ function ThemedRoot() {
         Platform.OS === 'web' && { backgroundColor: colors.background },
       ]}
     >
-      <ErrorBoundary>
-        <RevenueCatProvider>
-          <StatusBar style={isDark ? 'light' : 'dark'} />
-          <AppNavigator />
-        </RevenueCatProvider>
-      </ErrorBoundary>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <AppNavigator />
     </SafeAreaProvider>
   );
 }

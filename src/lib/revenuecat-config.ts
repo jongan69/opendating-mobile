@@ -3,8 +3,7 @@ import * as Crypto from 'expo-crypto';
 export const OPENDATING_ENTITLEMENT_ID = 'plus';
 export const OPENDATING_OFFERING_ID = 'default';
 export const OPENDATING_PRODUCT_IDS = new Set([
-  'opendating_plus_monthly',
-  'opendating_plus_annual',
+  'opendating_plus_lifetime',
 ]);
 
 export function isRevenueCatEnabled(): boolean {

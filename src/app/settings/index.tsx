@@ -15,6 +15,7 @@ import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { ChevronRight } from '@/components/chevron';
 import { ConfirmationDialog } from '@/components/confirmation-dialog';
+import { POLICY_EFFECTIVE_LABEL } from '@/lib/policy';
 
 interface MenuRowProps {
   label: string;
@@ -272,7 +273,7 @@ export default function SettingsScreen() {
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />
             <MenuRow
               label="Terms of Service"
-              supportingText="Effective August 9, 2026"
+              supportingText={`Effective ${POLICY_EFFECTIVE_LABEL}`}
               onPress={() => router.push('/settings/terms')}
             />
             <View style={[styles.divider, { backgroundColor: colors.divider }]} />

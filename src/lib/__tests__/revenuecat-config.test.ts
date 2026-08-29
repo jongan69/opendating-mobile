@@ -51,8 +51,7 @@ describe('RevenueCat release gates', () => {
 
   it('allows only the documented OpenDating products', () => {
     expect([...OPENDATING_PRODUCT_IDS]).toEqual([
-      'opendating_plus_monthly',
-      'opendating_plus_annual',
+      'opendating_plus_lifetime',
     ]);
   });
 

@@ -1,6 +1,6 @@
 # OpenDating Store Listing
 
-**Last updated:** 2026-08-13
+**Last updated:** 2026-08-29
 
 > **Submission status: blocked.** Apple rejected iOS 0.1.0 (1) under Guideline
 > 4.3(b) on August 13, 2026. This copy belongs to the materially revised 0.1.1
@@ -52,6 +52,7 @@ BUILT AROUND DATA MINIMIZATION
 - Open an end-to-end encrypted conversation only after mutual interest
 - Block locally and report privately
 - Use the app without ads, tracking, or a data-broker business model
+- Optionally unlock Sage, Ocean, and Plum app accents with one lifetime purchase
 
 OpenDating is the first reference client for the open OpenDating protocol. Your
 recovery key can restore your account on another compatible OpenDating client or
@@ -101,6 +102,7 @@ Safety. Confirm the final console answers before submitting for review.
 | Messages and user-generated content | Messaging and safety | Yes | No |
 | Public account ID | Account functionality | Yes | No |
 | Reports and block actions | Safety and moderation | Yes | No |
+| Purchase history | Optional Plus entitlement | Yes, through an opaque billing ID | No |
 
 The app does not use third-party advertising SDKs and does not sell personal
 data. iOS export compliance is configured as standard encryption with no France

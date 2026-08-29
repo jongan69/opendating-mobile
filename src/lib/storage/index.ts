@@ -54,6 +54,7 @@ const STORAGE_KEYS = {
   LOCATION_PREFIX: 'opendating_location_prefix',
   ONBOARDING_COMPLETE: 'opendating_onboarding_done',
   THEME_PREFERENCE: 'opendating_theme',
+  ACCENT_PREFERENCE: 'opendating_accent',
   PROFILE_CONTENT: 'opendating_profile_content',
   ONBOARDING_DRAFT: 'opendating_onboarding_draft',
   POLICY_ACCEPTANCE: 'opendating_policy_acceptance',
@@ -165,6 +166,15 @@ export const storage = {
     const val = await secureGet(STORAGE_KEYS.THEME_PREFERENCE);
     if (val === 'light' || val === 'dark' || val === 'system') return val;
     return null;
+  },
+  async saveAccentPreference(accent: 'coral' | 'sage' | 'ocean' | 'plum'): Promise<void> {
+    await secureSet(STORAGE_KEYS.ACCENT_PREFERENCE, accent);
+  },
+  async getAccentPreference(): Promise<'coral' | 'sage' | 'ocean' | 'plum' | null> {
+    const value = await secureGet(STORAGE_KEYS.ACCENT_PREFERENCE);
+    return value === 'coral' || value === 'sage' || value === 'ocean' || value === 'plum'
+      ? value
+      : null;
   },
 
   async saveDiscoveryPreferences(preferences: object): Promise<void> {

@@ -99,7 +99,7 @@ const DEMO_DRAFT: OnboardingDraft = {
   countryCode: 'US',
   policyAcceptance: {
     version: CURRENT_POLICY_VERSION,
-    acceptedAt: '2026-08-09T00:00:00.000Z',
+    acceptedAt: '2026-08-29T00:00:00.000Z',
   },
 };
 

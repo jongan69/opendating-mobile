@@ -10,7 +10,7 @@ describe('isCurrentPolicy', () => {
     expect(
       isCurrentPolicy({
         version: CURRENT_POLICY_VERSION,
-        acceptedAt: '2026-08-09T00:00:00.000Z',
+        acceptedAt: '2026-08-29T00:00:00.000Z',
       })
     ).toBe(true);
   });
@@ -23,7 +23,7 @@ describe('isCurrentPolicy', () => {
     expect(isCurrentPolicy(null)).toBe(false);
     expect(isCurrentPolicy(undefined)).toBe(false);
     expect(
-      isCurrentPolicy({ version: '', acceptedAt: '2026-08-09T00:00:00.000Z' })
+      isCurrentPolicy({ version: '', acceptedAt: '2026-08-29T00:00:00.000Z' })
     ).toBe(false);
     expect(
       isCurrentPolicy({
@@ -60,7 +60,7 @@ describe('isCurrentPolicy', () => {
     ).toBe(false);
   });
 
-  // "2026-08-09" parses to UTC midnight, which is exactly the effective-date
+  // "2026-08-29" parses to UTC midnight, which is exactly the effective-date
   // floor, so a bare date would otherwise clear the gate while recording
   // consent at a precision no writer in the app produces.
   it('rejects a date-only or non-canonical acceptance timestamp', () => {
@@ -114,8 +114,8 @@ describe('isValidPolicyTimestamp', () => {
   });
 
   it('applies the caller-supplied floor', () => {
-    const floor = Date.parse('2026-08-09T00:00:00Z');
-    expect(isValidPolicyTimestamp('2026-08-09T00:00:00.000Z', floor)).toBe(
+    const floor = Date.parse('2026-08-29T00:00:00Z');
+    expect(isValidPolicyTimestamp('2026-08-29T00:00:00.000Z', floor)).toBe(
       true
     );
     expect(isValidPolicyTimestamp('2026-08-08T23:59:59.999Z', floor)).toBe(
