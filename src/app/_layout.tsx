@@ -45,8 +45,8 @@ export default function RootLayout() {
                 <Stack.Screen name="index" />
                 <Stack.Screen name="unlock" />
                 <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="candidate/[pubkey]" />
-                <Stack.Screen name="chat/[pubkey]" />
+                <Stack.Screen name="candidate" />
+                <Stack.Screen name="chat" />
                 <Stack.Screen name="filters" options={{ presentation: 'modal' }} />
               </Stack>
             </RevenueCatProvider>

@@ -57,7 +57,7 @@ export default function MatchesScreen() {
     (match: Match) => {
       markMessaged(match.match_id);
       markConversationRead(match.pubkey);
-      router.push(`/chat/${match.pubkey}`);
+      router.push({ pathname: '/chat', params: { pubkey: match.pubkey } });
     },
     [markMessaged, router]
   );

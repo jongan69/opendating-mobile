@@ -54,7 +54,7 @@ export default function ChatScreen() {
   }, [router]);
 
   const openProfile = useCallback(() => {
-    router.push(`/candidate/${pubkey}`);
+    router.push({ pathname: '/candidate', params: { pubkey } });
   }, [router, pubkey]);
 
   const openReport = useCallback(() => {
