@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { useTheme } from '@/state/theme-context';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
@@ -26,6 +27,7 @@ interface SafetyMenuProps {
   targetName: string;
   onUnmatch?: () => void;
   onBlock?: () => void;
+  evidenceEventIds?: string;
   /** Extra hook invoked after navigating to /report */
   onReport?: () => void;
 }
@@ -34,28 +36,30 @@ type SafetyAction = 'unmatch' | 'block' | 'report';
 
 export const SafetyMenu = forwardRef<SafetyMenuHandle, SafetyMenuProps>(
   function SafetyMenu(
-    { targetPubkey, targetName, onUnmatch, onBlock, onReport },
+    { targetPubkey, targetName, onUnmatch, onBlock, evidenceEventIds, onReport },
     ref
   ) {
     const router = useRouter();
     const { colors } = useTheme();
     const [sheetVisible, setSheetVisible] = useState(false);
+    const [confirmation, setConfirmation] = useState<Exclude<SafetyAction, 'report'> | null>(null);
 
     const handleReport = useCallback(() => {
       // Navigate to the report flow with the target's pubkey
-      router.push({ pathname: '/report', params: { pubkey: targetPubkey } });
+      router.push({
+        pathname: '/report',
+        params: {
+          pubkey: targetPubkey,
+          name: targetName,
+          ...(evidenceEventIds ? { evidence_event_ids: evidenceEventIds } : {}),
+        },
+      });
       onReport?.();
-    }, [router, targetPubkey, onReport]);
+    }, [router, targetName, targetPubkey, evidenceEventIds, onReport]);
 
     const confirmUnmatch = useCallback(() => {
       if (Platform.OS === 'web') {
-        if (
-          window.confirm(
-            `Unmatch ${targetName}? You won't be able to message each other anymore.`
-          )
-        ) {
-          onUnmatch?.();
-        }
+        setConfirmation('unmatch');
         return;
       }
       Alert.alert(
@@ -74,13 +78,7 @@ export const SafetyMenu = forwardRef<SafetyMenuHandle, SafetyMenuProps>(
 
     const confirmBlock = useCallback(() => {
       if (Platform.OS === 'web') {
-        if (
-          window.confirm(
-            `Block ${targetName}? You won't see each other in discovery or be able to message or match. They won't be notified.`
-          )
-        ) {
-          onBlock?.();
-        }
+        setConfirmation('block');
         return;
       }
       Alert.alert(
@@ -113,29 +111,35 @@ export const SafetyMenu = forwardRef<SafetyMenuHandle, SafetyMenuProps>(
 
     const present = useCallback(() => {
       if (Platform.OS === 'ios') {
+        const actions = [
+          ...(onUnmatch ? [{ label: 'Unmatch', run: confirmUnmatch }] : []),
+          ...(onBlock ? [{ label: 'Block', run: confirmBlock }] : []),
+          { label: 'Report', run: handleReport },
+        ];
         ActionSheetIOS.showActionSheetWithOptions(
           {
             title: targetName,
             message: 'Choose an action',
-            options: ['Unmatch', 'Block', 'Report', 'Cancel'],
-            cancelButtonIndex: 3,
-            destructiveButtonIndex: 0,
+            options: [...actions.map((action) => action.label), 'Cancel'],
+            cancelButtonIndex: actions.length,
+            destructiveButtonIndex: actions
+              .map((action, index) => (action.label === 'Report' ? -1 : index))
+              .filter((index) => index >= 0),
           },
           (index) => {
-            if (index === 0) confirmUnmatch();
-            else if (index === 1) confirmBlock();
-            else if (index === 2) handleReport();
+            actions[index]?.run();
           }
         );
       } else {
         // Android / Web — themed bottom sheet
         setSheetVisible(true);
       }
-    }, [targetName, confirmUnmatch, confirmBlock, handleReport]);
+    }, [targetName, onUnmatch, onBlock, confirmUnmatch, confirmBlock, handleReport]);
 
     useImperativeHandle(ref, () => ({ present }), [present]);
 
     return (
+      <>
       <Modal
         visible={sheetVisible}
         transparent
@@ -163,32 +167,30 @@ export const SafetyMenu = forwardRef<SafetyMenuHandle, SafetyMenuProps>(
               {targetName}
             </Text>
 
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => choose('unmatch')}
-              style={({ pressed }) => [
-                styles.option,
-                pressed && styles.optionPressed,
-              ]}
-            >
-              <Text style={[styles.optionLabel, { color: colors.destructive }]}>
-                Unmatch
-              </Text>
-            </Pressable>
-            <View style={[styles.separator, { backgroundColor: colors.divider }]} />
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => choose('block')}
-              style={({ pressed }) => [
-                styles.option,
-                pressed && styles.optionPressed,
-              ]}
-            >
-              <Text style={[styles.optionLabel, { color: colors.destructive }]}>
-                Block
-              </Text>
-            </Pressable>
-            <View style={[styles.separator, { backgroundColor: colors.divider }]} />
+            {onUnmatch ? (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => choose('unmatch')}
+                  style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
+                >
+                  <Text style={[styles.optionLabel, { color: colors.destructive }]}>Unmatch</Text>
+                </Pressable>
+                <View style={[styles.separator, { backgroundColor: colors.divider }]} />
+              </>
+            ) : null}
+            {onBlock ? (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => choose('block')}
+                  style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
+                >
+                  <Text style={[styles.optionLabel, { color: colors.destructive }]}>Block</Text>
+                </Pressable>
+                <View style={[styles.separator, { backgroundColor: colors.divider }]} />
+              </>
+            ) : null}
             <Pressable
               accessibilityRole="button"
               onPress={() => choose('report')}
@@ -217,6 +219,25 @@ export const SafetyMenu = forwardRef<SafetyMenuHandle, SafetyMenuProps>(
           </View>
         </View>
       </Modal>
+      <ConfirmationDialog
+        visible={confirmation !== null}
+        title={`${confirmation === 'block' ? 'Block' : 'Unmatch'} ${targetName}?`}
+        message={
+          confirmation === 'block'
+            ? "You won't see each other in discovery or be able to message or match. They won't be notified."
+            : "You won't be able to message each other anymore."
+        }
+        confirmLabel={confirmation === 'block' ? 'Block' : 'Unmatch'}
+        destructive
+        onCancel={() => setConfirmation(null)}
+        onConfirm={() => {
+          const action = confirmation;
+          setConfirmation(null);
+          if (action === 'block') onBlock?.();
+          else if (action === 'unmatch') onUnmatch?.();
+        }}
+      />
+      </>
     );
   }
 );

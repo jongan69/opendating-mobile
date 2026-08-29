@@ -143,6 +143,7 @@ export default function IntroductionsScreen() {
     !isScreenshotMode && !!error && candidates.length === 0 && !loading;
   const showErrorBanner =
     !isScreenshotMode && !!error && candidates.length > 0;
+  const needsArea = error?.toLowerCase().includes('area') ?? false;
   const outOfInterests = loaded && !unavailable && remainingToday === 0;
 
   return (
@@ -196,7 +197,14 @@ export default function IntroductionsScreen() {
             icon={unavailable ? '🌱' : '📡'}
             title={unavailable ? 'Introductions are coming online' : "Couldn't load introductions"}
             subtitle={error}
-            action={{ label: 'Check again', onPress: () => void fetchCandidates() }}
+            action={
+              needsArea
+                ? {
+                    label: 'Set my approximate area',
+                    onPress: () => router.push('/(onboarding)/location?mode=update'),
+                  }
+                : { label: 'Check again', onPress: () => void fetchCandidates() }
+            }
           />
         </View>
       ) : currentCandidate ? (

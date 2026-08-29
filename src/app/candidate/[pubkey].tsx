@@ -27,6 +27,7 @@ import * as Haptics from 'expo-haptics';
 import { SafetyMenu, type SafetyMenuHandle } from '@/components/safety/safety-menu';
 import { useCachedCandidate } from '@/features/discovery/candidate-cache';
 import { postIntroductionDecision } from '@/features/discovery/introduction-decisions';
+import { useSafety } from '@/features/safety/use-safety';
 import { distanceLabel, genderLabel, intentLabel } from '@/lib/profile-labels';
 import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
@@ -44,6 +45,7 @@ export default function CandidateDetail() {
   const { width: screenWidth } = useWindowDimensions();
   const candidate = useCachedCandidate(pubkey);
   const safetyRef = useRef<SafetyMenuHandle>(null);
+  const { blockUser, error: safetyError } = useSafety();
   const decidedRef = useRef(false);
 
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -284,6 +286,11 @@ export default function CandidateDetail() {
       {/* Explicit text preserves the deliberate-introduction model on the full
           profile and makes the privacy consequence of each choice clear. */}
       <View style={[styles.actions, { borderTopColor: colors.border }]}>
+        {safetyError ? (
+          <Text style={[typography.caption, styles.safetyError, { color: colors.destructive }]}>
+            {safetyError}
+          </Text>
+        ) : null}
         <Pressable
           onPress={() => decide('pass')}
           accessibilityRole="button"
@@ -317,7 +324,9 @@ export default function CandidateDetail() {
         ref={safetyRef}
         targetPubkey={candidate.pubkey}
         targetName={displayName}
-        onBlock={() => router.back()}
+        onBlock={() => {
+          void blockUser(candidate.pubkey).then(() => router.back()).catch(() => {});
+        }}
       />
     </SafeAreaView>
   );
@@ -525,10 +534,12 @@ function makeStyles(colors: ThemeColors, screenWidth: number) {
     },
     actions: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       gap: spacing.md,
       padding: spacing.md,
       borderTopWidth: StyleSheet.hairlineWidth,
     },
+    safetyError: { width: '100%', textAlign: 'center' },
     actionButton: {
       flex: 1,
       minHeight: 52,

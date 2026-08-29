@@ -48,6 +48,7 @@ import { mapServiceError, ServiceUnavailableError } from './errors';
 import { parseCapabilities, serviceLabel } from './capabilities';
 import { unwrapGiftWrap } from './gift-wrap';
 import { uploadPendingPhotos } from './media';
+import { rememberMessage } from '@/features/messaging/message-history';
 import { identityVault, type IdentityState } from '@/lib/storage/identity-vault';
 import { storage } from '@/lib/storage';
 import {
@@ -121,8 +122,8 @@ class OpenDatingClientImpl {
   private messageListeners = new Set<(msg: ODMessage) => void>();
   /** Rumor ids already delivered — relays re-send, and we must not double-fire. */
   private seenRumorIds = new Set<string>();
-  /** DMs that arrive during bootstrap, before the conversation hook mounts. */
-  private bufferedMessages: ODMessage[] = [];
+  /** Bounded, memory-only replay for every conversation subscriber. */
+  private messageHistory: ODMessage[] = [];
   /** From the relay's NIP-11 `limitation.auth_required`. */
   private relayRequiresAuth = true;
 
@@ -208,7 +209,7 @@ class OpenDatingClientImpl {
     await identityVault.clear();
     this.userPubkey = '';
     this.userPrivkey = '';
-    this.bufferedMessages = [];
+    this.messageHistory = [];
   }
 
   async lockIdentity(): Promise<void> {
@@ -216,7 +217,7 @@ class OpenDatingClientImpl {
     await identityVault.lock();
     this.userPubkey = '';
     this.userPrivkey = '';
-    this.bufferedMessages = [];
+    this.messageHistory = [];
   }
 
   // ---- Connection ----
@@ -348,7 +349,7 @@ class OpenDatingClientImpl {
     }
     this.pendingRequests.clear();
     this.seenRumorIds.clear();
-    this.bufferedMessages = [];
+    this.messageHistory = [];
 
     // NDK manages relay connections via its pool; no explicit disconnect() method.
     // Just drop the reference and let GC handle cleanup.
@@ -661,13 +662,9 @@ class OpenDatingClientImpl {
       outgoing,
     };
 
-    if (this.messageListeners.size === 0) {
-      this.bufferedMessages.push(msg);
-      if (this.bufferedMessages.length > 100) this.bufferedMessages.shift();
-    } else {
-      for (const listener of this.messageListeners) {
-        listener(msg);
-      }
+    rememberMessage(this.messageHistory, msg);
+    for (const listener of this.messageListeners) {
+      listener(msg);
     }
     return true;
   }
@@ -889,9 +886,7 @@ class OpenDatingClientImpl {
 
   subscribeToMessages(callback: (msg: ODMessage) => void): () => void {
     this.messageListeners.add(callback);
-    const buffered = this.bufferedMessages;
-    this.bufferedMessages = [];
-    for (const message of buffered) callback(message);
+    for (const message of this.messageHistory) callback(message);
     // The inbox subscription is opened on connect and shared by every
     // listener, so attaching here never opens a second relay subscription.
     this.startInboxSubscription();

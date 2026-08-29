@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
@@ -33,6 +33,12 @@ export default function MatchesScreen() {
   const { colors } = useTheme();
   const { matches, newMatches, loading, error, refresh, markMessaged } = useMatches();
   const conversationLog = useConversationLog();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
 
   const screenshotMatches = useMemo(() => getScreenshotMatches(), []);
   const displayMatches = isScreenshotMode ? screenshotMatches : matches;

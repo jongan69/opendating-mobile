@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 import { BrandMark } from '@/components/brand/brand-mark';
+import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { getOpenDatingClient, resetOpenDatingClient } from '@/lib/opendating/open-dating-client';
 import { storage } from '@/lib/storage';
 import { useTheme } from '@/state/theme-context';
@@ -18,6 +19,7 @@ export default function UnlockScreen() {
   const [passphrase, setPassphrase] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDifferentKey, setConfirmDifferentKey] = useState(false);
 
   const unlock = useCallback(async () => {
     if (!passphrase || busy) return;
@@ -35,12 +37,6 @@ export default function UnlockScreen() {
   }, [busy, passphrase, router]);
 
   const handleDifferentKey = useCallback(async () => {
-    const confirmed =
-      Platform.OS !== 'web' ||
-      globalThis.confirm(
-        'Remove the account copy stored in this browser? This does not delete server data. Make sure you have your recovery key.'
-      );
-    if (!confirmed) return;
     await getOpenDatingClient().deleteIdentity();
     await storage.clearAll();
     await resetOpenDatingClient();
@@ -85,10 +81,22 @@ export default function UnlockScreen() {
             <Text style={[typography.button, { color: colors.textInverse }]}>{busy ? 'Unlocking…' : 'Unlock'}</Text>
           </Pressable>
         </View>
-        <Pressable onPress={() => void handleDifferentKey()} accessibilityRole="button">
+        <Pressable onPress={() => setConfirmDifferentKey(true)} accessibilityRole="button">
           <Text style={[typography.labelMedium, { color: colors.accent }]}>Use a different recovery key</Text>
         </Pressable>
       </View>
+      <ConfirmationDialog
+        visible={confirmDifferentKey}
+        title="Use a different recovery key?"
+        message="This removes the account copy stored in this browser without deleting server data. Make sure you have your recovery key."
+        confirmLabel="Remove browser copy"
+        destructive
+        onCancel={() => setConfirmDifferentKey(false)}
+        onConfirm={() => {
+          setConfirmDifferentKey(false);
+          void handleDifferentKey();
+        }}
+      />
     </SafeAreaView>
   );
 }

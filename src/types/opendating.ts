@@ -44,7 +44,6 @@ export interface DiscoveryPreferences {
   max_age?: number;
   intent?: string;
   genders?: string[];
-  relationship_intents?: string[];
 }
 
 export interface CandidateQuery {

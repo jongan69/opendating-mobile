@@ -57,6 +57,7 @@ const STORAGE_KEYS = {
   PROFILE_CONTENT: 'opendating_profile_content',
   ONBOARDING_DRAFT: 'opendating_onboarding_draft',
   POLICY_ACCEPTANCE: 'opendating_policy_acceptance',
+  DISCOVERY_PREFERENCES: 'opendating_discovery_preferences',
 } as const;
 
 export const storage = {
@@ -164,6 +165,21 @@ export const storage = {
     const val = await secureGet(STORAGE_KEYS.THEME_PREFERENCE);
     if (val === 'light' || val === 'dark' || val === 'system') return val;
     return null;
+  },
+
+  async saveDiscoveryPreferences(preferences: object): Promise<void> {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.DISCOVERY_PREFERENCES,
+      JSON.stringify(preferences)
+    );
+  },
+  async getDiscoveryPreferences<T>(): Promise<T | null> {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.DISCOVERY_PREFERENCES);
+      return raw ? (JSON.parse(raw) as T) : null;
+    } catch {
+      return null;
+    }
   },
 
   // Clear all app data
