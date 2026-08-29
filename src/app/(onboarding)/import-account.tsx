@@ -4,8 +4,7 @@
 // It never leaves the device.
 
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { bech32, hex } from '@scure/base';
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   ErrorBanner,
@@ -16,48 +15,10 @@ import { useTheme } from '@/state/theme-context';
 import type { ThemeColors } from '@/theme/colors';
 import { useOnboardingDraft } from '@/features/onboarding/onboarding-draft';
 import { getOpenDatingClient } from '@/lib/opendating/open-dating-client';
+import { normalizeRecoveryKey } from '@/lib/opendating/recovery-key';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
-
-/**
- * Normalize a user-supplied private key to lowercase hex.
- * Accepts: 64 hex chars, or an nsec… bech32 key (checksum-validated).
- */
-function normalizePrivateKey(input: string): string {
-  const trimmed = input.trim();
-
-  if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
-    return trimmed.toLowerCase();
-  }
-
-  if (trimmed.toLowerCase().startsWith('nsec1')) {
-    let decoded;
-    try {
-      decoded = bech32.decode(trimmed.toLowerCase() as `${string}1${string}`);
-    } catch {
-      // Plain apostrophe: this is a JS string, not JSX, so an HTML entity
-      // would reach the member verbatim.
-      throw new Error(
-        "That key doesn't look valid — double-check it was copied completely."
-      );
-    }
-    if (decoded.prefix !== 'nsec') {
-      throw new Error(
-        'That looks like a public account ID. Import needs your recovery key, the secret one.'
-      );
-    }
-    const bytes = bech32.fromWords(decoded.words);
-    if (bytes.length !== 32) {
-      throw new Error('That key is the wrong length — check it was copied in full.');
-    }
-    return hex.encode(bytes);
-  }
-
-  throw new Error(
-    'That does not look like a recovery key. Paste the whole thing, including the prefix.'
-  );
-}
 
 export default function ImportAccountScreen() {
   const router = useRouter();
@@ -68,6 +29,8 @@ export default function ImportAccountScreen() {
   const [showKey, setShowKey] = useState(false);
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passphrase, setPassphrase] = useState('');
+  const [confirmation, setConfirmation] = useState('');
 
   const styles = makeStyles(colors);
 
@@ -76,9 +39,19 @@ export default function ImportAccountScreen() {
     setImporting(true);
     setError(null);
     try {
-      const privkeyHex = normalizePrivateKey(keyText);
+      const privkeyHex = normalizeRecoveryKey(keyText);
+      if (Platform.OS === 'web') {
+        if (passphrase.length < 12) {
+          throw new Error('Use at least 12 characters for your browser-lock passphrase.');
+        }
+        if (passphrase !== confirmation) {
+          throw new Error('The browser-lock passphrases do not match.');
+        }
+      }
       const client = getOpenDatingClient();
-      const { pubkey } = await client.importIdentity(privkeyHex);
+      const { pubkey } = await client.importIdentity(privkeyHex, {
+        vaultPassphrase: Platform.OS === 'web' ? passphrase : undefined,
+      });
       update('pubkey', pubkey);
       router.push('/(onboarding)/privacy');
     } catch (err) {
@@ -128,6 +101,37 @@ export default function ImportAccountScreen() {
         </Pressable>
       </View>
 
+      {Platform.OS === 'web' ? (
+        <View style={styles.fieldGroup}>
+          <FieldLabel>Protect this browser copy</FieldLabel>
+          <Text style={[typography.bodySmall, styles.browserCopy, { color: colors.textSecondary }]}>
+            This passphrase encrypts the browser copy of your recovery key. It is not an OpenDating account password.
+          </Text>
+          <TextInput
+            value={passphrase}
+            onChangeText={setPassphrase}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            placeholder="At least 12 characters"
+            placeholderTextColor={colors.textTertiary}
+            style={[styles.input, { color: colors.text }]}
+          />
+          <TextInput
+            value={confirmation}
+            onChangeText={setConfirmation}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            placeholder="Confirm passphrase"
+            placeholderTextColor={colors.textTertiary}
+            style={[styles.input, { color: colors.text, marginTop: spacing.sm }]}
+          />
+        </View>
+      ) : null}
+
       {/* Security warning */}
       <View style={styles.warningBox}>
         <Text style={[typography.labelMedium, { color: colors.warning }]}>
@@ -139,9 +143,9 @@ export default function ImportAccountScreen() {
             { color: colors.textSecondary, marginTop: spacing.sm },
           ]}
         >
-          Anyone with this key controls the account. It&apos;s stored only in your
-          device's secure storage and never sent anywhere — but don&apos;t share it,
-          screenshot it, or paste it where others can see.
+          {Platform.OS === 'web'
+            ? 'Anyone with this key controls the account. This browser encrypts its copy with your browser-lock passphrase and never sends the key to our servers. Do not share or screenshot it.'
+            : "Anyone with this key controls the account. It's stored only in your device's secure storage and never sent anywhere — but don't share it, screenshot it, or paste it where others can see."}
         </Text>
       </View>
 
@@ -171,6 +175,9 @@ function makeStyles(colors: ThemeColors) {
       alignSelf: 'flex-end',
       marginTop: spacing.sm,
       paddingHorizontal: spacing.xs,
+    },
+    browserCopy: {
+      marginBottom: spacing.sm,
     },
     warningBox: {
       borderRadius: radius.md,

@@ -2,7 +2,7 @@
 // Polyfill crypto.getRandomValues before anything else (required by @noble/curves for key generation)
 import 'react-native-get-random-values';
 import { Stack } from 'expo-router';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { Platform, StyleSheet, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/state/theme-context';
@@ -17,17 +17,33 @@ export default function RootLayout() {
   return (
     // GestureHandlerRootView must remain the outermost full-screen view for
     // navigation and any gesture-driven controls used elsewhere in the app.
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView
+      style={[
+        styles.root,
+        Platform.OS === 'web' && {
+          backgroundColor: isDark ? '#111111' : '#EDE9E4',
+        },
+      ]}
+    >
       {/* Provides the insets that useSafeAreaInsets reads. Also absent, which
           left the chat composer measuring a zero bottom inset and sitting
           under the home indicator. */}
-      <SafeAreaProvider>
+      <SafeAreaProvider
+        style={[
+          styles.app,
+          Platform.OS === 'web' && styles.webApp,
+          Platform.OS === 'web' && {
+            backgroundColor: isDark ? '#181818' : '#FAF9F7',
+          },
+        ]}
+      >
         <ErrorBoundary>
           <ThemeProvider>
             <RevenueCatProvider>
               <StatusBar style={isDark ? 'light' : 'dark'} />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
+                <Stack.Screen name="unlock" />
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="candidate/[pubkey]" />
                 <Stack.Screen name="chat/[pubkey]" />
@@ -44,5 +60,17 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  app: {
+    flex: 1,
+  },
+  webApp: {
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
+    shadowColor: '#000000',
+    shadowOpacity: 0.08,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 4 },
   },
 });

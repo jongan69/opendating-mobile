@@ -13,7 +13,7 @@ module.exports = {
   transform: {
     '^.+\\.[tj]sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.jest.json' }],
   },
-  transformIgnorePatterns: ['/node_modules/(?!(opendating-protocol|@noble)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(opendating-protocol|@noble|@scure)/)'],
   testPathIgnorePatterns: ['/node_modules/', '/.expo/'],
   testMatch: ['**/__tests__/**/*.test.ts'],
 };

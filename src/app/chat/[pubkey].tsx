@@ -1,6 +1,6 @@
 // Chat screen — NIP-17 encrypted messaging with safety controls.
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   ActionSheetIOS,
   Alert,
@@ -22,6 +22,7 @@ import { useSafety } from '@/features/safety/use-safety';
 import { useCachedCandidate } from '@/features/discovery/candidate-cache';
 import { MessageList } from '@/components/chat/message-list';
 import { ChatComposer } from '@/components/chat/chat-composer';
+import { SafetyMenu, type SafetyMenuHandle } from '@/components/safety/safety-menu';
 import { shortPubkey } from '@/lib/format';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
@@ -34,6 +35,7 @@ export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const { messages, sendMessage, error } = useMessaging(pubkey);
   const { blockUser, unmatchUser } = useSafety();
+  const safetyRef = useRef<SafetyMenuHandle>(null);
 
   const candidate = useCachedCandidate(pubkey);
   const displayName =
@@ -60,6 +62,12 @@ export default function ChatScreen() {
   }, [router, pubkey, displayName]);
 
   const confirmUnmatch = useCallback(() => {
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm("Unmatch? You'll both disappear from each other's matches.")) {
+        void unmatchUser(pubkey).then(goBack);
+      }
+      return;
+    }
     Alert.alert('Unmatch?', "You'll both disappear from each other's matches.", [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -73,6 +81,12 @@ export default function ChatScreen() {
   }, [pubkey, unmatchUser, goBack]);
 
   const confirmBlock = useCallback(() => {
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm("Block? They won't be able to message you or see you in discovery.")) {
+        void blockUser(pubkey).then(goBack);
+      }
+      return;
+    }
     Alert.alert('Block?', "They won't be able to message you or see you in discovery.", [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -86,6 +100,10 @@ export default function ChatScreen() {
   }, [pubkey, blockUser, goBack]);
 
   const openSafetyMenu = useCallback(() => {
+    if (Platform.OS === 'web') {
+      safetyRef.current?.present();
+      return;
+    }
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
@@ -203,6 +221,13 @@ export default function ChatScreen() {
           <ChatComposer onSend={handleSend} />
         </View>
       </KeyboardAvoidingView>
+      <SafetyMenu
+        ref={safetyRef}
+        targetPubkey={pubkey}
+        targetName={displayName}
+        onUnmatch={() => void unmatchUser(pubkey).then(goBack)}
+        onBlock={() => void blockUser(pubkey).then(goBack)}
+      />
     </SafeAreaView>
   );
 }

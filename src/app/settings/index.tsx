@@ -1,7 +1,7 @@
 // Settings — grouped menu with account, discovery, about, and danger sections.
 
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -147,6 +147,13 @@ export default function SettingsScreen() {
   );
 
   const changeVisibility = useCallback(() => {
+    if (Platform.OS === 'web') {
+      const next = visibility === 'hidden' ? 'visible' : 'hidden';
+      if (globalThis.confirm(`Make your profile ${next} in discovery?`)) {
+        void updateVisibility(next);
+      }
+      return;
+    }
     Alert.alert(
       'Visibility',
       'Choose who can see your profile in discovery.',
@@ -162,7 +169,7 @@ export default function SettingsScreen() {
         },
       ]
     );
-  }, [updateVisibility]);
+  }, [updateVisibility, visibility]);
 
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
@@ -252,6 +259,12 @@ export default function SettingsScreen() {
               label="Terms of Service"
               supportingText="Effective August 9, 2026"
               onPress={() => router.push('/settings/terms')}
+            />
+            <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+            <MenuRow
+              label="Report a Problem"
+              supportingText="Preview a privacy-safe report"
+              onPress={() => router.push('/settings/report-problem')}
             />
           </View>
 

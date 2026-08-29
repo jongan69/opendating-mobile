@@ -1,6 +1,7 @@
 // Local storage abstraction.
 // Uses expo-secure-store for sensitive data, AsyncStorage for cache only.
-// NEVER stores: nsec, private keys, decrypted messages, raw GPS.
+// Identity is owned by identity-vault.ts. This module never stores decrypted
+// messages or raw GPS.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
@@ -49,8 +50,6 @@ async function secureDelete(key: string): Promise<void> {
 // ---- Public API ----
 
 const STORAGE_KEYS = {
-  IDENTITY_PRIVKEY: 'opendating_privkey',
-  IDENTITY_PUBKEY: 'opendating_pubkey',
   SERVICES_CACHE: 'opendating_services',
   LOCATION_PREFIX: 'opendating_location_prefix',
   ONBOARDING_COMPLETE: 'opendating_onboarding_done',
@@ -61,24 +60,6 @@ const STORAGE_KEYS = {
 } as const;
 
 export const storage = {
-  // Identity (secure)
-  async savePrivateKey(key: string): Promise<void> {
-    await secureSet(STORAGE_KEYS.IDENTITY_PRIVKEY, key);
-  },
-  async getPrivateKey(): Promise<string | null> {
-    return secureGet(STORAGE_KEYS.IDENTITY_PRIVKEY);
-  },
-  async savePublicKey(key: string): Promise<void> {
-    await secureSet(STORAGE_KEYS.IDENTITY_PUBKEY, key);
-  },
-  async getPublicKey(): Promise<string | null> {
-    return secureGet(STORAGE_KEYS.IDENTITY_PUBKEY);
-  },
-  async deleteIdentity(): Promise<void> {
-    await secureDelete(STORAGE_KEYS.IDENTITY_PRIVKEY);
-    await secureDelete(STORAGE_KEYS.IDENTITY_PUBKEY);
-  },
-
   // Services cache
   async saveServicesCache(data: object): Promise<void> {
     await secureSet(STORAGE_KEYS.SERVICES_CACHE, JSON.stringify(data));

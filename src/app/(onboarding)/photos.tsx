@@ -1,8 +1,8 @@
 // Photos — pick 2–6 photos from the library, shown in a 3-column grid.
 // Previews use expo-image; picker uses expo-image-picker.
 
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -31,6 +31,14 @@ export default function PhotosScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const styles = makeStyles(colors);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !draft.photos.some((uri) => uri.startsWith('blob:'))) return;
+    const restorable = draft.photos.filter((uri) => !uri.startsWith('blob:'));
+    setPhotos(restorable);
+    update('photos', restorable);
+    setError('Photos selected before this reload need to be chosen again.');
+  }, [draft.photos, update]);
 
   const pickPhotos = async () => {
     if (picking) return;

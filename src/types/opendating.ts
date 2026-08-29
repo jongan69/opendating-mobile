@@ -248,6 +248,7 @@ export type ConnectionState =
 export type AppBootstrapState =
   | 'loading'
   | 'no_identity'
+  | 'identity_locked'
   | 'connecting'
   | 'authenticating'
   | 'fetching_capabilities'

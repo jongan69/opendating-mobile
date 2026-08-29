@@ -34,6 +34,9 @@ export default function BootstrapScreen() {
       case 'no_identity':
         router.replace('/(onboarding)/welcome');
         break;
+      case 'identity_locked':
+        router.replace('/unlock');
+        break;
       case 'no_profile':
         router.replace('/(onboarding)/basics');
         break;

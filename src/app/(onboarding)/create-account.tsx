@@ -2,7 +2,7 @@
 // The key is stored in the phone's secure storage and never leaves the device.
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   ErrorBanner,
@@ -24,12 +24,22 @@ export default function CreateAccountScreen() {
 
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passphrase, setPassphrase] = useState('');
+  const [confirmation, setConfirmation] = useState('');
 
   const handleCreate = async () => {
     if (creating) return;
     setCreating(true);
     setError(null);
     try {
+      if (Platform.OS === 'web') {
+        if (passphrase.length < 12) {
+          throw new Error('Use at least 12 characters for your browser-lock passphrase.');
+        }
+        if (passphrase !== confirmation) {
+          throw new Error('The browser-lock passphrases do not match.');
+        }
+      }
       if (isScreenshotMode) {
         // Skip real key generation — use the demo pubkey from the draft
         update('pubkey', 'demo-pubkey-0000000000000000000000000000000000000000000000000000000000000000');
@@ -37,7 +47,9 @@ export default function CreateAccountScreen() {
         return;
       }
       const client = getOpenDatingClient();
-      const { pubkey } = await client.createIdentity();
+      const { pubkey } = await client.createIdentity({
+        vaultPassphrase: Platform.OS === 'web' ? passphrase : undefined,
+      });
       update('pubkey', pubkey);
       router.push('/(onboarding)/privacy');
     } catch (err) {
@@ -64,9 +76,40 @@ export default function CreateAccountScreen() {
     >
       {error ? <ErrorBanner message={error} /> : null}
 
+      {Platform.OS === 'web' ? (
+        <View style={styles.passphraseCard}>
+          <Text style={[typography.titleSmall, { color: colors.text }]}>Protect this browser copy</Text>
+          <Text style={[typography.bodySmall, { color: colors.textSecondary }]}>
+            Create a browser-lock passphrase with at least 12 characters. It encrypts your recovery key in this browser and is not an OpenDating account password.
+          </Text>
+          <TextInput
+            value={passphrase}
+            onChangeText={setPassphrase}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            placeholder="Browser-lock passphrase"
+            placeholderTextColor={colors.textTertiary}
+            style={[styles.input, { color: colors.text }]}
+          />
+          <TextInput
+            value={confirmation}
+            onChangeText={setConfirmation}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            placeholder="Confirm passphrase"
+            placeholderTextColor={colors.textTertiary}
+            style={[styles.input, { color: colors.text }]}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.infoCard}>
         <Text style={[typography.titleSmall, { color: colors.text }]}>
-          Your recovery key stays on this device
+          Your recovery key stays {Platform.OS === 'web' ? 'encrypted in this browser' : 'on this device'}
         </Text>
         <Text
           style={[
@@ -74,9 +117,9 @@ export default function CreateAccountScreen() {
             { color: colors.textSecondary, marginTop: spacing.sm },
           ]}
         >
-          We generate a recovery key right on your phone. It's stored in your
-          device's secure storage — not on our servers — and it never leaves
-          your phone.
+          {Platform.OS === 'web'
+            ? 'We generate a recovery key in this browser and encrypt it with your browser-lock passphrase before saving it. It is never sent to our servers.'
+            : "We generate a recovery key right on your phone. It's stored in your device's secure storage — not on our servers — and it never leaves your phone."}
         </Text>
       </View>
 
@@ -127,6 +170,19 @@ function makeStyles(colors: ThemeColors) {
       borderColor: colors.border,
       padding: spacing.lg,
       marginBottom: spacing.lg,
+    },
+    passphraseCard: {
+      gap: spacing.md,
+      marginBottom: spacing.lg,
+    },
+    input: {
+      minHeight: 52,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.lg,
+      fontSize: 17,
     },
     steps: {
       gap: spacing.md,

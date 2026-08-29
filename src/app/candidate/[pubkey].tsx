@@ -12,6 +12,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -74,7 +75,9 @@ export default function CandidateDetail() {
       // discovery screen so a double tap cannot reuse the same grant.
       if (decidedRef.current) return;
       decidedRef.current = true;
-      if (direction === 'like') {
+      if (Platform.OS === 'web') {
+        // Browser feedback stays visual; Expo haptics is native-only here.
+      } else if (direction === 'like') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
       } else {
         Haptics.selectionAsync().catch(() => {});

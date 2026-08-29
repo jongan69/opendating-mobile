@@ -14,6 +14,11 @@ export default function RootHtml({ children }: { children: ReactNode }) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta
+          httpEquiv="Content-Security-Policy"
+          content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://opendating-relay.jonathang132298.workers.dev wss://opendating-relay.jonathang132298.workers.dev https:; worker-src 'self' blob:; media-src 'self' blob: https:"
+        />
+        <meta name="referrer" content="no-referrer" />
+        <meta
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
@@ -32,7 +37,13 @@ export default function RootHtml({ children }: { children: ReactNode }) {
           content="https://opendating.org/images/lockup-coral.png"
         />
         <meta name="theme-color" content="#FAF9F7" />
-        <link rel="canonical" href="https://opendating.org/" />
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              '*:focus-visible{outline:3px solid #D95F59!important;outline-offset:3px}body{background:#EDE9E4}button,input,textarea{font:inherit}',
+          }}
+        />
+        <link rel="canonical" href="https://opendating-mobile.expo.app/" />
         <ScrollViewStyleReset />
         {headNodes}
       </head>

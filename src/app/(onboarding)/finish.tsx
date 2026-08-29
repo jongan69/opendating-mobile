@@ -3,7 +3,7 @@
 // is the organizing experience, not a setting hidden behind the dating flow.
 
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
@@ -19,6 +19,7 @@ export default function FinishScreen() {
   const styles = makeStyles(colors);
 
   useEffect(() => {
+    if (Platform.OS === 'web') return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
       () => {
         // Haptics are optional — ignore failures on unsupported devices.

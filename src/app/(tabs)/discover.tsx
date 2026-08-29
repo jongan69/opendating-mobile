@@ -5,7 +5,7 @@
 // privacy guarantees as before; only the member-facing interaction changes.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
@@ -93,7 +93,9 @@ export default function IntroductionsScreen() {
       interestPendingRef.current = true;
       setInterestPending(true);
       try {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        if (Platform.OS !== 'web') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+        }
         const matched = await like(pubkey, grant);
         if (matched) presentMatch(pubkey);
       } finally {
@@ -106,7 +108,7 @@ export default function IntroductionsScreen() {
 
   const handleSkip = useCallback(
     (pubkey: string) => {
-      Haptics.selectionAsync().catch(() => {});
+      if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
       pass(pubkey);
     },
     [pass]

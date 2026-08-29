@@ -1,7 +1,7 @@
 // Account — delete account with confirmation, local cleanup, and redirect.
 
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -43,6 +43,7 @@ export default function AccountScreen() {
       // Clear all local state and reset the client singleton. Awaited so the
       // relay subscription is torn down before we route away — otherwise it
       // could still deliver into the freshly-cleared session.
+      await client.deleteIdentity();
       await storage.clearAll();
       await resetOpenDatingClient();
 
@@ -57,6 +58,12 @@ export default function AccountScreen() {
   }, [deleting, router]);
 
   const confirmDelete = useCallback(() => {
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm(`Delete Account?\n\n${DELETE_CONSEQUENCES}`)) {
+        void deleteAccount();
+      }
+      return;
+    }
     Alert.alert('Delete Account?', DELETE_CONSEQUENCES, [
       { text: 'Cancel', style: 'cancel' },
       {
