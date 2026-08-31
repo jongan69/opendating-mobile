@@ -18,6 +18,8 @@
 
 The five phrases below were submitted verbatim in two lanes: an unquoted web search and a fresh, isolated ChatGPT web-search conversation for each query. The first four did not contain the OpenDating name. This is a dated sample of one search engine and one assistant, **not** a claim that every assistant or user will see the same results. Results vary by engine, model, locale, personalization, and time.
 
+Retrieval caveat: the original run did not retain the underlying search provider, exact ChatGPT model label, locale, UTC timestamp, or verbatim answer captures. The linked results and summarized positions below are the surviving evidence. Consequently, this is a directional snapshot rather than a reproducible benchmark; a future rerun must record those fields and archive each raw result or answer per query.
+
 A supplementary branded search (`OpenDating privacy dating app`) and direct checks of the supplied official origin were used only to diagnose gaps; they are not included in the five-query mention totals.
 
 - **Mentioned** means the returned result text or linked source named OpenDating as a product. The product name appearing in the query itself does not count.
@@ -134,7 +136,7 @@ OpenDating has a differentiated privacy story, but it is absent from generic ass
 
 The August 31 release change set addresses every repository-controlled gap:
 
-- `opendating-mobile.expo.app` is the single canonical origin in the app shell, sitemap, robots file, generated articles, product facts, repository metadata, and machine-readable product summary.
+- `opendating-mobile.expo.app` is the single canonical origin in repository-controlled app metadata, the sitemap, robots file, generated articles, product facts, README, and machine-readable product summary. The external GitHub About field was still pending at the audit snapshot and must be verified separately during rollout.
 - The app shell and crawlable product-facts page publish `SoftwareApplication` structured data with the live URL, free web availability, and official repository relationships.
 - Four fail-closed, source-reviewed pages now answer privacy-category, no-phone-account, coarse-location, and exact Tinder/Bumble/OpenDating comparison intent.
 - The comparison distinguishes mention from citation, links current first-party competitor sources, and states OpenDating's early-network, recovery, operator, and native-distribution limits.

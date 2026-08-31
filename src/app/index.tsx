@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useBootstrap } from '@/features/auth/use-bootstrap';
 import { useTheme } from '@/state/theme-context';
@@ -59,7 +60,12 @@ export default function BootstrapScreen() {
   }, [effectiveState, router]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <Head>
+        <link rel="canonical" href="https://opendating-mobile.expo.app/" />
+        <meta property="og:url" content="https://opendating-mobile.expo.app/" />
+      </Head>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <View style={styles.center}>
         <BrandMark size={80} />
@@ -99,7 +105,8 @@ export default function BootstrapScreen() {
           </>
         )}
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }
 

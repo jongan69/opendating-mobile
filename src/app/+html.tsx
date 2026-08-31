@@ -57,7 +57,6 @@ export default function RootHtml({ children }: { children: ReactNode }) {
           property="og:image"
           content="https://opendating-mobile.expo.app/images/lockup-coral.png"
         />
-        <meta property="og:url" content="https://opendating-mobile.expo.app/" />
         <meta property="og:type" content="website" />
         <meta name="color-scheme" content="light dark" />
         <meta name="theme-color" content="#FAF9F7" media="(prefers-color-scheme: light)" />
@@ -68,7 +67,6 @@ export default function RootHtml({ children }: { children: ReactNode }) {
               '*:focus-visible{outline:3px solid #D95F59!important;outline-offset:3px}html,body{background:#FAF9F7}button,input,textarea{font:inherit}@media(prefers-color-scheme:dark){html,body{background:#141413}}',
           }}
         />
-        <link rel="canonical" href="https://opendating-mobile.expo.app/" />
         <link
           rel="sitemap"
           type="application/xml"

@@ -27,7 +27,12 @@ const blog = config.blog ?? {};
 
 const CONTENT_DIR = resolve(blog.contentDir ?? 'content/blog');
 const PUBLIC_DIR = resolve(blog.publicDir ?? 'public');
-const BASE = (blog.basePath ?? '/blog').replace(/\/$/, '');
+const configuredBase = blog.basePath ?? '/blog';
+if (!/^\/(?:[a-z0-9_-]+\/?)+$/i.test(configuredBase)) {
+  console.error('   xx blog.basePath must be a non-root URL path with safe segments');
+  process.exit(1);
+}
+const BASE = configuredBase.replace(/\/$/, '');
 const COLOR = blog.primaryColor ?? '#5B8DEF';
 const SITE = (config.web?.productionUrl ?? 'https://example.com').replace(/\/$/, '');
 const BLOG_ROUTE = `${SITE}${BASE}`;
@@ -35,6 +40,11 @@ const HOME_ROUTE = `${SITE}/`;
 
 const log = (m) => console.log(`   ${m}`);
 const fail = (m) => { console.error(`   xx ${m}`); process.exit(1); };
+const isValidDate = (date) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsed = new Date(`${date}T12:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+};
 
 // ── escaping ──────────────────────────────────────────────────────────────────
 const esc = (s) => String(s)
@@ -196,7 +206,7 @@ const articles = [];
 for (const file of files) {
   const { data, body } = parseFrontmatter(readFileSync(join(CONTENT_DIR, file), 'utf8'));
   if (data.draft !== false) { log(`skip (draft) ${file}`); continue; }
-  if (!data.title || !data.description || !/^\d{4}-\d{2}-\d{2}$/.test(data.pubDate ?? '')) {
+  if (!data.title || !data.description || !isValidDate(data.pubDate ?? '')) {
     fail(`${file} must have title, description, and YYYY-MM-DD pubDate before publishing`);
   }
   articles.push({

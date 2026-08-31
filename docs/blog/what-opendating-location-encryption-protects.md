@@ -33,7 +33,7 @@ The intended platforms are iOS and Android. OpenDating is not generally availabl
 
 ## Who should choose another product
 
-Choose another service if you need current store availability, a large member network, conventional password recovery, web access, independent-provider portability, or mature support. OpenDating's approach is relevant to technical reviewers and pre-release testers who value minimized location precision and encrypted message content enough to accept those limits.
+Choose another service if you need current store availability, a large member network, conventional password recovery, independent-provider portability, or mature support. OpenDating's approach is relevant to technical reviewers and early users who value minimized location precision and encrypted message content enough to accept those limits.
 
 ## Sources checked
 

@@ -27,7 +27,7 @@ The decrypted recovery key exists temporarily in JavaScript memory while the web
 
 The browser app is live and free at [opendating-mobile.expo.app](https://opendating-mobile.expo.app/). It has no ads or product analytics, and billing is disabled on the web. Native iOS and Android clients remain pre-release.
 
-The current member network is early, services are operated by OpenDating on Cloudflare, and independent-provider portability is not generally available. People who need a mature member pool, conventional account recovery, identity verification, or native store distribution should choose an established product.
+The current member network is early, services are operated by OpenDating on Cloudflare, and independent-provider portability is not generally available. People who need a mature member pool, conventional account recovery, identity verification, mature support, or native store distribution should choose an established product.
 
 ## Compare privacy mechanics, not labels
 
