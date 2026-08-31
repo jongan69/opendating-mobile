@@ -12,9 +12,9 @@
         "keywords": ["privacy,introductions,encrypted,dating,identity,nearby,relationships,chat,recovery"],
         "releaseNotes": "Replaces swipe-first browsing with deliberate private introductions, adds an explanation and privacy receipt to every introduction, and introduces a live Privacy Passport for account, visibility, location, and conversation controls.",
         "promoText": "One private introduction at a time, with a receipt showing what is shared, withheld, and unlocked only after mutual interest.",
-        "privacyPolicyUrl": "https://jongan69.github.io/opendating-mobile/privacy/",
-        "supportUrl": "https://jongan69.github.io/opendating-mobile/safety/",
-        "marketingUrl": "https://jongan69.github.io/opendating-mobile/",
+        "privacyPolicyUrl": "https://opendating-mobile.expo.app/privacy/",
+        "supportUrl": "https://opendating-mobile.expo.app/safety/",
+        "marketingUrl": "https://opendating-mobile.expo.app/",
         "screenshots": {
           "APP_IPHONE_67": [],
           "APP_IPHONE_61": [],

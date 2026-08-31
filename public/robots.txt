@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jongan69.github.io/opendating-mobile/sitemap.xml
+Sitemap: https://opendating-mobile.expo.app/sitemap.xml

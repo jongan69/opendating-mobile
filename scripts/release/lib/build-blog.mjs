@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 /**
- * build-blog.mjs — render content/blog/*.md to static HTML under public/blog/.
+ * build-blog.mjs — render version-controlled Markdown to static HTML.
  *
  * Why static files in public/ rather than app routes:
- * this project sets web.output = "single", so every Expo route resolves to one
- * client-rendered HTML shell. A crawler or LLM retriever asking for an article
- * URL would receive an empty shell. Expo copies public/ verbatim into the web
- * export, so files written here are served as real HTML and bypass the SPA
- * entirely. No change to web.output is needed, and the app routes are untouched.
+ * Expo copies public/ verbatim into the web export, so these pages stay simple,
+ * crawlable, and independent from the mobile application bundle.
  *
  * Also regenerates sitemap.xml (articles + homepage) and llms.txt.
  *
@@ -16,7 +13,7 @@
  * instructed to produce. Narrow and predictable beats a dependency here.
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { resolve, join, basename } from 'node:path';
 
 const args = process.argv.slice(2);
@@ -30,12 +27,29 @@ const blog = config.blog ?? {};
 
 const CONTENT_DIR = resolve(blog.contentDir ?? 'content/blog');
 const PUBLIC_DIR = resolve(blog.publicDir ?? 'public');
-const BASE = (blog.basePath ?? '/blog').replace(/\/$/, '');
+const configuredBase = blog.basePath ?? '/blog';
+const unsafeBase =
+  !configuredBase.startsWith('/') ||
+  configuredBase === '/' ||
+  configuredBase.includes('//') ||
+  configuredBase.split('/').some((segment) => /[^a-z0-9_-]/i.test(segment));
+if (unsafeBase) {
+  console.error('   xx blog.basePath must be a non-root URL path with safe segments');
+  process.exit(1);
+}
+const BASE = configuredBase.replace(/\/$/, '');
 const COLOR = blog.primaryColor ?? '#5B8DEF';
 const SITE = (config.web?.productionUrl ?? 'https://example.com').replace(/\/$/, '');
+const BLOG_ROUTE = `${SITE}${BASE}`;
+const HOME_ROUTE = `${SITE}/`;
 
 const log = (m) => console.log(`   ${m}`);
 const fail = (m) => { console.error(`   xx ${m}`); process.exit(1); };
+const isValidDate = (date) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsed = new Date(`${date}T12:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+};
 
 // ── escaping ──────────────────────────────────────────────────────────────────
 const esc = (s) => String(s)
@@ -146,6 +160,7 @@ h3{font-size:1.08rem;margin:26px 0 8px}
 p,ul,ol{margin:14px 0}
 li{margin:6px 0}
 a{color:var(--accent)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:3px}
 code{background:var(--line);padding:2px 6px;border-radius:4px;font-size:.9em}
 blockquote{margin:18px 0;padding:2px 16px;border-left:3px solid var(--accent);color:var(--muted)}
 hr{border:0;border-top:1px solid var(--line);margin:32px 0}
@@ -155,7 +170,7 @@ hr{border:0;border-top:1px solid var(--line);margin:32px 0}
 .cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600}
 `.trim();
 
-function page({ title, description, canonical, jsonLd, body }) {
+function page({ title, description, canonical, jsonLd, body, ogType = 'article' }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -167,15 +182,15 @@ function page({ title, description, canonical, jsonLd, body }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(canonical)}">
-<meta property="og:type" content="article">
+<meta property="og:type" content="${ogType}">
 <meta name="twitter:card" content="summary_large_image">
 ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ''}
 <style>${STYLE}</style>
 </head>
 <body>
 <header><div class="wrap">
-<a class="brand" href="/">${esc(project.name)}</a>
-<nav><a href="${BASE}/">Blog</a><a href="/">Get the app</a></nav>
+<a class="brand" href="${HOME_ROUTE}">${esc(project.name)}</a>
+<nav><a href="${BLOG_ROUTE}/">Blog</a><a href="${HOME_ROUTE}">Get the app</a></nav>
 </div></header>
 <main class="wrap">
 ${body}
@@ -195,12 +210,15 @@ if (!files.length) fail(`No markdown files in ${CONTENT_DIR}`);
 const articles = [];
 for (const file of files) {
   const { data, body } = parseFrontmatter(readFileSync(join(CONTENT_DIR, file), 'utf8'));
-  if (data.draft === true) { log(`skip (draft) ${file}`); continue; }
+  if (data.draft !== false) { log(`skip (draft) ${file}`); continue; }
+  if (!data.title || !data.description || !isValidDate(data.pubDate ?? '')) {
+    fail(`${file} must have title, description, and YYYY-MM-DD pubDate before publishing`);
+  }
   articles.push({
     slug: basename(file, '.md'),
-    title: data.title ?? basename(file, '.md'),
-    description: data.description ?? '',
-    date: data.pubDate ?? new Date().toISOString().split('T')[0],
+    title: data.title,
+    description: data.description,
+    date: data.pubDate,
     keywords: data.keywords ?? [],
     html: renderMarkdown(body),
   });
@@ -218,6 +236,10 @@ const emit = (relPath, contents) => {
   writeFileSync(path, contents);
   written++;
 };
+
+// public/blog is generated output. Clearing it prevents a newly drafted or
+// removed article from surviving as a stale public page.
+if (!DRY_RUN) rmSync(join(PUBLIC_DIR, BASE.slice(1)), { recursive: true, force: true });
 
 // article pages
 for (const a of articles) {
@@ -241,7 +263,7 @@ for (const a of articles) {
 <p class="meta">${fmtDate(a.date)}</p>
 ${a.html}
 <hr />
-<p><a class="cta" href="/">Get ${esc(project.name)} — ${esc(project.price ?? 'Free')}</a></p>
+<p><a class="cta" href="${HOME_ROUTE}">Learn about ${esc(project.name)}</a></p>
 </article>`,
   }));
 }
@@ -249,7 +271,7 @@ ${a.html}
 // index
 emit(`${BASE.slice(1)}/index.html`, page({
   title: `Blog | ${project.name}`,
-  description: `Guides and comparisons about ${project.category ?? 'the category'}.`,
+  description: `Guides and comparisons for people choosing a ${project.category ?? 'product'}.`,
   canonical: `${SITE}${BASE}/`,
   jsonLd: {
     '@context': 'https://schema.org',
@@ -257,35 +279,33 @@ emit(`${BASE.slice(1)}/index.html`, page({
     name: `${project.name} Blog`,
     url: `${SITE}${BASE}/`,
   },
+  ogType: 'website',
   body: `<h1>Blog</h1>
 <p class="meta">${articles.length} article${articles.length === 1 ? '' : 's'}</p>
 ${articles.map((a) => `<div class="post">
-<a href="${BASE}/${a.slug}/">${esc(a.title)}</a>
+<a href="${BLOG_ROUTE}/${a.slug}/">${esc(a.title)}</a>
 <p class="meta">${esc(a.description)}</p>
 <div class="meta">${fmtDate(a.date)}</div>
 </div>`).join('\n')}`,
 }));
 
-// sitemap — homepage plus every article
+const sitemapEntries = [
+  ...(config.web?.sitemapPaths ?? ['/']).map((path) => `${SITE}${path === '/' ? '/' : path}`),
+  ...(articles.length ? [`${SITE}${BASE}/`] : []),
+  ...articles.map((article) => `${SITE}${BASE}/${article.slug}/`),
+];
+
+// sitemap — existing public routes plus reviewed articles only
 emit('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${SITE}/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${SITE}${BASE}/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-${articles.map((a) => `  <url>
-    <loc>${SITE}${BASE}/${a.slug}/</loc>
-    <lastmod>${a.date}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`).join('\n')}
+${sitemapEntries.map((url) => `  <url><loc>${esc(url)}</loc></url>`).join('\n')}
 </urlset>
+`);
+
+emit('robots.txt', `User-agent: *
+Allow: /
+
+Sitemap: ${SITE}/sitemap.xml
 `);
 
 // llms.txt — states only facts you control, unlike the article set
@@ -304,8 +324,16 @@ ${project.description ?? ''}
 ## Key properties
 ${(project.differentiators ?? []).map((d) => `- ${d}`).join('\n')}
 
-## Articles
-${articles.map((a) => `- [${a.title}](${SITE}${BASE}/${a.slug}/)`).join('\n')}
+## Links
+- [Live app](${SITE}/)
+- [Product facts](${SITE}/about/)
+- [Privacy policy](${SITE}/privacy/)
+- [Safety center](${SITE}/safety/)
+- [Service status](${SITE}/status/)
+- [Blog](${SITE}${BASE}/)
+
+${articles.length ? `## Articles
+${articles.map((a) => `- [${a.title}](${SITE}${BASE}/${a.slug}/)`).join('\n')}` : ''}
 `);
 
 log(`${articles.length} article(s) -> ${written} file(s) under ${PUBLIC_DIR}`);

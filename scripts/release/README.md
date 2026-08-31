@@ -98,20 +98,15 @@ it again with `-- --write-eas-json` to save the numeric `ascAppId` before
 `blog.mode: "expo-public"` (the default) renders articles as **static HTML** into
 `public/blog/<slug>/index.html`.
 
-This exists because an Expo web app with `web.output: "single"` serves one
-client-rendered HTML shell for every route. An article rendered as an app route
-would be invisible to crawlers and LLM retrievers — they would receive an empty
-shell. Expo copies `public/` verbatim into the web export, so files written there
-are served as real HTML and bypass the SPA entirely.
+Expo copies `public/` verbatim into the web export, so files written there are
+served as direct static HTML without adding application routes or another site.
 
-The upshot: no change to `web.output`, no risk of statically rendering app routes
-that need SQLite, and no second site to deploy. `npm run deploy:web:prod` ships
-the articles along with everything else.
+The upshot: no app-route changes, no second site, and no new dependency.
 
 The stage also regenerates `public/sitemap.xml` (homepage + index + every article)
 and writes `public/llms.txt`.
 
-Markdown in `content/blog/` is the source of truth and is version-controlled.
+Markdown in the configured `blog.contentDir` is the source of truth and is version-controlled.
 Editing an article and re-running `--only blog` re-renders it without calling the
 API again. Supported markdown is deliberately narrow — headings, paragraphs,
 lists, blockquotes, inline code, links, bold/italic — matching what the generator
