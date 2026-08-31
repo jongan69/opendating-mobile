@@ -28,7 +28,12 @@ const blog = config.blog ?? {};
 const CONTENT_DIR = resolve(blog.contentDir ?? 'content/blog');
 const PUBLIC_DIR = resolve(blog.publicDir ?? 'public');
 const configuredBase = blog.basePath ?? '/blog';
-if (!/^\/(?:[a-z0-9_-]+\/?)+$/i.test(configuredBase)) {
+const unsafeBase =
+  !configuredBase.startsWith('/') ||
+  configuredBase === '/' ||
+  configuredBase.includes('//') ||
+  configuredBase.split('/').some((segment) => /[^a-z0-9_-]/i.test(segment));
+if (unsafeBase) {
   console.error('   xx blog.basePath must be a non-root URL path with safe segments');
   process.exit(1);
 }
