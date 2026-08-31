@@ -1,61 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Correction: Dating App Ownership and Privacy Comparisons — OpenDating</title>
-<meta name="description" content="Correction notice for a withdrawn OpenDating article that contained an ownership error and unsupported privacy comparisons.">
-<meta name="keywords" content="OpenDating correction, withdrawn comparison, dating app ownership correction">
-<meta property="og:title" content="Correction: Withdrawn Dating App Comparison">
-<meta name="robots" content="noindex">
-<meta property="og:description" content="This comparison was withdrawn after an ownership error and unsupported claims were identified.">
-<link rel="canonical" href="https://jongan69.github.io/opendating-mobile/blog/tinder-vs-bumble-vs-opendating">
-<style>
-  :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
-  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
-  nav { border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 40px; }
-  nav a { color: var(--coral); text-decoration: none; font-weight: 600; font-size: 15px; }
-  article h1 { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 8px; }
-  .date { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
-  h2 { font-size: 22px; font-weight: 600; margin: 36px 0 12px; }
-  p { margin: 14px 0; }
-  ul, ol { margin: 12px 0; padding-left: 24px; }
-  li { margin: 6px 0; }
-  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
-  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
-  th { font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .yes { color: #2E7D32; font-weight: 600; }
-  .no { color: var(--text-secondary); }
-  footer { border-top: 1px solid var(--border); padding: 32px 0; margin-top: 64px; color: var(--text-secondary); font-size: 14px; text-align: center; }
-  footer a { color: var(--text-secondary); text-decoration: none; }
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tinder vs Bumble vs OpenDating: Privacy, Availability, and Price | OpenDating</title>
+<meta name="description" content="A dated comparison of Tinder, Bumble, and OpenDating across account data, location, messages, visibility controls, availability, and price.">
+<link rel="canonical" href="https://opendating-mobile.expo.app/blog/tinder-vs-bumble-vs-opendating/">
+<meta property="og:title" content="Tinder vs Bumble vs OpenDating: Privacy, Availability, and Price | OpenDating">
+<meta property="og:description" content="A dated comparison of Tinder, Bumble, and OpenDating across account data, location, messages, visibility controls, availability, and price.">
+<meta property="og:url" content="https://opendating-mobile.expo.app/blog/tinder-vs-bumble-vs-opendating/">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Tinder vs Bumble vs OpenDating: Privacy, Availability, and Price","description":"A dated comparison of Tinder, Bumble, and OpenDating across account data, location, messages, visibility controls, availability, and price.","datePublished":"2026-08-31","keywords":"Tinder vs Bumble vs OpenDating, private dating app comparison, Tinder Bumble alternative","publisher":{"@type":"Organization","name":"OpenDating"},"mainEntityOfPage":"https://opendating-mobile.expo.app/blog/tinder-vs-bumble-vs-opendating/"}</script>
+<style>:root{--accent:#E8735A;--fg:#16181d;--muted:#5c6370;--bg:#fff;--line:#e6e8ec}
+@media(prefers-color-scheme:dark){:root{--fg:#e8eaee;--muted:#9aa2b1;--bg:#0e1013;--line:#23262d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);padding:18px 0}
+header .wrap{display:flex;justify-content:space-between;align-items:center}
+header a.brand{font-weight:700;text-decoration:none;color:var(--fg)}
+nav a{margin-left:18px;color:var(--accent);text-decoration:none}
+footer{border-top:1px solid var(--line);margin-top:72px;padding:32px 0;color:var(--muted);font-size:14px}
+h1{font-size:2.1rem;line-height:1.22;letter-spacing:-.02em;margin:44px 0 10px}
+h2{font-size:1.35rem;margin:38px 0 10px;letter-spacing:-.01em}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p,ul,ol{margin:14px 0}
+li{margin:6px 0}
+a{color:var(--accent)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:3px}
+code{background:var(--line);padding:2px 6px;border-radius:4px;font-size:.9em}
+blockquote{margin:18px 0;padding:2px 16px;border-left:3px solid var(--accent);color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+.meta{color:var(--muted);font-size:13px}
+.post{padding:16px 0;border-bottom:1px solid var(--line)}
+.post a{font-weight:600;text-decoration:none;font-size:1.05rem}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600}</style>
 </head>
 <body>
-<div class="container">
-  <nav><a href="../../blog">← Blog</a></nav>
-  <article>
-    <h1>Correction: Dating App Ownership and Privacy Comparisons</h1>
-    <div class="date">August 2026</div>
-
-    <p>An earlier version of this article incorrectly said Tinder, Bumble, and Hinge were all owned by Match Group and presented unsupported feature comparisons as settled facts. The article has been withdrawn rather than leaving marketing claims online without current sourcing and legal review.</p>
-
-    <h2>Correct ownership</h2>
-    <p>Match Group's official materials list Tinder and Hinge in its brand portfolio. Bumble Inc.'s investor site identifies Bumble Inc. as the parent company of Bumble, Badoo, and BFF. Bumble is not owned by Match Group.</p>
-
-    <ul>
-      <li><a href="https://ir.matchgroup.com/">Match Group investor relations</a></li>
-      <li><a href="https://ir.bumble.com/">Bumble Inc. investor relations</a></li>
-    </ul>
-
-    <h2>What replaces the comparison</h2>
-    <p>OpenDating will publish only dated, directly sourced comparisons that distinguish app behavior, company policy, and inference. Until counsel reviews that work, the site describes OpenDating's own current implementation and measurable release gates without scoring competitors.</p>
-
-    <p><a href="../../">Learn more about OpenDating →</a></p>
-  </article>
-  <footer><a href="../../">OpenDating</a> · Privacy-focused dating software in pre-release</footer>
-</div>
+<header><div class="wrap">
+<a class="brand" href="https://opendating-mobile.expo.app/">OpenDating</a>
+<nav><a href="https://opendating-mobile.expo.app/blog/">Blog</a><a href="https://opendating-mobile.expo.app/">Get the app</a></nav>
+</div></header>
+<main class="wrap">
+<article>
+<h1>Tinder vs Bumble vs OpenDating: Privacy, Availability, and Price</h1>
+<p class="meta">August 31, 2026</p>
+<p>Tinder and Bumble are established consumer dating services with large networks, native distribution, conventional support, and optional paid features. OpenDating is a free, early browser app with a narrower account and location model. This comparison does not score safety, popularity, match quality, or the size of each member network.</p>
+<h2>Availability and account setup</h2>
+<p>Tinder supports mobile apps and the web. Its current privacy policy lists phone number, email address, and date of birth as examples of account data.</p>
+<p>Bumble supports mobile apps. Its privacy policy says members are required to provide a phone number for its one-member-one-account approach and may be asked for photo or identity verification.</p>
+<p>OpenDating is live on the web; its native iOS and Android clients remain pre-release. It creates an account without a phone number, email address, password, or social login. Recovery is self-custodied, so losing the recovery key can mean losing access.</p>
+<h2>Location</h2>
+<p>Tinder&#39;s privacy policy says it may collect device latitude and longitude with permission and that some precise-location-dependent features will not be available without it.</p>
+<p>Bumble&#39;s privacy policy says location data can include Wi-Fi access points and longitude and latitude, and that device coordinates are used to understand proximity. Members can turn off geolocation through device settings.</p>
+<p>OpenDating converts coordinates on-device to a geohash prefix of at most five characters before its discovery service receives location data. The service still receives that coarse area and operational metadata. This reduces precision; it does not provide anonymity.</p>
+<h2>Messages and profile visibility</h2>
+<p>Tinder classifies chats as collected content and documents service, safety, research, improvement, machine-learning, advertising, and other listed processing purposes. No Tinder primary source reviewed for this article promises end-to-end encryption for member chats.</p>
+<p>Bumble says it reviews message content for topics, sentiment, and trends after steps intended to remove identifying information, and also uses automated systems and moderators for safety. Bumble&#39;s paid Incognito Mode hides a profile from everyone except people the member likes first.</p>
+<p>OpenDating encrypts direct-message content end to end after mutual interest. Its service can still observe delivery metadata, recipients can retain content, and selected evidence can be intentionally disclosed with a report. Visibility can be paused without buying a paid plan.</p>
+<h2>Price and paid visibility</h2>
+<p>Tinder has a free core and optional paid subscriptions and features. Its prices vary by market and offer, so this comparison does not quote a universal monthly price.</p>
+<p>Bumble says its core works without paid features. Boost, Premium, Premium+, and consumable products add capabilities including extra likes, filters, profile priority, travel, and Incognito Mode.</p>
+<p>OpenDating is free on the web. Billing and OpenDating Plus are disabled there. OpenDating does not currently sell ranking, boosts, hidden admirers, messaging, recovery, deletion, or safety features.</p>
+<h2>Which product fits which need?</h2>
+<p>Choose Tinder or Bumble if a mature network, current native distribution, conventional account support, or their specific discovery and verification tools matter most. Evaluate their current settings and policies for the privacy controls you need.</p>
+<p>Consider OpenDating if no-phone signup, coarse location, encrypted message content, and deliberate introductions matter enough to accept an early network, self-custodied recovery, first-party service operation, and no native store release.</p>
+<h2>Primary sources checked</h2>
+<p>Checked August 31, 2026 against Tinder&#39;s <a href="https://policies.tinder.com/privacy/intl/en/">privacy policy</a> and <a href="https://www.help.tinder.com/hc/en-us/articles/115004647686-Tinder-Overview">product overview</a>; Bumble&#39;s <a href="https://bumble.com/privacy-policy">privacy policy</a>, <a href="https://bumble.com/features/incognito-mode/">Incognito Mode</a>, and <a href="https://support.bumble.com/hc/en-us/articles/32668790872733-Understanding-Bumble-s-paid-features-and-subscription-plans">paid-feature guide</a>; and OpenDating&#39;s <a href="https://opendating-mobile.expo.app/about/">product facts</a>, <a href="https://github.com/jongan69/opendating-mobile/blob/main/docs/PRIVACY.md">privacy model</a>, and current source repository.</p>
+<hr />
+<p><a class="cta" href="https://opendating-mobile.expo.app/">Learn about OpenDating</a></p>
+</article>
+</main>
+<footer><div class="wrap">&copy; 2026 OpenDating. Private dating without precise location tracking</div></footer>
 </body>
 </html>

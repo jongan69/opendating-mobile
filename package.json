@@ -16,7 +16,7 @@
     "self-sovereign",
     "mobile"
   ],
-  "homepage": "https://github.com/jongan69/opendating-mobile#readme",
+  "homepage": "https://opendating-mobile.expo.app/",
   "repository": {
     "type": "git",
     "url": "https://github.com/jongan69/opendating-mobile.git"
@@ -89,7 +89,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "export:web": "expo export --platform web && node scripts/secure-web-export.mjs",
+    "export:web": "bun run blog:build && expo export --platform web && node scripts/secure-web-export.mjs",
     "serve:web": "expo serve",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
@@ -118,7 +118,7 @@
     "blog:generate": "node scripts/release/lib/generate-articles.mjs",
     "blog:build": "node scripts/release/lib/build-blog.mjs",
     "check:duplicates": "node scripts/check-duplicate-runtimes.mjs",
-    "test:release-tools": "bun test ./scripts/release/lib/security-utils.test.mjs",
+    "test:release-tools": "bun test ./scripts/release/lib/*.test.mjs",
     "postinstall": "node scripts/check-duplicate-runtimes.mjs"
   },
   "private": true,

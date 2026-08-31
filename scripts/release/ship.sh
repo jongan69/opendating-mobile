@@ -161,7 +161,7 @@ if should_run blog && enabled blog; then
     run node "$HERE/lib/scaffold-landing.mjs" --config "$CONFIG" $($DRY_RUN && echo --dry-run || true)
   else
     # Renders static HTML into public/, which Expo copies verbatim on web export.
-    # Works alongside web.output="single" because these files bypass the SPA.
+    # Keeps article HTML independent from Expo application routes.
     step "Render blog into $(cfg blog.publicDir public)$(cfg blog.basePath /blog)"
     run node "$HERE/lib/build-blog.mjs" --config "$CONFIG" $($DRY_RUN && echo --dry-run || true)
   fi

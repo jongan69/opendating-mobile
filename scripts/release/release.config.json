@@ -4,20 +4,21 @@
   "project": {
     "name": "OpenDating",
     "slug": "opendating",
-    "tagline": "Privacy-first decentralized dating",
-    "description": "A dating app built around coarse location and end-to-end encrypted direct messages. Your exact location never leaves your phone.",
+    "tagline": "Private dating without precise location tracking",
+    "description": "A live browser dating app built around deliberate introductions, coarse location, private decisions, and end-to-end encrypted direct messages. Native clients remain pre-release.",
     "category": "dating app",
-    "audience": "people who want genuine dating without surveillance capitalism",
-    "platforms": ["iOS", "Android"],
-    "price": "Free",
+    "audience": "privacy-conscious adults seeking deliberate introductions",
+    "platforms": ["Web", "iOS and Android pre-release clients"],
+    "price": "Free on the web",
     "differentiators": [
-      "Cryptographic identity with a legacy recovery-key flow",
-      "Coarse location only — your exact GPS never reaches the server",
-      "End-to-end encrypted direct-message content",
+      "No email address or phone number required to create an account",
+      "Browser recovery keys are encrypted locally behind a user-chosen passphrase",
+      "Raw coordinates are converted on-device to a 5-character geohash",
+      "Direct-message content uses end-to-end encryption",
       "Private likes — one-way likes are never public",
       "Private blocks and reports — enforced server-side, never notified",
-      "No ads, no data harvesting, no surveillance business model",
-      "Open protocol with cross-provider portability planned after GA"
+      "Current discovery and matching services are first-party",
+      "The web app is live; native store distribution remains pre-release"
     ]
   },
 
@@ -55,8 +56,20 @@
   "web": {
     "enabled": true,
     "deployCommand": "npm run deploy:web",
-    "productionUrl": "https://jongan69.github.io/opendating-mobile",
-    "verifyAnchors": ["#privacy", "#features", "#get"]
+    "productionUrl": "https://opendating-mobile.expo.app",
+    "verifyAnchors": ["#privacy", "#features", "#get"],
+    "sitemapPaths": [
+      "/",
+      "/about/",
+      "/privacy/",
+      "/terms/",
+      "/community/",
+      "/safety/",
+      "/deletion/",
+      "/subprocessors/",
+      "/retention/",
+      "/status/"
+    ]
   },
 
   "domain": {
@@ -71,12 +84,12 @@
     "publicDir": "public",
     "basePath": "/blog",
     "primaryColor": "#E8735A",
-    "_comment": "mode 'expo-public' renders static HTML into public/blog/, which GitHub Pages serves verbatim."
+    "_comment": "mode 'expo-public' renders static HTML into public/blog/ for EAS export; the secondary Pages copy carries canonical links back to EAS."
   },
 
   "seo": {
-    "enabled": true,
-    "articleCount": 20,
+    "enabled": false,
+    "articleCount": 6,
     "year": 2026,
     "model": "deepseek-chat",
     "autoPublish": false,
@@ -97,6 +110,6 @@
       "people who want data portability",
       "ethical dating app users"
     ],
-    "_comment": "AI-generated blog articles. Review competitor comparison articles before publishing — claims about named products are your liability."
+    "_comment": "Manual, version-controlled articles only. Re-enable generation deliberately; generated files still default to drafts."
   }
 }

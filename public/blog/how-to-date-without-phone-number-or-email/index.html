@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How to Date Online Without a Phone Number or Email Login | OpenDating</title>
+<meta name="description" content="Understand account-recovery trade-offs before choosing a dating app that does not require a phone number, email address, or password.">
+<link rel="canonical" href="https://opendating-mobile.expo.app/blog/how-to-date-without-phone-number-or-email/">
+<meta property="og:title" content="How to Date Online Without a Phone Number or Email Login | OpenDating">
+<meta property="og:description" content="Understand account-recovery trade-offs before choosing a dating app that does not require a phone number, email address, or password.">
+<meta property="og:url" content="https://opendating-mobile.expo.app/blog/how-to-date-without-phone-number-or-email/">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"How to Date Online Without a Phone Number or Email Login","description":"Understand account-recovery trade-offs before choosing a dating app that does not require a phone number, email address, or password.","datePublished":"2026-08-31","keywords":"dating app without phone number, dating without email, dating account privacy","publisher":{"@type":"Organization","name":"OpenDating"},"mainEntityOfPage":"https://opendating-mobile.expo.app/blog/how-to-date-without-phone-number-or-email/"}</script>
+<style>:root{--accent:#E8735A;--fg:#16181d;--muted:#5c6370;--bg:#fff;--line:#e6e8ec}
+@media(prefers-color-scheme:dark){:root{--fg:#e8eaee;--muted:#9aa2b1;--bg:#0e1013;--line:#23262d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);padding:18px 0}
+header .wrap{display:flex;justify-content:space-between;align-items:center}
+header a.brand{font-weight:700;text-decoration:none;color:var(--fg)}
+nav a{margin-left:18px;color:var(--accent);text-decoration:none}
+footer{border-top:1px solid var(--line);margin-top:72px;padding:32px 0;color:var(--muted);font-size:14px}
+h1{font-size:2.1rem;line-height:1.22;letter-spacing:-.02em;margin:44px 0 10px}
+h2{font-size:1.35rem;margin:38px 0 10px;letter-spacing:-.01em}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p,ul,ol{margin:14px 0}
+li{margin:6px 0}
+a{color:var(--accent)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:3px}
+code{background:var(--line);padding:2px 6px;border-radius:4px;font-size:.9em}
+blockquote{margin:18px 0;padding:2px 16px;border-left:3px solid var(--accent);color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+.meta{color:var(--muted);font-size:13px}
+.post{padding:16px 0;border-bottom:1px solid var(--line)}
+.post a{font-weight:600;text-decoration:none;font-size:1.05rem}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600}</style>
+</head>
+<body>
+<header><div class="wrap">
+<a class="brand" href="https://opendating-mobile.expo.app/">OpenDating</a>
+<nav><a href="https://opendating-mobile.expo.app/blog/">Blog</a><a href="https://opendating-mobile.expo.app/">Get the app</a></nav>
+</div></header>
+<main class="wrap">
+<article>
+<h1>How to Date Online Without a Phone Number or Email Login</h1>
+<p class="meta">August 31, 2026</p>
+<p>Avoiding a phone number or email can reduce account linkage, but it moves responsibility for recovery onto you. Before choosing that model, decide whether you are willing to protect a recovery secret and accept that support may not be able to reset your account.</p>
+<h2>What no-phone signup changes</h2>
+<p>A conventional account can connect your dating profile to an inbox, phone account, password reset history, and identity-verification provider. Removing those inputs reduces that connection. It does not make a profile anonymous: photos, profile text, device and network data, purchases, coarse location, and conversations can still identify someone.</p>
+<h2>The recovery trade-off</h2>
+<p>OpenDating creates a cryptographic account on the device without an email address, phone number, password, or social login. Its recovery flow uses a standard recovery key. There is no conventional &quot;forgot password&quot; process.</p>
+<p>On the web, OpenDating encrypts the recovery key before storing it in the browser. The browser-lock passphrase is required again after a reload and is not stored. This protects the browser copy at rest, but the decrypted key still exists temporarily in JavaScript memory while the app is unlocked.</p>
+<p>A lost device and lost recovery key can still mean lost access. Copying the key into an insecure note, message, screenshot, or synchronized clipboard can expose the account. Store an offline recovery copy you control, and do not treat the browser-lock passphrase as a substitute for that backup.</p>
+<h2>Pricing, platforms, and privacy boundaries</h2>
+<p>OpenDating is live as a free browser app. Its native iOS and Android clients remain pre-release. Billing and OpenDating Plus are disabled on the web.</p>
+<p>No-phone signup does not hide a member from OpenDating-operated discovery, matching, moderation, media, and deletion services. Current federation and cross-provider migration are not available. People you match with can keep what you send them.</p>
+<h2>Who should choose another product</h2>
+<p>Choose a conventional account if support-assisted recovery, a mature member network, phone-based verification, or native store availability matters more than minimizing signup data. Consider OpenDating if you can secure a recovery key and accept its current network, first-party-operator, and portability limits.</p>
+<h2>Sources checked</h2>
+<p>Checked August 31, 2026 against OpenDating&#39;s <a href="https://github.com/jongan69/opendating-mobile/blob/main/src/lib/storage/identity-vault.web.ts">browser vault implementation</a>, <a href="https://github.com/jongan69/opendating-mobile/blob/main/docs/SECURITY.md">security model</a>, and <a href="https://opendating-mobile.expo.app/about/">live product facts</a>.</p>
+<hr />
+<p><a class="cta" href="https://opendating-mobile.expo.app/">Learn about OpenDating</a></p>
+</article>
+</main>
+<footer><div class="wrap">&copy; 2026 OpenDating. Private dating without precise location tracking</div></footer>
+</body>
+</html>

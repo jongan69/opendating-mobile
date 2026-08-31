@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Policy — OpenDating</title>
 <meta name="description" content="OpenDating privacy policy — how we handle your data, what we collect, and what we never see.">
-<link rel="canonical" href="https://jongan69.github.io/opendating-mobile/privacy">
+<link rel="canonical" href="https://opendating-mobile.expo.app/privacy/">
 <style>
   :root { --coral: #E8735A; --bg: #FAF9F7; --text: #1A1A19; --text-secondary: #6B6B68; --border: #E8E7E4; --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
   @media (prefers-color-scheme: dark) { :root { --bg: #141413; --text: #F5F4F2; --text-secondary: #9B9B98; --border: #2E2E2C; } }
@@ -30,19 +30,19 @@
   <nav><a href="../">← OpenDating</a></nav>
   <article>
     <h1>Privacy Policy</h1>
-    <div class="date">Last updated: August 29, 2026</div>
+    <div class="date">Last updated: August 31, 2026</div>
 
     <h2>Our Approach to Privacy</h2>
     <p>OpenDating is designed to minimize data collection and separate service responsibilities. Privacy depends on both architecture and operating policy; no system can honestly promise that surveillance or compromise is impossible.</p>
 
     <h2>What We Collect</h2>
-    <p>The beta does not require an email address or phone number. It does process a pseudonymous public account key plus the profile, relationship, safety, and service metadata needed to provide the product.</p>
+    <p>The service does not require an email address or phone number. It does process a pseudonymous public account key plus the profile, relationship, safety, and service metadata needed to provide the product.</p>
 
     <h3>Information you provide</h3>
     <ul>
       <li><strong>Profile data</strong> — Display name, age range, gender, bio, interests, relationship intent, and photos. This is what you choose to share on your dating profile.</li>
       <li><strong>Coarse location</strong> — A 5-character geohash prefix (~5 km precision). Your exact GPS coordinates are converted to this coarse representation entirely on your device and then discarded. We never receive your precise location.</li>
-      <li><strong>Messages</strong> — End-to-end encrypted. We cannot read them. Message content is encrypted with NIP-44 before transmission and can only be decrypted by the intended recipient.</li>
+      <li><strong>Messages</strong> — End-to-end encrypted before transmission and readable by the intended recipient, not the delivery service.</li>
       <li><strong>Relationship and safety data</strong> — Likes, matches, blocks, unmatches, reports, moderation state, and deletion records are processed by their role-specific services.</li>
       <li><strong>Operational metadata</strong> — Cloudflare and the relay may process IP address, request timing, device connection information, and random request identifiers for delivery, abuse prevention, and reliability.</li>
     </ul>
@@ -66,13 +66,13 @@
       <li>Encrypted likes are routed to the matcher service to create matches</li>
       <li>Encrypted messages are routed between matched users</li>
     </ul>
-    <p>The app does not use advertising SDKs or product analytics. RevenueCat processes an opaque billing identifier and Apple purchase-entitlement status only when the optional one-time Plus feature is enabled. Infrastructure security and operational logs may still be processed. Any future allowlisted aggregate analytics or moderation vendors will require an updated notice and production approval.</p>
+    <p>The app does not use advertising SDKs or product analytics. Billing is disabled on the web. RevenueCat processes an opaque billing identifier and Apple purchase-entitlement status only in native builds where the optional one-time Plus feature is enabled. Infrastructure security and operational logs may still be processed. Any future analytics or moderation vendor will require an updated notice and production approval.</p>
 
     <h2>Data Storage and Security</h2>
     <ul>
-      <li>Your private key is stored with device secure storage and loaded into the app's JavaScript signer in v0.1. It can leave the device only when you explicitly use the legacy advanced recovery-key export.</li>
-      <li>Messages are end-to-end encrypted using NIP-44. The relay stores only encrypted ciphertext.</li>
-      <li>Likes are private — encrypted as NIP-59 gift wraps to the matcher service.</li>
+      <li>Native devices use secure storage. On the web, the recovery key is encrypted before entering local storage and unlocked only with the browser-lock passphrase. The decrypted key exists temporarily in JavaScript memory while the app is unlocked.</li>
+      <li>Messages are end-to-end encrypted. The delivery service stores only encrypted ciphertext.</li>
+      <li>Likes are private and encrypted to the matching service.</li>
       <li>Blocks and reports are private — encrypted to their respective services.</li>
       <li>The relay operates on Cloudflare's infrastructure. Encrypted data may be cached at Cloudflare edge locations for performance.</li>
     </ul>
@@ -84,12 +84,13 @@
     <ul>
       <li><strong>Pause discovery</strong> — Hide your profile from new discovery at any time while keeping existing matches.</li>
       <li><strong>Delete account</strong> — Requests deletion through the dedicated service and clears local app state after confirmation. See the <a href="../deletion/">deletion instructions</a>.</li>
-      <li><strong>Export identity</strong> — The advanced beta flow can copy the recovery key. Clipboard exposure is a known pre-GA limitation; passkey-encrypted recovery is required for production.</li>
+      <li><strong>Export identity</strong> — After warning and authentication, you can explicitly copy the recovery key. Anything copied to a clipboard can be exposed to other software or synchronized devices.</li>
+      <li><strong>Lock browser</strong> — Removes the decrypted recovery key from the app's current in-memory session without deleting the encrypted browser copy.</li>
       <li><strong>Location permission</strong> — You can deny or revoke at any time. Discovery requires coarse location.</li>
     </ul>
 
     <h2>Children's Privacy</h2>
-    <p>OpenDating is only for adults 18 and older. The current beta does not yet have the required liveness and age-assurance system, which is one reason public distribution is blocked.</p>
+    <p>OpenDating is only for adults 18 and older. The service does not currently verify every member's identity or age. Report suspected underage use immediately.</p>
 
     <h2>Changes to This Policy</h2>
     <p>We will update this notice when practices, providers, retention, or available countries change. Material production changes require a new policy version and acceptance record.</p>

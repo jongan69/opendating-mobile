@@ -24,9 +24,9 @@ Console records.
 | Price | Free |
 | Primary category | Social Networking |
 | Secondary category | Lifestyle |
-| Privacy policy URL | `https://jongan69.github.io/opendating-mobile/privacy/` |
-| Support URL | `https://jongan69.github.io/opendating-mobile/safety/` |
-| Marketing URL | `https://jongan69.github.io/opendating-mobile/` |
+| Privacy policy URL | `https://opendating-mobile.expo.app/privacy/` |
+| Support URL | `https://opendating-mobile.expo.app/safety/` |
+| Marketing URL | `https://opendating-mobile.expo.app/` |
 
 ## Store Description
 

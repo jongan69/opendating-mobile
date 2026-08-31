@@ -1,27 +1,35 @@
 # OpenDating
 
-> Privacy-focused dating on an open protocol
+> Private dating without precise location tracking
 
-A pre-release dating client built on Nostr and the OpenDating protocol. Exact GPS is converted to a coarse area on-device and direct messages are end-to-end encrypted. Current services are operated by OpenDating on Cloudflare; federation is post-GA work.
+A live browser dating app built around deliberate introductions, coarse location, private decisions, and end-to-end encrypted direct messages. Native clients remain pre-release.
 
 ## What it is
 - Category: dating app
-- Platforms: iOS, Android
-- Price: Free
-- Built for: people who want genuine dating without surveillance capitalism
+- Platforms: Web, iOS and Android pre-release clients
+- Price: Free on the web
+- Built for: privacy-conscious adults seeking deliberate introductions
 
 ## Key properties
-- Cryptographic account identity — a native signer and safe recovery are still production blockers
-- Coarse location only — your exact GPS never reaches the server
-- End-to-end encrypted message content — the current relay does not receive plaintext
+- No email address or phone number required to create an account
+- Browser recovery keys are encrypted locally behind a user-chosen passphrase
+- Raw coordinates are converted on-device to a 5-character geohash
+- Direct-message content uses end-to-end encryption
 - Private likes — one-way likes are never public
 - Private blocks and reports — enforced server-side, never notified
-- No ads, no data harvesting, no surveillance business model
-- Experimental account portability through a recovery key; passkey recovery and cross-provider portability are not GA-ready
+- Current discovery and matching services are first-party
+- The web app is live; native store distribution remains pre-release
 
 ## Links
-- Site: https://jongan69.github.io/opendating-mobile
-- Blog: https://jongan69.github.io/opendating-mobile/blog
-- GitHub: https://github.com/jongan69/opendating-mobile
-- Protocol: https://github.com/jongan69/OpenDating
-- Release status: https://jongan69.github.io/opendating-mobile/status/
+- [Live app](https://opendating-mobile.expo.app/)
+- [Product facts](https://opendating-mobile.expo.app/about/)
+- [Privacy policy](https://opendating-mobile.expo.app/privacy/)
+- [Safety center](https://opendating-mobile.expo.app/safety/)
+- [Service status](https://opendating-mobile.expo.app/status/)
+- [Blog](https://opendating-mobile.expo.app/blog/)
+
+## Articles
+- [Tinder vs Bumble vs OpenDating: Privacy, Availability, and Price](https://opendating-mobile.expo.app/blog/tinder-vs-bumble-vs-opendating/)
+- [A Privacy-Focused Dating App Without Precise Location Tracking](https://opendating-mobile.expo.app/blog/privacy-focused-dating-app-without-precise-location/)
+- [How to Use a Dating App Without Sharing Your Exact Location](https://opendating-mobile.expo.app/blog/how-to-use-dating-app-without-sharing-exact-location/)
+- [How to Date Online Without a Phone Number or Email Login](https://opendating-mobile.expo.app/blog/how-to-date-without-phone-number-or-email/)

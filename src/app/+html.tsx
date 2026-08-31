@@ -4,6 +4,27 @@ import {
   useServerDocumentContext,
 } from 'expo-router/html';
 
+const PRODUCT_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'OpenDating',
+  url: 'https://opendating-mobile.expo.app/',
+  description:
+    'A browser dating app built around deliberate introductions, coarse location, private decisions, and end-to-end encrypted direct messages.',
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  sameAs: [
+    'https://github.com/jongan69/opendating-mobile',
+    'https://github.com/jongan69/OpenDating',
+  ],
+  subjectOf: 'https://opendating-mobile.expo.app/about/',
+};
+
 export default function RootHtml({ children }: { children: ReactNode }) {
   const { bodyAttributes, bodyNodes, headNodes, htmlAttributes } =
     useServerDocumentContext();
@@ -34,8 +55,10 @@ export default function RootHtml({ children }: { children: ReactNode }) {
         />
         <meta
           property="og:image"
-          content="https://opendating.org/images/lockup-coral.png"
+          content="https://opendating-mobile.expo.app/images/lockup-coral.png"
         />
+        <meta property="og:url" content="https://opendating-mobile.expo.app/" />
+        <meta property="og:type" content="website" />
         <meta name="color-scheme" content="light dark" />
         <meta name="theme-color" content="#FAF9F7" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
@@ -46,6 +69,15 @@ export default function RootHtml({ children }: { children: ReactNode }) {
           }}
         />
         <link rel="canonical" href="https://opendating-mobile.expo.app/" />
+        <link
+          rel="sitemap"
+          type="application/xml"
+          href="https://opendating-mobile.expo.app/sitemap.xml"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(PRODUCT_JSON_LD) }}
+        />
         <ScrollViewStyleReset />
         {headNodes}
       </head>

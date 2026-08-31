@@ -39,7 +39,7 @@ const project = config.project ?? {};
 const MODEL = seo.model ?? 'claude-sonnet-5';
 const YEAR = seo.year ?? new Date().getFullYear();
 const COUNT = seo.articleCount ?? 30;
-const AUTO_PUBLISH = seo.autoPublish !== false;
+const AUTO_PUBLISH = seo.autoPublish === true;
 const CONCURRENCY = 3;
 
 // Markdown is the source of truth and is version-controlled. build-blog.mjs

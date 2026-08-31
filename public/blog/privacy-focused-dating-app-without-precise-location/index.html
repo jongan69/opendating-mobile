@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Privacy-Focused Dating App Without Precise Location Tracking | OpenDating</title>
+<meta name="description" content="Evaluate OpenDating&#39;s no-phone signup, coarse location, encrypted chats, browser storage, availability, and practical privacy limits.">
+<link rel="canonical" href="https://opendating-mobile.expo.app/blog/privacy-focused-dating-app-without-precise-location/">
+<meta property="og:title" content="A Privacy-Focused Dating App Without Precise Location Tracking | OpenDating">
+<meta property="og:description" content="Evaluate OpenDating&#39;s no-phone signup, coarse location, encrypted chats, browser storage, availability, and practical privacy limits.">
+<meta property="og:url" content="https://opendating-mobile.expo.app/blog/privacy-focused-dating-app-without-precise-location/">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"A Privacy-Focused Dating App Without Precise Location Tracking","description":"Evaluate OpenDating's no-phone signup, coarse location, encrypted chats, browser storage, availability, and practical privacy limits.","datePublished":"2026-08-31","keywords":"privacy-focused dating app, dating app without precise location, private dating app","publisher":{"@type":"Organization","name":"OpenDating"},"mainEntityOfPage":"https://opendating-mobile.expo.app/blog/privacy-focused-dating-app-without-precise-location/"}</script>
+<style>:root{--accent:#E8735A;--fg:#16181d;--muted:#5c6370;--bg:#fff;--line:#e6e8ec}
+@media(prefers-color-scheme:dark){:root{--fg:#e8eaee;--muted:#9aa2b1;--bg:#0e1013;--line:#23262d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);padding:18px 0}
+header .wrap{display:flex;justify-content:space-between;align-items:center}
+header a.brand{font-weight:700;text-decoration:none;color:var(--fg)}
+nav a{margin-left:18px;color:var(--accent);text-decoration:none}
+footer{border-top:1px solid var(--line);margin-top:72px;padding:32px 0;color:var(--muted);font-size:14px}
+h1{font-size:2.1rem;line-height:1.22;letter-spacing:-.02em;margin:44px 0 10px}
+h2{font-size:1.35rem;margin:38px 0 10px;letter-spacing:-.01em}
+h3{font-size:1.08rem;margin:26px 0 8px}
+p,ul,ol{margin:14px 0}
+li{margin:6px 0}
+a{color:var(--accent)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:3px}
+code{background:var(--line);padding:2px 6px;border-radius:4px;font-size:.9em}
+blockquote{margin:18px 0;padding:2px 16px;border-left:3px solid var(--accent);color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+.meta{color:var(--muted);font-size:13px}
+.post{padding:16px 0;border-bottom:1px solid var(--line)}
+.post a{font-weight:600;text-decoration:none;font-size:1.05rem}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600}</style>
+</head>
+<body>
+<header><div class="wrap">
+<a class="brand" href="https://opendating-mobile.expo.app/">OpenDating</a>
+<nav><a href="https://opendating-mobile.expo.app/blog/">Blog</a><a href="https://opendating-mobile.expo.app/">Get the app</a></nav>
+</div></header>
+<main class="wrap">
+<article>
+<h1>A Privacy-Focused Dating App Without Precise Location Tracking</h1>
+<p class="meta">August 31, 2026</p>
+<p>A privacy-focused dating app should make specific, testable claims about what it collects and what it cannot see. A hidden profile mode can reduce exposure to other members; it does not automatically reduce the location, account, message, device, or usage data available to the service operator.</p>
+<h2>What OpenDating minimizes</h2>
+<p>OpenDating does not require an email address, phone number, password, or social login to create an account. On the web, the recovery key is encrypted in browser storage behind a user-chosen passphrase. The passphrase is not stored, and reopening the browser requires unlocking again.</p>
+<p>When location permission is used, coordinates are converted on-device to a geohash prefix of at most five characters. OpenDating&#39;s discovery service receives that approximate area rather than the raw coordinates from the location module.</p>
+<p>Direct-message content is encrypted end to end after a mutual match. One-way likes are private, and blocking takes effect locally before network confirmation.</p>
+<h2>What privacy-focused does not mean</h2>
+<p>OpenDating is not anonymous. The service still receives an account identifier, approximate area, request timing, routing information, profile data, and media needed to operate the product. Matches can retain messages and infer identity or location from photos, profiles, and conversations. A person may also intentionally submit selected evidence with a safety report.</p>
+<p>The decrypted recovery key exists temporarily in JavaScript memory while the web app is unlocked. Browser storage is tied to the current site origin. Losing both the browser copy and recovery backup can mean losing the account.</p>
+<h2>Availability and price</h2>
+<p>The browser app is live and free at <a href="https://opendating-mobile.expo.app/">opendating-mobile.expo.app</a>. It has no ads or product analytics, and billing is disabled on the web. Native iOS and Android clients remain pre-release.</p>
+<p>The current member network is early, services are operated by OpenDating on Cloudflare, and independent-provider portability is not generally available. People who need a mature member pool, conventional account recovery, identity verification, or native store distribution should choose an established product.</p>
+<h2>Compare privacy mechanics, not labels</h2>
+<p>Before choosing any dating app, check its current first-party privacy policy for account inputs, location precision, message processing, advertising, retention, deletion, verification, and paid visibility controls. Separate what other members can see from what the operator and its vendors process.</p>
+<h2>Sources checked</h2>
+<p>Checked August 31, 2026 against OpenDating&#39;s <a href="https://opendating-mobile.expo.app/about/">product facts</a>, <a href="https://github.com/jongan69/opendating-mobile/blob/main/docs/PRIVACY.md">privacy model</a>, <a href="https://github.com/jongan69/opendating-mobile/blob/main/src/lib/storage/identity-vault.web.ts">browser vault source</a>, and <a href="https://github.com/jongan69/opendating-mobile/tree/main/src/lib/location">location source</a>.</p>
+<hr />
+<p><a class="cta" href="https://opendating-mobile.expo.app/">Learn about OpenDating</a></p>
+</article>
+</main>
+<footer><div class="wrap">&copy; 2026 OpenDating. Private dating without precise location tracking</div></footer>
+</body>
+</html>

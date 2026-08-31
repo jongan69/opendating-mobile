@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenDating Product Facts — Private Dating on the Web</title>
+<meta name="description" content="Verified product facts about OpenDating's live web app, browser account protection, coarse location, encrypted messages, availability, and limits.">
+<link rel="canonical" href="https://opendating-mobile.expo.app/about/">
+<link rel="stylesheet" href="../legal.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "OpenDating",
+  "url": "https://opendating-mobile.expo.app/",
+  "description": "A browser dating app built around deliberate introductions, coarse location, private decisions, and end-to-end encrypted direct messages.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "sameAs": [
+    "https://github.com/jongan69/opendating-mobile",
+    "https://github.com/jongan69/OpenDating"
+  ]
+}
+</script>
+</head>
+<body>
+<div class="container">
+<nav><a href="../">← OpenDating</a></nav>
+<main>
+<h1>OpenDating product facts</h1>
+<div class="date">Reviewed August 31, 2026</div>
+<p>OpenDating is a live browser dating app for adults who prefer deliberate introductions and data minimization over an endless swipe feed. Its native iOS and Android clients remain pre-release.</p>
+
+<h2>Availability and price</h2>
+<ul>
+  <li><strong>Live app:</strong> <a href="https://opendating-mobile.expo.app/">opendating-mobile.expo.app</a></li>
+  <li><strong>Supported platform:</strong> modern HTTPS browsers with Web Crypto, WebSocket, and local storage.</li>
+  <li><strong>Web price:</strong> free. Billing and OpenDating Plus are disabled on the web.</li>
+  <li><strong>Advertising and analytics:</strong> the current web app contains no advertising SDK or product analytics.</li>
+</ul>
+
+<h2>Account and browser storage</h2>
+<ul>
+  <li>No phone number, email address, password, or social login is required to create an account.</li>
+  <li>The browser recovery key is encrypted before it enters local storage using AES-256-GCM and a key derived from the user's browser-lock passphrase with PBKDF2-HMAC-SHA256.</li>
+  <li>The passphrase and decrypted recovery key are not persisted. The decrypted key exists temporarily in JavaScript memory while the browser is unlocked.</li>
+  <li>Browser storage is tied to the current origin. Moving browsers or domains requires explicit recovery-key export and import.</li>
+</ul>
+
+<h2>Location and conversations</h2>
+<ul>
+  <li>Coordinates are converted on-device to a geohash prefix of at most five characters before OpenDating's discovery service receives location data.</li>
+  <li>Coarse location is not anonymity. The service still receives the approximate area and operational metadata, and a profile or conversation can reveal more.</li>
+  <li>Direct-message content is encrypted end to end after a mutual match. Delivery metadata remains visible to the service, and recipients can retain what they receive.</li>
+</ul>
+
+<h2>Service and safety boundaries</h2>
+<p>Discovery, matching, moderation, media, delivery, and deletion currently use first-party OpenDating services on Cloudflare. OpenDating does not claim a large member network, independent-provider portability, identity verification for every member, anonymity, or guaranteed safety.</p>
+<p>Members can block, unmatch, report, pause visibility, export their recovery key, lock the browser, and request account deletion. See the <a href="../privacy/">privacy policy</a>, <a href="../safety/">safety center</a>, and <a href="../status/">service status</a>.</p>
+
+<h2>Primary evidence</h2>
+<p>The implementation is source-available in the <a href="https://github.com/jongan69/opendating-mobile">OpenDating mobile repository</a>. The protocol is documented in the separate <a href="https://github.com/jongan69/OpenDating">OpenDating protocol repository</a>. Security-sensitive claims should be evaluated against the current source and deployment rather than this summary alone.</p>
+
+<p><a href="https://opendating-mobile.expo.app/">Open the live web app →</a></p>
+</main>
+<footer><a href="../blog/">Blog</a> · <a href="../privacy/">Privacy</a> · <a href="../safety/">Safety</a></footer>
+</div>
+</body>
+</html>

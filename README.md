@@ -7,7 +7,8 @@
 
 <p align="center">
   <strong>Deliberate private introductions on an open protocol.</strong><br>
-  An Expo React Native reference client for the OpenDating protocol.
+  A live browser dating app and Expo reference client for the OpenDating protocol.<br>
+  <a href="https://opendating-mobile.expo.app/"><strong>Open the web app →</strong></a>
 </p>
 
 <p align="center">
@@ -16,12 +17,12 @@
   <a href="https://www.typescriptlang.org/"><img alt="TypeScript strict" src="https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript"></a>
   <a href="https://reactnative.dev/"><img alt="React Native 0.86" src="https://img.shields.io/badge/react--native-0.86-61dafb?logo=react"></a>
   <a href="../../actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/badge/CI-passing-brightgreen"></a>
-  <img alt="Platforms iOS Android" src="https://img.shields.io/badge/platforms-iOS%20%7C%20Android-lightgrey">
+  <img alt="Platforms Web iOS Android" src="https://img.shields.io/badge/platforms-Web%20%7C%20iOS%20%7C%20Android-lightgrey">
 </p>
 
 <br>
 
-> **Release status:** 0.1.1 is a proposed launch candidate; approval is not effective until `release/manifest.json` records the reviewed source SHA, artifact IDs, and checksums. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities, and the [1.0 Execution Roadmap](docs/ROADMAP-1.0.md) for the path through GA.
+> **Release status:** The [web app is live](https://opendating-mobile.expo.app/). Native 0.1.1 remains a proposed launch candidate; approval is not effective until `release/manifest.json` records the reviewed source SHA, artifact IDs, and checksums. See [Release Status](docs/RELEASE-STATUS.md) for verified capabilities.
 
 ## What is OpenDating?
 

@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenDating — Privacy-focused dating in pre-release</title>
-<meta name="description" content="Pre-release privacy-focused dating software with coarse location and end-to-end encrypted messages. Current services are operated by OpenDating on an open protocol.">
+<title>OpenDating — Private Dating Without Precise Location Tracking</title>
+<meta name="description" content="A live browser dating app with deliberate introductions, coarse location, private decisions, and end-to-end encrypted direct messages.">
 <meta name="keywords" content="opendating, dating app, privacy, open protocol, encrypted dating, private dating, data minimization, no surveillance">
-<meta property="og:title" content="OpenDating — First-party service on an open protocol">
-<meta property="og:description" content="Pre-release dating software operated by OpenDating and designed around data minimization, coarse location, and encrypted messages.">
-<meta property="og:url" content="https://jongan69.github.io/opendating-mobile">
+<meta property="og:title" content="OpenDating — Private dating without precise location tracking">
+<meta property="og:description" content="A live browser dating app built around deliberate introductions and data minimization.">
+<meta property="og:url" content="https://opendating-mobile.expo.app/">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://jongan69.github.io/opendating-mobile/images/lockup-coral.png">
+<meta property="og:image" content="https://opendating-mobile.expo.app/images/lockup-coral.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenDating — Privacy-focused dating in pre-release">
-<meta name="twitter:description" content="Pre-release dating software currently operated by OpenDating, with coarse location and encrypted messages.">
-<link rel="canonical" href="https://jongan69.github.io/opendating-mobile">
+<meta name="twitter:title" content="OpenDating — Private dating on the web">
+<meta name="twitter:description" content="Deliberate introductions, coarse location, and encrypted direct messages.">
+<link rel="canonical" href="https://opendating-mobile.expo.app/">
 <link rel="icon" type="image/png" href="images/favicon-32.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon-180.png">
 <script type="application/ld+json">
@@ -22,10 +22,12 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "OpenDating",
-  "description": "Pre-release privacy-focused dating software currently operated by OpenDating, with end-to-end encrypted messaging and coarse location privacy.",
+  "url": "https://opendating-mobile.expo.app/",
+  "description": "A live browser dating app with deliberate introductions, coarse location, private decisions, and end-to-end encrypted direct messages.",
   "applicationCategory": "LifestyleApplication",
-  "operatingSystem": "iOS, Android",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "sameAs": ["https://github.com/jongan69/opendating-mobile", "https://github.com/jongan69/OpenDating"]
 }
 </script>
 <style>
@@ -252,7 +254,7 @@
     <div class="links">
       <a href="#features">Features</a>
       <a href="#privacy">Privacy</a>
-      <a href="blog">Blog</a>
+      <a href="about/">Product Facts</a>
       <a href="https://github.com/jongan69/opendating-mobile" class="cta-nav">GitHub</a>
     </div>
   </div>
@@ -264,15 +266,15 @@
     <img src="images/lockup-coral.png" alt="OpenDating" class="logo" width="480" height="99">
   </picture>
   <p class="sub">
-    A pre-release dating client built around data minimization. Exact GPS is
+    A live browser dating app built around data minimization. Exact GPS is
     converted to a coarse area on-device, and direct messages are
-    <strong>end-to-end encrypted</strong>. The first services are operated by
-    OpenDating while federation is developed after reliable general availability.
+    <strong>end-to-end encrypted</strong>. Current services are operated by
+    OpenDating while independent-provider portability remains future work.
   </p>
   <div class="actions">
-    <a href="https://github.com/jongan69/opendating-mobile" class="btn btn-primary">
+    <a href="https://opendating-mobile.expo.app/" class="btn btn-primary">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      View on GitHub
+      Open the Web App
     </a>
     <a href="#get" class="btn btn-outline">Get the App</a>
   </div>
@@ -287,17 +289,17 @@
       <div class="feature-card">
         <div class="icon">🔑</div>
         <h3>Own Your Identity</h3>
-        <p>Your account is based on a cryptographic keypair stored in device secure storage. The current advanced recovery flow can export it; passkey recovery is required before launch.</p>
+        <p>No phone or email login. Native devices use secure storage; browsers encrypt the recovery key locally behind your browser-lock passphrase.</p>
       </div>
       <div class="feature-card">
         <div class="icon">📍</div>
         <h3>Location Privacy</h3>
-        <p>Only your general area (~5 km) is shared. Your exact GPS coordinates <em>never</em> leave your phone. Not to us, not to advertisers, not to anyone.</p>
+        <p>Only an approximate geohash area crosses the location boundary. Raw GPS does not reach OpenDating's discovery service, but coarse location is not anonymity.</p>
       </div>
       <div class="feature-card">
         <div class="icon">🔒</div>
         <h3>Encrypted Messages</h3>
-        <p>All conversations are end-to-end encrypted with NIP-44. Nobody — not even the relay operator — can read your messages.</p>
+        <p>Direct-message content is end-to-end encrypted before delivery. The relay operator receives ciphertext rather than message plaintext.</p>
       </div>
       <div class="feature-card">
         <div class="icon">🛡️</div>
@@ -306,13 +308,13 @@
       </div>
       <div class="feature-card">
         <div class="icon">📱</div>
-        <h3>Native Experience</h3>
-        <p>Photo-first cards, gesture-driven discovery, native navigation, dark mode, and accessibility foundations for iOS and Android.</p>
+        <h3>Web Today, Native Next</h3>
+        <p>The browser app is live with responsive layouts, keyboard focus, dark mode, and encrypted local account storage. Native clients remain pre-release.</p>
       </div>
       <div class="feature-card">
         <div class="icon">🌐</div>
         <h3>Open protocol, first-party operation</h3>
-        <p>Built on Nostr and the open OpenDating protocol. The current profile, discovery, matching, moderation, and deletion services are operated by OpenDating on Cloudflare.</p>
+        <p>Built on the open OpenDating protocol. The current profile, discovery, matching, moderation, and deletion services are operated by OpenDating on Cloudflare.</p>
       </div>
     </div>
   </div>
@@ -351,7 +353,7 @@
       <div class="privacy-list">
         <div class="item"><span class="check-icon">✓</span><span><strong>Your exact location</strong> — only a ~5 km geohash prefix is sent</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Your messages</strong> — end-to-end encrypted, not stored in plaintext</span></div>
-        <div class="item"><span class="check-icon">✓</span><span><strong>Your private key</strong> — stored in device secure storage; it leaves only if you explicitly use the legacy export flow</span></div>
+        <div class="item"><span class="check-icon">✓</span><span><strong>Your recovery key</strong> — native secure storage or an encrypted browser vault; plaintext exists temporarily in memory while unlocked</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Who you like</strong> — one-way likes are encrypted gift wraps</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Who you block</strong> — blocks are private and enforced locally first</span></div>
         <div class="item"><span class="check-icon">✓</span><span><strong>Your report details</strong> — encrypted to the moderation service</span></div>
@@ -363,13 +365,13 @@
 <section class="alt">
   <div class="container">
     <h2>How It Works</h2>
-    <p class="section-sub">You don't need to understand Nostr. Just create an account and start discovering.</p>
+    <p class="section-sub">Create an account, protect its recovery key, and start discovering.</p>
 
     <div class="steps">
       <div class="step">
         <div class="num">1</div>
         <h3>Create Account</h3>
-        <p>A secure keypair is generated on your phone. No email. No password. No phone number.</p>
+        <p>A secure account is generated on your device. No email, password, phone number, or social login.</p>
       </div>
       <div class="step">
         <div class="num">2</div>
@@ -379,12 +381,12 @@
       <div class="step">
         <div class="num">3</div>
         <h3>Set Your Area</h3>
-        <p>Share only your general area (~5 km). Your exact coordinates never leave your phone.</p>
+        <p>Share only a general geohash area. Raw coordinates do not leave the location module.</p>
       </div>
       <div class="step">
         <div class="num">4</div>
-        <h3>Discover & Swipe</h3>
-        <p>Browse real people nearby. Like privately. Match when the feeling is mutual.</p>
+        <h3>Discover Deliberately</h3>
+        <p>Review one contextual introduction, decide privately, and match when interest is mutual.</p>
       </div>
     </div>
   </div>
@@ -393,18 +395,18 @@
 <section id="get">
   <div class="container-narrow">
     <h2>Get OpenDating</h2>
-    <p class="section-sub">Source available for development and security review. Store distribution is held.</p>
+    <p class="section-sub">Use OpenDating now in a modern browser. Native store distribution remains pre-release.</p>
 
     <div class="download-grid">
       <div class="download-card">
-        <h3>📱 iOS</h3>
-        <p>The stale submission is not approved to ship. Invited testing resumes only after the documented release gates pass.</p>
-        <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">Build from Source</a>
+        <h3>🌐 Web</h3>
+        <p>The complete browser app is live. Your recovery key is encrypted locally and unlocking is required after reload.</p>
+        <a href="https://opendating-mobile.expo.app/" class="store-btn">Open OpenDating</a>
       </div>
       <div class="download-card">
-        <h3>🤖 Android</h3>
-        <p>The Android artifact remains draft. Developers can build from source for isolated testing.</p>
-        <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">Build from Source</a>
+        <h3>📱 iOS & Android</h3>
+        <p>Native clients are source-available but remain pre-release while store and physical-device gates are completed.</p>
+        <a href="https://github.com/jongan69/opendating-mobile" class="store-btn">View Source</a>
       </div>
     </div>
 
@@ -417,7 +419,7 @@
 <section class="alt" id="blog-preview">
   <div class="container">
     <h2>From the Blog</h2>
-    <p class="section-sub">Thoughts on privacy, decentralized dating, and building ethical technology.</p>
+    <p class="section-sub">Practical guidance on location privacy, account trade-offs, and choosing a dating app.</p>
 
     <div class="blog-grid">
       <a href="safety/" class="blog-card">
@@ -425,20 +427,20 @@
         <h3>Safety Center</h3>
         <p>Practical guidance for spotting scams, planning safer meetings, protecting private information, and reporting concerns.</p>
       </a>
-      <a href="blog/how-decentralized-dating-works" class="blog-card">
+      <a href="blog/how-to-use-dating-app-without-sharing-exact-location/" class="blog-card">
         <div class="date">2026</div>
-        <h3>How Decentralized Dating Works</h3>
-        <p>How encrypted gift wraps and role-separated first-party services work today, and what federation still needs before providers are interchangeable.</p>
+        <h3>Use Dating Apps Without Sharing Exact GPS</h3>
+        <p>Practical location settings, what an approximate area protects, and why coarse location is not anonymity.</p>
       </a>
       <a href="status/" class="blog-card">
         <div class="date">LIVE</div>
         <h3>Release and Service Status</h3>
-        <p>See why production distribution is blocked and which reliability, safety, legal, and security gates remain.</p>
+        <p>Check browser availability, native distribution status, and current service boundaries.</p>
       </a>
     </div>
 
     <p style="text-align:center; margin-top: 28px;">
-      <a href="blog" class="btn btn-outline">Read All Articles →</a>
+      <a href="blog/" class="btn btn-outline">Read All Articles →</a>
     </p>
   </div>
 </section>
@@ -449,6 +451,8 @@
     <span>
       <a href="https://github.com/jongan69/opendating-mobile">GitHub</a> ·
       <a href="https://github.com/jongan69/OpenDating">Protocol</a> ·
+      <a href="about/">Product Facts</a> ·
+      <a href="blog/">Blog</a> ·
       <a href="privacy/">Privacy</a> ·
       <a href="terms/">Terms</a> ·
       <a href="safety/">Safety</a> ·
